@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tier 2 — Stakeholder & Reporting · Reviewer · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#eef2f7; --bg2:#fff; --bg3:#f0f4f9; --border:#d0dae8; --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc; --blue:#1a6eb5; --blue-light:#e8f1fb; --blue-mid:#b8d0ed; --blue-dark:#0f4a7a; --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2; --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8; --amber:#92600a; --amber-light:#fdf3e3; --radius:12px; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); }
+  .auth-overlay { position:fixed; inset:0; background:rgba(26,35,50,.85); display:flex; align-items:center; justify-content:center; z-index:999; }
+  .auth-box { background:var(--bg2); border-radius:var(--radius); padding:40px; max-width:420px; width:90%; text-align:center; }
+  .auth-title { font-size:20px; font-weight:700; margin-bottom:8px; }
+  .auth-sub { font-size:14px; color:var(--text-dim); margin-bottom:24px; }
+  .google-btn { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:13px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Merriweather Sans',sans-serif; }
+  .google-btn:hover { background:var(--blue-dark); }
+  .auth-error { font-size:13px; color:var(--coral); margin-top:10px; font-family:'Source Code Pro',monospace; }
+  .hidden { display:none !important; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; justify-content:space-between; font-size:12px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); }
+  .topnav a { color:var(--blue); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .user-badge { background:var(--blue-light); border:1px solid var(--blue-mid); color:var(--blue-dark); padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; }
+  .sign-out { cursor:pointer; color:var(--text-dimmer); }
+  .sign-out:hover { color:var(--coral); }
+  .hero { background:var(--bg2); border-bottom:2px solid var(--border); padding:28px 32px; }
+  .hero-inner { max-width:1400px; margin:0 auto; }
+  .hero-eyebrow { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--blue); letter-spacing:.12em; text-transform:uppercase; margin-bottom:6px; }
+  .hero h1 { font-size:24px; font-weight:700; margin-bottom:6px; }
+  .hero-sub { font-size:15px; color:var(--text-dim); }
+  .main { max-width:1400px; margin:0 auto; padding:32px; }
+  .example-block { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); margin-bottom:20px; overflow:hidden; }
+  .example-block-header { padding:16px 22px; border-bottom:1px solid var(--border); background:var(--bg3); display:flex; align-items:center; justify-content:space-between; }
+  .example-block-title { font-size:15px; font-weight:700; }
+  .example-block-body { padding:0; }
+  .learner-row { display:grid; grid-template-columns:200px 1fr; border-bottom:1px solid var(--border); }
+  .learner-row:last-child { border-bottom:none; }
+  .learner-email { padding:16px 20px; font-size:12px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-right:1px solid var(--border); background:var(--bg3); display:flex; align-items:flex-start; word-break:break-all; }
+  .learner-answers { padding:16px 20px; }
+  .q-row { display:grid; grid-template-columns:1fr 80px 80px; gap:10px; align-items:start; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px; }
+  .q-row:last-child { border:none; }
+  .q-row-header { display:grid; grid-template-columns:1fr 80px 80px; gap:10px; padding:4px 0 8px; font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); text-transform:uppercase; letter-spacing:.08em; border-bottom:2px solid var(--border); margin-bottom:4px; }
+  .q-cell { color:var(--text-dim); line-height:1.5; }
+  .pill { display:inline-block; padding:2px 10px; border-radius:12px; font-size:12px; font-family:'Source Code Pro',monospace; font-weight:700; }
+  .pill-correct { background:var(--green-light); color:var(--green); border:1px solid var(--green-mid); }
+  .pill-wrong   { background:var(--coral-light); color:var(--coral); border:1px solid var(--coral-mid); }
+  .pill-correct-ans { background:var(--blue-light); color:var(--blue-dark); border:1px solid var(--blue-mid); }
+  .pill-none { background:var(--bg3); color:var(--text-dimmer); border:1px solid var(--border); }
+  .no-data { padding:28px; text-align:center; color:var(--text-dimmer); font-size:14px; }
+  footer { text-align:center; padding:28px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); margin-top:16px; }
+  @media(max-width:700px) { .learner-row { grid-template-columns:1fr; } .learner-email { border-right:none; border-bottom:1px solid var(--border); } }
+</style>
+</head>
+<body>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-title">Reviewer Access</div>
+    <div class="auth-sub">Sign in with your SourceFuse Google account.</div>
+    <button class="google-btn" id="googleSignInBtn">Sign in with Google</button>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
+
+<nav class="topnav">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="index.html">Reviewer hub</a><span class="sep">/</span><span>Tier 2 — Stakeholder & Reporting</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="user-badge" id="userBadge"></span>
+    <span class="sign-out" id="signOutBtn">Sign out</span>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Reviewer · Module review</div>
+    <h1>Tier 2 — Stakeholder & Reporting</h1>
+    <p class="hero-sub">Examples 8–9: Change request · AI project reporting</p>
+  </div>
+</div>
+
+<div class="main" id="mainContent" style="display:none">
+  <div id="moduleBody"><div class="no-data">Loading learner data...</div></div>
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · Reviewer Portal</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain:"sfcertification-grafana.firebaseapp.com",
+  projectId:"sfcertification-grafana",
+  storageBucket:"sfcertification-grafana.firebasestorage.app",
+  messagingSenderId:"227322696511",
+  appId:"1:227322696511:web:12e7ced7dd3d45fa06798a"
+});
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+const EXAMPLES = [
+  { id:'example-8-change', title:'Example 8 — Change request', qs:['What is the most dangerous PM behaviour with scope change requests?', 'What creative option did Claude surface that Sarah had not considered?', 'Why is a formal Change Request reference number important?'] },
+  { id:'example-9-model', title:'Example 9 — AI project reporting', qs:['When translating "3% hallucination rate" for a board, what is the correct framing?', "What is the PM's key test before sending a translated AI update?", 'Why must a PM validate the translation with the tech lead before sending?'] }
+];
+
+document.getElementById('googleSignInBtn').addEventListener('click', function() {
+  const p = new firebase.auth.GoogleAuthProvider();
+  p.setCustomParameters({ hd:'sourcefuse.com' });
+  auth.signInWithPopup(p).catch(e => { document.getElementById('authError').textContent = e.message; });
+});
+document.getElementById('signOutBtn').addEventListener('click', () => auth.signOut());
+
+auth.onAuthStateChanged(function(user) {
+  if (!user) { document.getElementById('authOverlay').classList.remove('hidden'); document.getElementById('mainContent').style.display='none'; return; }
+  if (!user.email.endsWith('@sourcefuse.com')) { document.getElementById('authError').textContent='@sourcefuse.com only.'; auth.signOut(); return; }
+  document.getElementById('authOverlay').classList.add('hidden');
+  document.getElementById('mainContent').style.display='block';
+  document.getElementById('userBadge').textContent = user.email;
+  loadModule();
+});
+
+async function loadModule() {
+  try {
+    const snap = await db.collection('pm_learner_sessions').get();
+    const sessions = {};
+    snap.forEach(d => { sessions[d.data().email] = d.data(); });
+
+    let html = '';
+    for (const ex of EXAMPLES) {
+      html += `<div class="example-block">
+        <div class="example-block-header">
+          <div class="example-block-title">${ex.title}</div>
+          <div style="font-size:12px;font-family:'Source Code Pro',monospace;color:var(--text-dimmer)">${Object.keys(sessions).length} learners</div>
+        </div>
+        <div class="example-block-body">`;
+
+      const learners = Object.values(sessions);
+      if (!learners.length) {
+        html += '<div class="no-data">No learner data recorded yet.</div>';
+      } else {
+        learners.forEach(function(s) {
+          const exData = s.examples && s.examples[ex.id];
+          const answers = exData?.answers || {};
+          const correct = exData?.correct || {};
+          html += `<div class="learner-row">
+            <div class="learner-email">${s.email||'—'}</div>
+            <div class="learner-answers">
+              <div class="q-row-header"><div>Question</div><div>Answer</div><div>Correct</div></div>`;
+          ex.qs.forEach(function(q, qi) {
+            const qk  = 'q' + (qi+1);
+            const ans = answers[qk] || '—';
+            const cor = correct[qk]  || '—';
+            const isCorrect = ans !== '—' && ans === cor;
+            const pillCls = ans === '—' ? 'pill-none' : (isCorrect ? 'pill-correct' : 'pill-wrong');
+            html += `<div class="q-row">
+              <div class="q-cell">${q}</div>
+              <div><span class="pill ${pillCls}">${ans}</span></div>
+              <div><span class="pill pill-correct-ans">${cor}</span></div>
+            </div>`;
+          });
+          html += '</div></div>';
+        });
+      }
+      html += '</div></div>';
+    }
+    document.getElementById('moduleBody').innerHTML = html;
+  } catch(e) {
+    document.getElementById('moduleBody').innerHTML = '<div class="no-data">Error: ' + e.message + '</div>';
+  }
+}
+</script>
+</body>
+</html>
