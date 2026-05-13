@@ -563,7 +563,7 @@
     <!-- ── Learner assessment ──────────────────────────────────────────────── -->
     <div class="assessment-wrap" id="assessmentWrap">
       <!-- Questions (shown after email confirmed) -->
-      <div class="questions-wrap hidden" id="questionsWrap">
+      <div class="questions-wrap" id="questionsWrap">
         <div class="assessment-title">Check your understanding</div>
         <p class="assessment-sub">Answer all three questions to complete this example. Your answers are saved — results shown at the end of the course.</p>
 
@@ -678,10 +678,10 @@ function saveState(s) {
 document.addEventListener('DOMContentLoaded', function() {
   const state = loadState();
 
-  // If already completed — show submitted state directly
-  if (state.complete) {
+  // If already submitted — show submitted state
+  if (state.submittedAt) {
     showSubmittedState();
-    activateCompleteBar(true);
+    activateCompleteBar(state.complete || false);
     return;
   }
 
