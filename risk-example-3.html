@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example 3 — Risk Register · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --pm:#0b6e4f; --pm-light:#e6f4ef; --pm-mid:#a8d5c2; --pm-dark:#074d37;
+    --blue:#1a6eb5; --blue-light:#e8f1fb;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--pm); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; overflow-x:auto; }
+  .tabs { display:flex; }
+  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:13px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; font-family:'Merriweather Sans',sans-serif; }
+  .tab-btn .num { width:22px; height:22px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .tab-btn.active { color:var(--pm); border-bottom-color:var(--pm); }
+  .tab-btn.active .num { background:var(--pm); border-color:var(--pm); color:#fff; }
+  .main { max-width:860px; margin:0 auto; padding:40px; }
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num { width:48px; height:48px; border-radius:50%; background:var(--pm); color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:22px; font-weight:700; }
+  .prose { font-size:15px; color:var(--text-dim); line-height:1.8; margin-bottom:20px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .callout { border-left:3px solid var(--pm); background:var(--pm-light); padding:14px 18px; border-radius:0 8px 8px 0; margin:20px 0; font-size:14px; line-height:1.7; color:var(--text-dim); }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
+  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.7; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
+  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
+  .prompt-block .speaker.user { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
+  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:3px solid var(--green); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:10px; font-weight:600; }
+
+  /* Risk table */
+  .risk-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:13px; }
+  .risk-table th { background:var(--bg3); border:1px solid var(--border); padding:10px 12px; text-align:left; font-size:11px; font-family:'Source Code Pro',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dimmer); font-weight:600; }
+  .risk-table td { border:1px solid var(--border); padding:10px 12px; vertical-align:top; line-height:1.5; color:var(--text-dim); }
+  .risk-table tr:nth-child(even) td { background:var(--bg3); }
+  .rag { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
+  .rag-red    { background:#c0392b; }
+  .rag-amber  { background:#e67e22; }
+  .rag-green  { background:#1a6b3a; }
+  .score-high { color:#c0392b; font-weight:700; font-family:'Source Code Pro',monospace; }
+  .score-med  { color:#e67e22; font-weight:700; font-family:'Source Code Pro',monospace; }
+  .score-low  { color:#1a6b3a; font-weight:700; font-family:'Source Code Pro',monospace; }
+
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag { font-size:11px; font-family:'Source Code Pro',monospace; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:var(--pm-dark); }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  .reviewer-bar { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:8px; margin:24px 0; background:var(--amber-light); border:1.5px solid #e8c97a; border-left:3px solid var(--amber); font-size:13px; font-family:'Source Code Pro',monospace; font-weight:600; color:var(--amber); }
+  .reviewer-bar.checked { background:var(--green-light); border-color:var(--green-mid); border-left-color:var(--green); color:var(--green); }
+  .reviewer-bar input[type="checkbox"] { width:16px; height:16px; accent-color:var(--green); }
+  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
+  .nav-btn { padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
+  .nav-btn { background:var(--pm); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--pm-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:32px 40px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .risk-table { font-size:11px; } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a>
+  <span class="sep">/</span>
+  <span>Tier 1 examples</span>
+  <span class="sep">/</span>
+  <span>Example 3 — Risk register</span>
+</nav>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+    <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+    <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+    <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+    <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <section class="step-section active" id="step-1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-meta">
+        <div class="step-label">Step 1 of 5</div>
+        <div class="step-title">The problem</div>
+      </div>
+    </div>
+
+    <div class="tags-row">
+      <span class="tag pm">Example 3 · Tier 1</span>
+      <span class="tag">Risk identification</span>
+      <span class="tag">Single-context</span>
+      <span class="tag">2–3 turn interaction</span>
+    </div>
+
+    <p class="prose">
+      The Meridian Cloud Migration project is entering its planning phase. Sarah needs to produce a risk register for the project kick-off — a document that will be reviewed by Raj Patel (SF Delivery Head) and shared with Lisa Park (Meridian PMO Lead).
+    </p>
+
+    <p class="prose">
+      The input she has is the project brief plus her knowledge of the Meridian context — a financial services firm with strict compliance requirements, an on-premise legacy infrastructure being migrated to AWS, and an aggressive Q4 deadline.
+    </p>
+
+    <div class="doc-block">
+      <div class="doc-label">Project brief — Meridian Cloud Migration</div>
+      Migrate Meridian's on-premise data centre workloads to AWS. Scope includes 14 application workloads, database migration (Oracle to Aurora PostgreSQL), network configuration (VPC, Direct Connect), and security/compliance setup (SOC 2, PCI DSS). Timeline: 9 months. Team: 6 SF engineers (cloud), 2 Meridian IT liaisons. Key constraint: zero downtime on 3 business-critical applications (trading platform, client reporting, risk engine). Legacy infrastructure is partially documented.
+    </div>
+
+    <p class="prose">
+      Risk registers are one of those deliverables that PMs often produce under time pressure and tend to be either too generic ("integration risk — medium") or too exhaustive to be useful. The challenge is producing a register that is specific, scored, and actionable — with mitigations that reflect the actual project context.
+    </p>
+
+    <div class="callout">
+      <strong>What makes cloud migration risks different:</strong> Unlike a greenfield build, migration projects have dependency risks on the legacy system state, compliance risks that are binary (you pass the audit or you don't), and zero-downtime requirements that make sequencing critical. A generic risk register won't capture these.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-1">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-1" data-step="1">
+      <label for="rev-cb-1">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step-section" id="step-2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-meta">
+        <div class="step-label">Step 2 of 5</div>
+        <div class="step-title">The naive approach</div>
+      </div>
+    </div>
+
+    <p class="prose">The naive approach produces a risk register that looks complete but is generic enough to apply to any project:</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah (naive prompt)</div>Create a risk register for a cloud migration project.</div>
+
+    <div class="doc-block">
+      <div class="doc-label">Naive output — generic risk register (excerpt)</div>
+      1. Timeline risk — Likelihood: Medium | Impact: High | Mitigation: Monitor progress weekly<br>
+      2. Budget overrun — Likelihood: Medium | Impact: High | Mitigation: Track costs monthly<br>
+      3. Technical complexity — Likelihood: Medium | Impact: Medium | Mitigation: Engage experienced engineers<br>
+      4. Stakeholder misalignment — Likelihood: Low | Impact: Medium | Mitigation: Regular communication<br>
+      5. Data loss during migration — Likelihood: Low | Impact: High | Mitigation: Back up data before migration
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>What's wrong:</strong> Every item is generic. "Monitor progress weekly" is not a mitigation — it's a standard PM practice. "Engage experienced engineers" tells you nothing about the actual risk. None of the Meridian-specific risks appear: the partially-documented legacy infrastructure, the zero-downtime requirement on three business-critical applications, the Oracle-to-Aurora database migration complexity, or the SOC 2 + PCI DSS compliance dependency. This register provides no value to Raj or Lisa.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-2">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-2" data-step="2">
+      <label for="rev-cb-2">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-section" id="step-3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-meta">
+        <div class="step-label">Step 3 of 5</div>
+        <div class="step-title">The Claude interaction</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah provides the specific project context, a scoring rubric, and instructions to surface Meridian-specific risks — not generic cloud migration risks.</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 1</div>I'm a senior PM at a cloud consultancy. I need a risk register for the project described below. Use this scoring approach:
+
+Likelihood: 1 (unlikely) to 5 (almost certain)
+Impact: 1 (negligible) to 5 (project-ending)
+Risk score: Likelihood × Impact (1–25)
+RAG: Red (15–25), Amber (8–14), Green (1–7)
+
+Requirements:
+— Surface risks that are SPECIFIC to this project context, not generic cloud migration risks
+— Each risk must have a specific mitigation (not "monitor closely" or "communicate regularly")
+— Flag any risks that require CLIENT action to mitigate (not just SF action)
+— Include a "risk owner" for each item
+
+Project brief:
+[pastes brief]
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 1</div>Here is the Meridian Cloud Migration risk register:
+
+<strong>Risk 1: Legacy infrastructure documentation gaps</strong>
+Likelihood: 4 | Impact: 4 | Score: 16 | RAG: RED
+The brief notes legacy infrastructure is "partially documented." Undocumented dependencies or configurations will cause unplanned migration work.
+Mitigation: Run a 3-week discovery sprint before migration begins. Produce a dependency map for all 14 workloads. Do not begin migration until documentation is complete.
+Owner: Arjun (SF Cloud lead) + Meridian IT liaisons
+Client action required: YES — Meridian IT must provide access to all legacy system configurations and assign liaisons with sufficient knowledge to fill gaps.
+
+<strong>Risk 2: Zero-downtime requirement on 3 business-critical applications</strong>
+Likelihood: 3 | Impact: 5 | Score: 15 | RAG: RED
+Trading platform, client reporting, and risk engine cannot tolerate downtime. Any migration sequencing error or cutover failure creates immediate business and regulatory impact.
+Mitigation: Design blue-green deployment for all three applications. Mandate load testing in staging at 2× production load before cutover. Define rollback procedure with a maximum 15-minute RTO before cutover is approved.
+Owner: Arjun (SF Cloud lead)
+Client action required: YES — Meridian must define acceptable maintenance windows and confirm regulatory notification requirements for cutover events.
+
+<strong>Risk 3: Oracle to Aurora PostgreSQL migration complexity</strong>
+Likelihood: 4 | Impact: 4 | Score: 16 | RAG: RED
+Oracle-to-PostgreSQL schema and stored procedure incompatibilities are common and frequently underestimated. Financial services databases often contain complex procedural logic.
+Mitigation: Engage AWS Schema Conversion Tool in Week 1. Catalogue all stored procedures and triggers. Allocate a dedicated database engineer for conversion. Build a 4-week buffer for database migration in the project plan.
+Owner: Arjun (SF Cloud lead)
+Client action required: YES — Meridian DBA team must be available for knowledge transfer sessions.
+
+<strong>Risk 4: PCI DSS compliance scope expansion</strong>
+Likelihood: 3 | Impact: 4 | Score: 12 | RAG: AMBER
+PCI DSS scope may expand if the migrated architecture introduces new cardholder data flows not present in the legacy setup. This would require additional security controls and audit time.
+Mitigation: Engage a PCI DSS QSA in the architecture review phase (not post-migration). Document cardholder data flows explicitly in the architecture design document.
+Owner: Sarah Chen (PM) — escalate to Raj Patel if scope confirmed to expand
+Client action required: YES — Meridian must provide their current PCI DSS scoping document before architecture design begins.
+
+<strong>Risk 5: Direct Connect provisioning lead time</strong>
+Likelihood: 4 | Impact: 3 | Score: 12 | RAG: AMBER
+AWS Direct Connect provisioning typically takes 4–8 weeks. If not ordered at project start, it becomes a critical path blocker for the network configuration phase.
+Mitigation: Initiate Direct Connect order in Week 1. Do not schedule network configuration phase until provisioning is confirmed.
+Owner: Arjun (SF Cloud lead)
+Client action required: YES — Meridian IT must raise the procurement order and provide AWS account access immediately.
+
+<strong>Risk 6: Meridian IT liaison availability</strong>
+Likelihood: 3 | Impact: 3 | Score: 9 | RAG: AMBER
+The project relies on 2 Meridian IT liaisons. If these resources are pulled for BAU work, migration progress will stall on dependency resolution and testing sign-off.
+Mitigation: Formalise liaison commitment in the project charter — minimum 60% allocation for duration. Escalate to Lisa Park if availability drops below 40% in any given week.
+Owner: Sarah Chen (PM)
+Client action required: YES — Meridian IT management must confirm liaison availability in writing before project start.</div>
+
+    <div class="callout callout-good" style="margin-top:20px;">
+      <strong>What changed:</strong> Every risk is specific to Meridian's context. Every mitigation is actionable. Client-required actions are explicitly flagged — which turns the risk register into a client accountability document, not just an internal planning tool.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-3">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-3" data-step="3">
+      <label for="rev-cb-3">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step-section" id="step-4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-meta">
+        <div class="step-label">Step 4 of 5</div>
+        <div class="step-title">The refined output</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah reviews the register and asks Claude to format it as a table for the kickoff presentation, then adds one risk Claude missed — based on her prior experience with financial services clients.</p>
+
+    <div class="output-block">
+      <div class="output-label">✓ Refined output — Meridian Cloud Migration Risk Register v1.0</div>
+
+      <table class="risk-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Risk</th>
+            <th>L</th>
+            <th>I</th>
+            <th>Score</th>
+            <th>RAG</th>
+            <th>Client action?</th>
+            <th>Owner</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Legacy infrastructure documentation gaps</td>
+            <td>4</td><td>4</td>
+            <td class="score-high">16</td>
+            <td><span class="rag rag-red"></span>Red</td>
+            <td>Yes</td>
+            <td>Arjun + Meridian IT</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Zero-downtime requirement — 3 critical apps</td>
+            <td>3</td><td>5</td>
+            <td class="score-high">15</td>
+            <td><span class="rag rag-red"></span>Red</td>
+            <td>Yes</td>
+            <td>Arjun</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Oracle → Aurora PostgreSQL migration complexity</td>
+            <td>4</td><td>4</td>
+            <td class="score-high">16</td>
+            <td><span class="rag rag-red"></span>Red</td>
+            <td>Yes</td>
+            <td>Arjun</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>PCI DSS scope expansion</td>
+            <td>3</td><td>4</td>
+            <td class="score-med">12</td>
+            <td><span class="rag rag-amber"></span>Amber</td>
+            <td>Yes</td>
+            <td>Sarah → Raj</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Direct Connect provisioning lead time</td>
+            <td>4</td><td>3</td>
+            <td class="score-med">12</td>
+            <td><span class="rag rag-amber"></span>Amber</td>
+            <td>Yes</td>
+            <td>Arjun</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>Meridian IT liaison availability</td>
+            <td>3</td><td>3</td>
+            <td class="score-med">9</td>
+            <td><span class="rag rag-amber"></span>Amber</td>
+            <td>Yes</td>
+            <td>Sarah</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td>Regulatory change during migration window</td>
+            <td>2</td><td>4</td>
+            <td class="score-med">8</td>
+            <td><span class="rag rag-amber"></span>Amber</td>
+            <td>Yes</td>
+            <td>Sarah + Meridian Legal</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>Risk 7 — what Claude missed:</strong> Sarah added the regulatory change risk from her own experience. Financial services firms in the US face regulatory change at a pace that can affect in-flight infrastructure projects — a FINRA or SEC rule change during a 9-month migration window is not hypothetical. This is the PM's domain knowledge complementing Claude's analytical output.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-4">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-4" data-step="4">
+      <label for="rev-cb-4">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step-section" id="step-5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-meta">
+        <div class="step-label">Step 5 of 5</div>
+        <div class="step-title">Watch out</div>
+      </div>
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>1. Claude will not surface industry-specific risks it wasn't told about</strong><br>
+      Claude doesn't know your client's regulatory environment, change freeze windows, or internal politics unless you tell it. Always add your own domain knowledge after the Claude output — treat the register as a first draft, not a finished product.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>2. Scores are only as good as the context</strong><br>
+      Claude will score risks based on what's in the brief. If the brief undersells a risk (e.g. describes a complex legacy system as "partially documented"), Claude's likelihood score will be conservative. Validate every score against your own judgment before presenting.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>3. Mitigations that require client action are easy to miss</strong><br>
+      Claude will produce SF-side mitigations by default. Explicitly ask it to flag client-required actions — otherwise these disappear into the mitigation column and never get raised at the kickoff.
+    </div>
+
+    <div class="callout callout-good">
+      <strong>The prompting discipline that makes this work:</strong><br>
+      (1) Provide specific project context — not a generic brief. (2) Give a scoring rubric — Claude will use it. (3) Ask explicitly for client-required actions. (4) Add your own domain knowledge after reviewing the output. A risk register is a living document — update it at each sprint review.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-5">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-5" data-step="5">
+      <label for="rev-cb-5">Mark step as reviewed</label>
+    </div>
+
+    <div class="bottom-nav">
+      <a class="nav-btn secondary" href="example-2-status.html">← Example 2</a>
+      <a class="nav-btn" href="example-4-sprint.html">Example 4 — Sprint planning →</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+const REV_KEY = 'pm_example-3-risk';
+
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+
+function revLoad() { try { return JSON.parse(localStorage.getItem(REV_KEY)) || {}; } catch(e) { return {}; } }
+function revSave(s) { localStorage.setItem(REV_KEY, JSON.stringify(s)); }
+
+document.querySelectorAll('.rev-checkbox').forEach(cb => {
+  const s = revLoad();
+  if (s['cb_' + cb.dataset.step]) {
+    cb.checked = true;
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) { bar.classList.add('checked'); bar.querySelector('label').textContent = '✓ Step reviewed'; }
+  }
+  cb.addEventListener('change', () => {
+    const s = revLoad();
+    s['cb_' + cb.dataset.step] = cb.checked;
+    revSave(s);
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) {
+      bar.classList.toggle('checked', cb.checked);
+      bar.querySelector('label').textContent = cb.checked ? '✓ Step reviewed' : 'Mark step as reviewed';
+    }
+  });
+});
+</script>
+</body>
+</html>
