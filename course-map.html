@@ -162,6 +162,9 @@
     .hero { padding-top: 28px; }
     .diagram-grid, .example-grid { grid-template-columns: 1fr; }
   }
+  .cert-card.locked { pointer-events:none; }
+  .cert-card.unlocked { cursor:pointer !important; opacity:1 !important; pointer-events:auto; }
+  .cert-card.unlocked:hover { border-color:var(--blue); box-shadow:0 4px 16px rgba(26,110,181,.15); }
 </style>
 </head>
 <body>
@@ -410,7 +413,7 @@
     Complete all 12 examples and both diagrams, then take the certification exam.
     36 scenario-based questions · 75% pass mark · 45 minutes · 3 attempts.
   </p>
-  <a class="example-card" href="certification-test.html" style="max-width:420px; display:block;">
+  <div class="example-card cert-card locked" id="certCard" style="max-width:420px; display:block; cursor:not-allowed; opacity:.55;" title="Complete all 12 examples to unlock">
     <div class="example-num">Certification Exam</div>
     <div class="example-title">SF Certified AI-Augmented Project Manager</div>
     <div class="example-desc">36 questions across all 12 examples. Scenario-based MCQ and True/False.</div>
@@ -418,7 +421,7 @@
       <span class="example-tag tag-tier1">75% pass · 45 min · 3 attempts</span>
       <span class="card-arrow">→</span>
     </div>
-  </a>
+  </div>
 
 </div>
 
@@ -456,6 +459,37 @@ EXAMPLES.forEach(id => {
 const pct = Math.round((done / EXAMPLES.length) * 100);
 document.getElementById('progressFill').style.width = pct + '%';
 document.getElementById('progressCount').textContent = done + ' of ' + EXAMPLES.length + ' complete';
+
+  // ── Certification lock ────────────────────────────────────────────────────
+  const EXAMPLE_IDS = [
+    'example-1-scope','example-2-status','example-3-risk','example-4-sprint',
+    'example-5-requirements','example-6-tracking','example-7-reporting',
+    'example-8-change','example-9-model','example-10-rca',
+    'example-11-contract','example-12-cost'
+  ];
+
+  function checkCertUnlock() {
+    const allComplete = EXAMPLE_IDS.every(function(id) {
+      try {
+        const s = JSON.parse(localStorage.getItem('pm_learner_' + id));
+        return s && s.complete === true;
+      } catch(e) { return false; }
+    });
+    const card  = document.getElementById('certCard');
+    const arrow = document.getElementById('certArrow');
+    if (!card) return;
+    if (allComplete) {
+      card.className = 'example-card cert-card unlocked';
+      card.style.cssText = 'max-width:420px; display:block;';
+      card.style.cursor = 'pointer';
+      if (arrow) arrow.textContent = '→';
+      card.addEventListener('click', function() {
+        window.location.href = 'certification-test.html';
+      });
+    }
+  }
+  checkCertUnlock();
+
 </script>
 </body>
 </html>
