@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example 2 — Status Update · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --pm:#0b6e4f; --pm-light:#e6f4ef; --pm-mid:#a8d5c2; --pm-dark:#074d37;
+    --blue:#1a6eb5; --blue-light:#e8f1fb;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--pm); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; overflow-x:auto; }
+  .tabs { display:flex; }
+  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:13px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; transition:color .15s; font-family:'Merriweather Sans',sans-serif; }
+  .tab-btn .num { width:22px; height:22px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; transition:all .15s; }
+  .tab-btn.active { color:var(--pm); border-bottom-color:var(--pm); }
+  .tab-btn.active .num { background:var(--pm); border-color:var(--pm); color:#fff; }
+  .main { max-width:860px; margin:0 auto; padding:40px; }
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num { width:48px; height:48px; border-radius:50%; background:var(--pm); color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:22px; font-weight:700; }
+  .prose { font-size:15px; color:var(--text-dim); line-height:1.8; margin-bottom:20px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .callout { border-left:3px solid var(--pm); background:var(--pm-light); padding:14px 18px; border-radius:0 8px 8px 0; margin:20px 0; font-size:14px; line-height:1.7; color:var(--text-dim); }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
+  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.7; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
+  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
+  .prompt-block .speaker.user { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
+  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:3px solid var(--green); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:10px; font-weight:600; }
+  .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:20px 0; }
+  .compare-card { border-radius:var(--radius); padding:18px 20px; font-size:13px; line-height:1.7; }
+  .compare-bad  { background:var(--coral-light); border:1.5px solid var(--coral-mid); border-top:3px solid var(--coral); }
+  .compare-good { background:var(--green-light); border:1.5px solid var(--green-mid); border-top:3px solid var(--green); }
+  .compare-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.1em; text-transform:uppercase; font-weight:700; margin-bottom:10px; }
+  .compare-bad .compare-label  { color:var(--coral); }
+  .compare-good .compare-label { color:var(--green); }
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag { font-size:11px; font-family:'Source Code Pro',monospace; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:var(--pm-dark); }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  .reviewer-bar { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:8px; margin:24px 0; background:var(--amber-light); border:1.5px solid #e8c97a; border-left:3px solid var(--amber); font-size:13px; font-family:'Source Code Pro',monospace; font-weight:600; color:var(--amber); transition:all .2s; }
+  .reviewer-bar.checked { background:var(--green-light); border-color:var(--green-mid); border-left-color:var(--green); color:var(--green); }
+  .reviewer-bar input[type="checkbox"] { width:16px; height:16px; accent-color:var(--green); }
+  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
+  .nav-btn { padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; transition:background .15s; }
+  .nav-btn { background:var(--pm); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--pm-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  .nav-btn.secondary:hover { background:var(--bg3); }
+  footer { text-align:center; padding:32px 40px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .tabs-wrap { padding-left:20px; } .compare-grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a>
+  <span class="sep">/</span>
+  <span>Tier 1 examples</span>
+  <span class="sep">/</span>
+  <span>Example 2 — Status update</span>
+</nav>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+    <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+    <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+    <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+    <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <section class="step-section active" id="step-1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-meta">
+        <div class="step-label">Step 1 of 5</div>
+        <div class="step-title">The problem</div>
+      </div>
+    </div>
+
+    <div class="tags-row">
+      <span class="tag pm">Example 2 · Tier 1</span>
+      <span class="tag">Stakeholder communication</span>
+      <span class="tag">Single-context</span>
+      <span class="tag">2–3 turn interaction</span>
+    </div>
+
+    <p class="prose">It is end of Sprint 2 on the Meridian Portal project. Sarah has the raw status data in front of her. The numbers are mixed — some things are on track, some are not.</p>
+
+    <div class="doc-block">
+      <div class="doc-label">Raw sprint data — Sprint 2 wrap</div>
+      Sprint velocity: 34 points delivered vs 42 planned (81%)<br>
+      Stories completed: 11 of 14<br>
+      Carried forward: 3 stories (authentication flow, Salesforce sync handshake, mobile nav)<br>
+      Blockers resolved: 2 (Salesforce sandbox access — 6-day delay; design sign-off on dashboard layout)<br>
+      Active blocker: Brand guide not received from client (due April 14, now April 19 — 5 days late)<br>
+      Budget: $47K spent of $380K total (12.4% of budget, 14.3% of timeline elapsed)<br>
+      Team: Priya flagged capacity issue — one frontend engineer on sick leave, returns Monday<br>
+      Risk: Mobile nav story now at risk of missing Sprint 3 if brand guide not received by April 22<br>
+      Next sprint focus: Authentication, Salesforce sync, document upload module
+    </div>
+
+    <p class="prose">Sarah needs to send two updates within the next two hours:</p>
+
+    <div class="callout">
+      <strong>Update 1 — Mark Donovan (Meridian CTO):</strong> Executive sponsor. Cares about timeline, budget, and whether the project is on track. Does not want technical detail. Will forward this to the Meridian board.
+    </div>
+    <div class="callout" style="margin-top:8px;">
+      <strong>Update 2 — Arjun's dev team (SF Cloud lead) + Priya (SF Web lead):</strong> Execution team. Need to know exactly what's blocked, what's carried forward, and what the plan is for Sprint 3. Want specifics, not narrative.
+    </div>
+
+    <p class="prose" style="margin-top:20px;">
+      The same raw data needs to become two completely different documents. The mistake most PMs make is writing one update and sending it to both audiences — or spending 90 minutes writing two from scratch.
+    </p>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-1">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-1" data-step="1">
+      <label for="rev-cb-1">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step-section" id="step-2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-meta">
+        <div class="step-label">Step 2 of 5</div>
+        <div class="step-title">The naive approach</div>
+      </div>
+    </div>
+
+    <p class="prose">The naive approach is to ask Claude to "write a status update" without specifying audience, tone, or what to emphasise.</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah (naive prompt)</div>Here's my sprint data. Write a project status update.
+
+[pastes raw data]</div>
+
+    <p class="prose">Claude produces something like this:</p>
+
+    <div class="doc-block">
+      <div class="doc-label">Naive output — generic status update</div>
+      <strong>Meridian Portal — Sprint 2 Status Update</strong><br><br>
+      Sprint 2 has concluded with 34 story points delivered out of a planned 42, representing 81% velocity. Eleven of fourteen planned stories were completed, with three carried forward to Sprint 3: the authentication flow, Salesforce sync handshake, and mobile navigation.<br><br>
+      Two blockers were resolved during the sprint — Salesforce sandbox access (causing a 6-day delay) and design sign-off on the dashboard layout. An active blocker remains: the brand guide from the client is 5 days overdue, originally due April 14. This puts the mobile navigation story at risk if not received by April 22.<br><br>
+      Budget utilisation stands at $47K of $380K (12.4%). One team member is returning from sick leave on Monday.<br><br>
+      Sprint 3 will focus on authentication, Salesforce sync, and the document upload module.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>What's wrong:</strong> This is a technically accurate summary — but it serves neither audience well. Mark Donovan doesn't need to know about story points or the Salesforce sync handshake. Arjun's team doesn't need the budget percentage framed as reassuring. And neither audience gets what they actually need: the CTO needs to know if action is required from him; the dev team needs to know exactly what Sprint 3 looks like.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-2">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-2" data-step="2">
+      <label for="rev-cb-2">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-section" id="step-3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-meta">
+        <div class="step-label">Step 3 of 5</div>
+        <div class="step-title">The Claude interaction</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah gives Claude audience context, tone guidance, and explicit instructions on what each audience needs — and what to exclude.</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 1 (CTO update)</div>I'm a senior PM at a cloud consultancy. I need to write two separate status updates from the same sprint data. Let's do the executive one first.
+
+Audience: Mark Donovan, CTO of Meridian Financial Group. He is the project sponsor. He will forward this to the board. He cares about: (1) are we on track for the September 30 go-live, (2) is the budget under control, (3) is there anything that requires action from him or his team.
+
+Tone: Confident, concise, no jargon, no story points, no technical terminology. Maximum 150 words. Lead with RAG status. If there's a client-side action needed, make it explicit and actionable.
+
+Here is the sprint data:
+[pastes raw data]
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 1</div><strong>Meridian Portal — Sprint 2 Update</strong>
+<em>Status: AMBER | Week 6 of 26 | Budget on track</em>
+
+The project is progressing well overall — we are within budget and the core portal features are being built to plan. We delivered the majority of Sprint 2's scope and are on track for the September 30 go-live.
+
+One item requires your attention: <strong>the brand guide your team committed to providing by April 14 is now 5 days overdue.</strong> If we do not receive it by April 22, it will delay the mobile experience — a visible feature for your clients. No other blockers are on the SF side.
+
+<strong>Action required from Meridian:</strong> Please confirm with your design team that the brand guide will be shared by April 22.
+
+Next update: end of Sprint 3 (May 3).</div>
+
+    <p class="prose" style="margin-top:20px;">Sarah reviews it — the client-side action is clear, the tone is right, and Mark doesn't need to care about velocity. Now the team update:</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 2 (team update)</div>Good. Now write the team update for Arjun (cloud lead) and Priya (web lead) and their respective dev teams.
+
+Audience: SF delivery team — engineers and tech leads. They want specifics: what's blocked, what carried over and why, what's the plan for Sprint 3, and any capacity issues.
+
+Tone: Direct, no fluff, technical detail is fine. Use bullet points. They don't need the budget or the board context.
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 2</div><strong>Sprint 2 Wrap + Sprint 3 Plan</strong>
+
+<strong>Sprint 2 — what happened</strong>
+— 34/42 pts delivered (81% velocity)
+— 3 stories carried forward: authentication flow, Salesforce sync handshake, mobile nav
+— Salesforce sandbox delay (6 days) and dashboard design sign-off both resolved
+— Active blocker: brand guide from client — 5 days overdue (was April 14). Hard deadline April 22 or mobile nav slips
+
+<strong>Capacity</strong>
+— Priya: one frontend engineer on sick leave, back Monday. Factor into Sprint 3 planning.
+
+<strong>Sprint 3 focus</strong>
+— Authentication flow (carried)
+— Salesforce sync handshake (carried)
+— Document upload module (new)
+— Mobile nav — contingent on brand guide by April 22
+
+<strong>Actions before Sprint 3 kickoff</strong>
+— Arjun: confirm Salesforce sync handshake dependencies with Meridian IT
+— Priya: replan mobile nav story assuming brand guide arrives April 22 (if late, flag immediately)
+— All: Sprint 3 planning call Wednesday 10am IST</div>
+
+    <div class="callout callout-good" style="margin-top:20px;">
+      <strong>What changed:</strong> Two completely different documents from the same data — each serving its audience precisely. Total time: one focused prompt session, two turns. Mark gets a 130-word executive brief with a clear action. The team gets a structured operational update with named owners and deadlines.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-3">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-3" data-step="3">
+      <label for="rev-cb-3">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step-section" id="step-4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-meta">
+        <div class="step-label">Step 4 of 5</div>
+        <div class="step-title">The refined output</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah makes one adjustment to each update before sending. The CTO update needs a subject line formatted for forwarding. The team update needs the Sprint 3 planning call added to the calendar invite text.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card compare-good">
+        <div class="compare-label">✓ CTO update — final</div>
+        <strong>Subject: Meridian Portal — Sprint 2 Update (Action Required)</strong><br><br>
+        Status: <strong>AMBER</strong> | Week 6 of 26 | Budget on track<br><br>
+        The project is progressing well — within budget and on track for September 30. One item requires your attention:<br><br>
+        <strong>The brand guide your team committed to by April 14 is now 5 days overdue.</strong> If not received by April 22, it will delay the mobile experience.<br><br>
+        <strong>Action required:</strong> Please confirm your design team will share the brand guide by April 22.<br><br>
+        Next update: end of Sprint 3 (May 3).
+      </div>
+      <div class="compare-card compare-good">
+        <div class="compare-label">✓ Team update — final</div>
+        <strong>Sprint 2 Wrap / Sprint 3 Plan</strong><br><br>
+        <strong>Carried forward:</strong> Auth flow, SF sync handshake, mobile nav<br>
+        <strong>Blocker:</strong> Brand guide — April 22 hard deadline<br>
+        <strong>Capacity:</strong> Priya -1 FE until Monday<br><br>
+        <strong>Sprint 3 focus:</strong> Auth, SF sync, doc upload, mobile nav (conditional)<br><br>
+        <strong>Actions:</strong><br>
+        — Arjun: SF sync dependencies with Meridian IT<br>
+        — Priya: replan mobile nav, flag if brand guide late<br><br>
+        <strong>Sprint 3 planning: Wed 10am IST</strong><br>
+        Calendar invite to follow.
+      </div>
+    </div>
+
+    <p class="prose">The CTO update has a subject line designed to prompt forwarding and flags the amber status immediately. The team update is condensed to the essentials — named owners, hard dates, one action each.</p>
+
+    <div class="callout">
+      <strong>The PM's role in this workflow:</strong> Claude drafts, the PM edits. Sarah's value-add was knowing that Mark forwards these to the board (so the subject line matters), and that the team needs the calendar invite text. Claude can't know those things. The PM always closes the last mile.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-4">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-4" data-step="4">
+      <label for="rev-cb-4">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step-section" id="step-5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-meta">
+        <div class="step-label">Step 5 of 5</div>
+        <div class="step-title">Watch out</div>
+      </div>
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>1. Claude will soften bad news by default</strong><br>
+      Claude tends toward diplomatic framing. "81% velocity" will be presented as "we delivered most of our sprint scope" unless you explicitly tell it not to soften. If the news is genuinely bad — missed milestone, budget overrun, team conflict — tell Claude: "Do not soften this. The audience needs to understand the severity."
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>2. Audience bleed</strong><br>
+      If you write both updates in the same session without resetting context, Claude may carry tone from one into the other. Start each audience update with a fresh context statement: "Now write for a different audience…" and restate the audience profile.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>3. Missing the ask</strong><br>
+      The most common failure in executive updates is not making the required action explicit. Claude will sometimes bury the action in a paragraph rather than call it out. Always review: "Is the action required from this person crystal clear? Could they read this and think no action is needed?"
+    </div>
+
+    <div class="callout callout-good">
+      <strong>The prompting pattern that works:</strong><br>
+      (1) Paste raw data. (2) Describe the audience in detail — role, what they care about, what they don't, what action you need from them. (3) Set format constraints — word count, tone, structure. (4) Review for softening and missing asks before sending.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-5">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-5" data-step="5">
+      <label for="rev-cb-5">Mark step as reviewed</label>
+    </div>
+
+    <div class="bottom-nav">
+      <a class="nav-btn secondary" href="example-1-scope.html">← Example 1</a>
+      <a class="nav-btn" href="example-3-risk.html">Example 3 — Risk register →</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+const REV_KEY = 'pm_example-2-status';
+
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+
+function revLoad() { try { return JSON.parse(localStorage.getItem(REV_KEY)) || {}; } catch(e) { return {}; } }
+function revSave(s) { localStorage.setItem(REV_KEY, JSON.stringify(s)); }
+
+document.querySelectorAll('.rev-checkbox').forEach(cb => {
+  const s = revLoad();
+  if (s['cb_' + cb.dataset.step]) {
+    cb.checked = true;
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) { bar.classList.add('checked'); bar.querySelector('label').textContent = '✓ Step reviewed'; }
+  }
+  cb.addEventListener('change', () => {
+    const s = revLoad();
+    s['cb_' + cb.dataset.step] = cb.checked;
+    revSave(s);
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) {
+      bar.classList.toggle('checked', cb.checked);
+      bar.querySelector('label').textContent = cb.checked ? '✓ Step reviewed' : 'Mark step as reviewed';
+    }
+  });
+});
+</script>
+</body>
+</html>
