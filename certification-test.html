@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certification Exam · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#fff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --blue:#1a6eb5; --blue-light:#e8f1fb; --blue-mid:#b8d0ed; --blue-dark:#0f4a7a;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--blue); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+
+  /* ── Screens ── */
+  .screen { display:none; }
+  .screen.active { display:block; }
+
+  /* ── Intro screen ── */
+  .intro-wrap { max-width:720px; margin:60px auto; padding:0 32px; }
+  .intro-badge { display:inline-block; font-size:11px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--blue); background:var(--blue-light); border:1px solid var(--blue-mid); border-radius:20px; padding:4px 14px; margin-bottom:20px; }
+  .intro-title { font-size:30px; font-weight:700; margin-bottom:12px; line-height:1.25; }
+  .intro-sub { font-size:17px; color:var(--text-dim); line-height:1.8; margin-bottom:32px; }
+  .meta-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:32px; }
+  .meta-card { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:16px 20px; }
+  .meta-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:4px; }
+  .meta-val { font-size:18px; font-weight:700; color:var(--text); }
+  .attempt-info { background:var(--amber-light); border:1.5px solid #e8c97a; border-left:4px solid var(--amber); border-radius:var(--radius); padding:16px 20px; margin-bottom:28px; font-size:15px; color:var(--text-dim); line-height:1.7; }
+  .attempt-info strong { color:var(--amber); }
+  .start-btn { display:block; width:100%; padding:16px; background:var(--blue); color:#fff; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; font-family:'Merriweather Sans',sans-serif; letter-spacing:.02em; }
+  .start-btn:hover { background:var(--blue-dark); }
+  .start-btn:disabled { background:var(--border); color:var(--text-dimmer); cursor:not-allowed; }
+
+  /* ── Exam screen ── */
+  .exam-topbar { background:var(--bg2); border-bottom:1px solid var(--border); padding:14px 32px; display:flex; align-items:center; gap:20px; position:sticky; top:0; z-index:100; }
+  .exam-progress-wrap { flex:1; }
+  .exam-progress-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-bottom:4px; }
+  .exam-progress-bar { height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .exam-progress-fill { height:100%; background:var(--blue); border-radius:3px; transition:width .3s; }
+  .timer-wrap { text-align:right; }
+  .timer-label { font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); text-transform:uppercase; letter-spacing:.08em; }
+  .timer-val { font-size:20px; font-weight:700; font-family:'Source Code Pro',monospace; color:var(--text); }
+  .timer-val.warn { color:var(--amber); }
+  .timer-val.danger { color:var(--coral); }
+  .answered-count { font-size:13px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); white-space:nowrap; }
+
+  .exam-body { max-width:820px; margin:0 auto; padding:40px 32px 80px; }
+  .section-header { font-size:11px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--blue); font-weight:700; margin:40px 0 20px; padding-bottom:10px; border-bottom:2px solid var(--blue-light); }
+  .section-header:first-child { margin-top:0; }
+
+  .q-block { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:24px 28px; margin-bottom:16px; }
+  .q-block.answered { border-color:var(--blue-mid); background:var(--blue-light); }
+  .q-number { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; }
+  .q-text { font-size:16px; font-weight:600; color:var(--text); line-height:1.5; margin-bottom:16px; }
+  .q-options { display:flex; flex-direction:column; gap:8px; }
+  .q-option { display:flex; align-items:flex-start; gap:10px; padding:11px 16px; border-radius:8px; border:1.5px solid var(--border); cursor:pointer; font-size:15px; color:var(--text-dim); line-height:1.5; transition:border-color .15s, background .15s; background:var(--bg2); }
+  .q-option:hover { border-color:var(--blue-mid); background:var(--bg3); }
+  .q-option.selected { border-color:var(--blue); background:var(--bg2); color:var(--text); }
+  .q-option input[type="radio"] { margin-top:3px; flex-shrink:0; accent-color:var(--blue); }
+
+  .exam-footer { position:fixed; bottom:0; left:0; right:0; background:var(--bg2); border-top:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; gap:16px; z-index:100; }
+  .submit-exam-btn { padding:14px 32px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Merriweather Sans',sans-serif; }
+  .submit-exam-btn:disabled { background:var(--border); color:var(--text-dimmer); cursor:not-allowed; }
+  .submit-exam-btn:not(:disabled):hover { background:var(--blue-dark); }
+  .footer-note { font-size:13px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); }
+
+  /* ── Results screen ── */
+  .result-wrap { max-width:720px; margin:60px auto; padding:0 32px 60px; }
+  .result-badge { display:inline-block; font-size:13px; font-family:'Source Code Pro',monospace; font-weight:700; padding:6px 18px; border-radius:20px; margin-bottom:20px; }
+  .result-badge.pass { background:var(--green-light); color:var(--green); border:1.5px solid var(--green-mid); }
+  .result-badge.fail { background:var(--coral-light); color:var(--coral); border:1.5px solid var(--coral-mid); }
+  .result-score { font-size:56px; font-weight:700; font-family:'Source Code Pro',monospace; margin-bottom:4px; }
+  .result-score.pass { color:var(--green); }
+  .result-score.fail { color:var(--coral); }
+  .result-title { font-size:24px; font-weight:700; margin-bottom:12px; }
+  .result-sub { font-size:16px; color:var(--text-dim); line-height:1.8; margin-bottom:32px; }
+  .result-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:32px; }
+  .result-card { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:18px 20px; text-align:center; }
+  .result-card .rval { font-size:28px; font-weight:700; font-family:'Source Code Pro',monospace; }
+  .result-card .rlbl { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); text-transform:uppercase; letter-spacing:.08em; margin-top:4px; }
+  .result-card.correct .rval { color:var(--green); }
+  .result-card.wrong   .rval { color:var(--coral); }
+  .result-card.pct     .rval { color:var(--blue); }
+  .result-actions { display:flex; gap:12px; flex-wrap:wrap; }
+  .result-btn { padding:12px 24px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; border:none; }
+  .result-btn.primary { background:var(--blue); color:#fff; }
+  .result-btn.primary:hover { background:var(--blue-dark); }
+  .result-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  .result-btn.secondary:hover { background:var(--bg3); }
+  .attempts-used { font-size:13px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:16px; }
+
+  /* Section breakdown */
+  .breakdown { margin-top:32px; }
+  .breakdown-title { font-size:16px; font-weight:700; margin-bottom:16px; }
+  .breakdown-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+  .breakdown-row:last-child { border:none; }
+  .br-label { flex:1; color:var(--text-dim); }
+  .br-score { font-family:'Source Code Pro',monospace; font-weight:700; font-size:13px; }
+  .br-bar-wrap { width:120px; height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+  .br-bar { height:100%; border-radius:4px; }
+  .br-bar.good { background:var(--green); }
+  .br-bar.ok   { background:var(--amber); }
+  .br-bar.poor { background:var(--coral); }
+
+  footer { text-align:center; padding:32px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a><span class="sep">/</span>
+  <span>Certification exam</span>
+</nav>
+
+<!-- ── INTRO SCREEN ── -->
+<div class="screen active" id="screenIntro">
+  <div class="intro-wrap">
+    <div class="intro-badge">SF Certification</div>
+    <h1 class="intro-title">SF Certified AI-Augmented Project Manager</h1>
+    <p class="intro-sub">This exam tests your understanding of how to use Claude effectively across the full PM workflow — from scoping and planning through to incident management, contract review, and stakeholder communication.</p>
+    <div class="meta-grid">
+      <div class="meta-card"><div class="meta-label">Questions</div><div class="meta-val">36 questions</div></div>
+      <div class="meta-card"><div class="meta-label">Time limit</div><div class="meta-val">45 minutes</div></div>
+      <div class="meta-card"><div class="meta-label">Pass mark</div><div class="meta-val">70% (26/36)</div></div>
+      <div class="meta-card"><div class="meta-label">Attempts</div><div class="meta-val">3 maximum</div></div>
+    </div>
+    <div class="attempt-info" id="attemptInfo">
+      <strong>Before you begin:</strong> Complete all 12 course examples before taking this exam. Your exam results are saved locally. You have <strong id="attemptsLeft">3 attempts</strong> remaining.
+    </div>
+    <button class="start-btn" id="startBtn">Begin exam →</button>
+  </div>
+</div>
+
+<!-- ── EXAM SCREEN ── -->
+<div class="screen" id="screenExam">
+  <div class="exam-topbar">
+    <div class="exam-progress-wrap">
+      <div class="exam-progress-label" id="progressLabel">Question 0 of 36</div>
+      <div class="exam-progress-bar"><div class="exam-progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="answered-count" id="answeredCount">0 answered</div>
+    <div class="timer-wrap">
+      <div class="timer-label">Time remaining</div>
+      <div class="timer-val" id="timerVal">45:00</div>
+    </div>
+  </div>
+  <div class="exam-body" id="examBody"></div>
+  <div class="exam-footer">
+    <div class="footer-note" id="footerNote">Answer all 36 questions to submit.</div>
+    <button class="submit-exam-btn" id="submitExamBtn" disabled>Submit exam</button>
+  </div>
+</div>
+
+<!-- ── RESULTS SCREEN ── -->
+<div class="screen" id="screenResults">
+  <div class="result-wrap">
+    <div class="result-badge" id="resultBadge">—</div>
+    <div class="result-score" id="resultScore">—</div>
+    <div class="result-title" id="resultTitle">—</div>
+    <p class="result-sub" id="resultSub">—</p>
+    <div class="result-grid">
+      <div class="result-card correct"><div class="rval" id="resCorrect">—</div><div class="rlbl">Correct</div></div>
+      <div class="result-card wrong"><div class="rval" id="resWrong">—</div><div class="rlbl">Incorrect</div></div>
+      <div class="result-card pct"><div class="rval" id="resPct">—</div><div class="rlbl">Score</div></div>
+    </div>
+    <div class="result-actions">
+      <a class="result-btn primary" href="course-map.html">← Back to course map</a>
+      <button class="result-btn secondary" id="retryBtn" style="display:none">Retake exam</button>
+    </div>
+    <div class="attempts-used" id="attemptsUsedNote"></div>
+    <div class="breakdown" id="breakdown"></div>
+  </div>
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const STORAGE_KEY   = 'pm_cert_exam';
+const MAX_ATTEMPTS  = 3;
+const PASS_MARK     = 0.70;
+const TIME_LIMIT    = 45 * 60; // seconds
+
+// ── All 36 questions ─────────────────────────────────────────────────────────
+const EXAM_QUESTIONS = [
+  // Tier 1 — Example 1: Scope
+  { section:'Tier 1 — Scoping & Communication', qn:1,
+    text:'When Claude is given a vague brief and asked to write a scope document, what is its most likely default behaviour?',
+    options:['Ask clarifying questions before writing anything','Fill in gaps with plausible-sounding assumptions without flagging them','Refuse to write until all information is confirmed','Write only what is explicitly stated, leaving the rest blank'],
+    correct:'B' },
+  { section:'Tier 1 — Scoping & Communication', qn:2,
+    text:'In the two-phase prompting approach for scope documents, what is the correct order?',
+    options:['Write the scope document first, then ask Claude to review it for gaps','Ask Claude to analyse and surface gaps first, then generate the document','Generate the document and the gap analysis simultaneously in one prompt','Send the brief to the client for clarification before involving Claude'],
+    correct:'B' },
+  { section:'Tier 1 — Scoping & Communication', qn:3,
+    text:'A PM adds a PII data handling constraint to a scope document that Claude produced. Why was Claude unable to include it without the PM\'s input?',
+    options:['Claude is not permitted to handle information about data privacy','The constraint came from a verbal conversation — Claude has no memory of interactions outside the current session','Claude would have included it automatically from the brief context','PII constraints are always out of scope for AI-generated documents'],
+    correct:'B' },
+
+  // Example 2: Status update
+  { section:'Tier 1 — Scoping & Communication', qn:4,
+    text:'What is the most critical element missing from a one-size-fits-all status update sent to both the CTO and the engineering team?',
+    options:['A RAG status indicator','A clear action required from the specific audience','Story point velocity data','The budget percentage spent'],
+    correct:'B' },
+  { section:'Tier 1 — Scoping & Communication', qn:5,
+    text:'When writing a status update for a C-suite executive on a financial services project, which of these should be excluded?',
+    options:['The overall RAG status','Budget percentage consumed','Story points and sprint velocity numbers','The go-live date'],
+    correct:'C' },
+  { section:'Tier 1 — Scoping & Communication', qn:6,
+    text:'Claude tends to soften bad news by default. What should a PM explicitly include in their prompt to prevent this when delivering a genuinely serious update?',
+    options:['An instruction not to soften the news when it is genuinely serious','A word count limit to keep the update short','A request to include all technical details','A list of all sprint stories completed'],
+    correct:'A' },
+
+  // Example 3: Risk
+  { section:'Tier 1 — Scoping & Communication', qn:7,
+    text:'What is the primary failure of a generic risk register prompt like "create a risk register for a cloud migration project"?',
+    options:['Claude refuses to create risk registers without a scoring rubric','The output will always be too long to be useful','Claude produces risks that apply to any project, not the specific context','The likelihood scores will always be set to Medium by default'],
+    correct:'C' },
+  { section:'Tier 1 — Scoping & Communication', qn:8,
+    text:'When asking Claude to produce a risk register, what instruction most improves the quality of mitigations?',
+    options:['Ask for at least 20 risks to ensure comprehensive coverage','Specify that each mitigation must be specific — not "monitor closely" or "communicate regularly"','Ask Claude to score risks using a 1–3 scale for simplicity','Provide the risk register from the previous project as a template'],
+    correct:'B' },
+  { section:'Tier 1 — Scoping & Communication', qn:9,
+    text:'A PM adds a regulatory change risk to a Claude-produced risk register. What does this illustrate about Claude\'s output?',
+    options:['Claude\'s output is a first draft — domain knowledge must be added by the PM','Claude is unable to reason about regulatory risks in any industry','The prompt was not specific enough about the industry context','Regulatory risks should always be excluded from the initial register'],
+    correct:'A' },
+
+  // Example 4: Sprint
+  { section:'Tier 1 — Scoping & Communication', qn:10,
+    text:'What is the key difference between a naive story decomposition prompt and a well-structured one?',
+    options:['The well-structured prompt produces more stories, covering more features','The well-structured prompt produces testable acceptance criteria, size estimates, and dependency flags','The well-structured prompt uses a different user story format','The well-structured prompt is produced faster because fewer turns are needed'],
+    correct:'B' },
+  { section:'Tier 1 — Scoping & Communication', qn:11,
+    text:'A technical lead increases an AI story estimate from 8 to 10 points after a sprint planning session. What does this illustrate?',
+    options:['Claude recalculated the estimate after seeing the full sprint capacity','The PM should have provided more context in the original prompt','Claude cannot accurately estimate AI/ML work — technical leads must validate all estimates','The QA team requested additional test coverage for the story'],
+    correct:'C' },
+  { section:'Tier 1 — Scoping & Communication', qn:12,
+    text:'What is the most important PM action after receiving Claude\'s epic decomposition before a sprint planning session?',
+    options:['Validate estimates with the technical lead before the planning session','Send the output directly to the client for sign-off','Reduce all estimates by 20% to account for Claude\'s optimism','Add the stories to the sprint board without further review'],
+    correct:'A' },
+
+  // Tier 2 — Example 5: Project plan
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:13,
+    text:'For fixed-deadline projects, what is the critical technique Claude should always be asked to perform before producing a milestone plan?',
+    options:['Backwards scheduling — reasoning from the deadline to find the latest start date for each phase','Forward scheduling — building the plan from Day 1 to the deadline','Parallel scheduling — running all phases simultaneously to compress the timeline','Agile scheduling — planning only two sprints ahead at any time'],
+    correct:'A' },
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:14,
+    text:'A SOC 2 audit requires 30 days of system operation before it can begin. How does this affect a September 30 go-live plan?',
+    options:['It has no effect — SOC 2 runs after go-live and does not affect the build timeline','The system must be in a production-equivalent environment by September 1, compressing the build window by 4 weeks','It adds 30 days after go-live before the system can be certified','It requires all development to stop for 30 days during the audit'],
+    correct:'B' },
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:15,
+    text:'Claude produces a milestone plan without any buffer sprint between integration and compliance phases. What should the PM add and why?',
+    options:['Nothing — buffer sprints are wasteful and should be eliminated from project plans','A 2-week integration buffer, based on operational experience with integration risk in similar projects','An additional compliance sprint to ensure SOC 2 documentation is complete','A client review sprint to get sign-off on each phase before moving on'],
+    correct:'B' },
+
+  // Example 6: Tracking
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:16,
+    text:'What information must be provided to Claude for delivery risk modelling to produce useful output?',
+    options:['Velocity data only — Claude can infer the deadline from the scope','The deadline only — Claude can calculate remaining scope from velocity','Both remaining scope AND the deadline — Claude cannot model risk without both','Team capacity only — velocity data is a lagging indicator'],
+    correct:'C' },
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:17,
+    text:'A PM notices sprint velocity declining over 4 sprints. At what point should this risk be surfaced to stakeholders?',
+    options:['At Week 8 — when there are still enough sprints remaining to take corrective action','At the midpoint — when the trend is confirmed over enough sprints','Only when a deadline miss becomes certain — to avoid unnecessary alarm','At the final sprint review — so the team can plan the go-live carefully'],
+    correct:'A' },
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:18,
+    text:'When presenting a delivery risk scenario model to stakeholders, what does asking Claude to include "options with named asks" achieve?',
+    options:['It gives stakeholders a list of technical changes the engineering team needs to make','It moves the conversation from diagnosing the problem to deciding which corrective action to take','It demonstrates that the PM has read the contract SLA requirements','It allows the delivery head to bypass the client conversation entirely'],
+    correct:'B' },
+
+  // Example 7: Reporting
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:19,
+    text:'Without explicit synthesis instructions, how does Claude typically handle a multi-workstream programme status update?',
+    options:['It produces one integrated programme view with cross-cutting themes','It produces N separate workstream summaries with no cross-cutting analysis','It refuses to process more than one workstream at a time','It combines all workstreams into a single status without distinguishing between them'],
+    correct:'B' },
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:20,
+    text:'What is the single most valuable structural element of a Claude-assisted multi-workstream health report?',
+    options:['The per-workstream RAG status — giving each lead their own section','The consolidated client action section — making the client\'s accountability visible in one place','The budget utilisation table — showing spend across all workstreams','The executive summary — a three-sentence overview of programme health'],
+    correct:'B' },
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:21,
+    text:'A PM adds a visual RAG dashboard to the Claude-produced health report. What does this illustrate about PM judgment in AI-assisted workflows?',
+    options:['Claude cannot produce visual outputs of any kind','The PM understands how the client actually uses the report — knowledge Claude cannot have','The RAG status was incorrect and needed to be corrected visually','Health reports always require a visual component to be accepted by clients'],
+    correct:'B' },
+
+  // Example 8: Change request
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:22,
+    text:'What is the most dangerous PM behaviour when receiving a scope change request from a senior client stakeholder?',
+    options:['Immediately escalating to the delivery head without analysing the request','Responding before running an impact analysis — implying agreement without formally committing','Asking for the request in writing before responding','Presenting too many options and confusing the client'],
+    correct:'B' },
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:23,
+    text:'Why should a PM always request a formal impact analysis across schedule, budget, AND risk — not just cost — for a scope change request?',
+    options:['Because the client will always challenge cost estimates but not schedule estimates','Because the real constraint for fixed-deadline projects is usually schedule, not budget','Because Anthropic requires three-dimensional analysis for all change requests','Because risk analysis is required by the contract SLA'],
+    correct:'B' },
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:24,
+    text:'Why is a Change Request reference number important even for an informal verbal request from a CTO?',
+    options:['It is a contractual requirement under all SF engagement terms','It creates a documented record of the risk presented and the decision accepted by the client','It allows the PM to delay responding until the next sprint planning session','It signals to the client that SF takes scope changes seriously'],
+    correct:'B' },
+
+  // Example 9: AI reporting
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:25,
+    text:'When translating "3% hallucination rate" for a financial services board, what is the most appropriate framing?',
+    options:['Omit it entirely — boards do not need to know about technical limitations','Report it as a failure rate: "the system gets it wrong 3% of the time"','Reframe as appropriate uncertainty flagging: "in 3 of 100 cases the assistant flags its response as uncertain rather than guessing"','Convert to percentage accuracy: "97% accurate" with no further context'],
+    correct:'C' },
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:26,
+    text:'What is the PM\'s key test before sending a translated AI technical update to a client?',
+    options:['Has Claude approved the translation for accuracy?','Is the translated version still technically accurate — has vocabulary changed but not facts?','Has the word count been reduced to under 200 words?','Has all mention of accuracy metrics been removed?'],
+    correct:'B' },
+  { section:'Tier 2 — Planning, Tracking & Reporting', qn:27,
+    text:'Why must a PM validate a translated AI update with the engineering lead before sending?',
+    options:['Claude\'s translation may miss a technical nuance that changes the meaning — the tech lead is the accuracy authority','The tech lead must approve all client communications for legal reasons','Claude is not authorised to produce client-facing content without technical review','The translation may contain jargon that only the tech lead can identify'],
+    correct:'A' },
+
+  // Tier 3 — Example 10: RCA
+  { section:'Tier 3 — Advanced PM Judgment', qn:28,
+    text:'When managing a P1 incident with two different audiences, what is the correct order of document production?',
+    options:['Write the board communication first — the client is the highest priority stakeholder','Produce the engineering RCA first — it forces precise understanding, making the board communication a translation exercise','Write one document and adjust the tone for each audience separately','Wait for the incident to be fully resolved before writing either document'],
+    correct:'B' },
+  { section:'Tier 3 — Advanced PM Judgment', qn:29,
+    text:'Why should an engineering RCA never be sent directly to the client?',
+    options:['It contains too much technical detail for a non-technical audience','It is written in a format that only engineers can understand','Phrases like "process failures" can be read as admissions of negligence by the client\'s legal team','It contains budget information that should not be shared with clients'],
+    correct:'C' },
+  { section:'Tier 3 — Advanced PM Judgment', qn:30,
+    text:'In a P1 incident response, what did the PM add to the board communication that Claude could not have provided from the incident log alone?',
+    options:['The current status of the incident','The plain-language explanation of the root cause','Whether any transactions were lost — information requiring a separate conversation with the engineering lead','The corrective action plan and timeline'],
+    correct:'C' },
+
+  // Example 11: Contract
+  { section:'Tier 3 — Advanced PM Judgment', qn:31,
+    text:'What was the highest-risk clause in a cloud AI vendor MSA for a financial services engagement with US-only data residency requirements?',
+    options:['A liability cap set at 3 months of fees','A clause permitting data processing in the EU as operationally required','An unlimited subcontracting clause without prior written consent','An indemnification clause limited to gross negligence'],
+    correct:'B' },
+  { section:'Tier 3 — Advanced PM Judgment', qn:32,
+    text:'What is the correct role of a PM when using Claude to review a vendor contract before passing it to legal?',
+    options:['Use Claude to replace legal review entirely — it is faster and cheaper','Use Claude to identify which clauses legal can safely ignore','Use Claude to produce a prioritised triage brief that directs limited legal review time to the highest-risk clauses','Use Claude to negotiate contract terms directly with the vendor'],
+    correct:'C' },
+  { section:'Tier 3 — Advanced PM Judgment', qn:33,
+    text:'Why must engagement context (PII requirements, data residency, liability position) be provided to Claude before the contract clauses?',
+    options:['Claude processes information sequentially and cannot reconsider earlier analysis','The context determines what is a red flag — without it, standard clauses appear acceptable','Legal requires context before contract language in all formal reviews','Claude cannot read contract language without a reference framework'],
+    correct:'B' },
+
+  // Example 12: Cost
+  { section:'Tier 3 — Advanced PM Judgment', qn:34,
+    text:'A cloud AI workstream is running $60K over its $120K budget on a $680K total programme. What is the most important structural reframe a PM should add to the cost narrative?',
+    options:['Remove the options table — it is too complex for a board audience','Add programme-level budget context — reframing $60K from 50% of the AI budget to under 9% of the total programme','Add the raw AWS cost data so the client can verify the numbers','Replace the recommendation with a request for the client to choose an option'],
+    correct:'B' },
+  { section:'Tier 3 — Advanced PM Judgment', qn:35,
+    text:'Claude states that 3–5× AI infrastructure cost overruns are common in the industry. What should a PM do before presenting this claim to a client?',
+    options:['Accept it — Claude\'s knowledge base is comprehensive and reliable for industry benchmarks','Remove it — industry benchmarks should never be cited in client communications','Validate it with the engineering lead so there is a defensible source if the client challenges it','Replace it with a lower estimate to manage client expectations conservatively'],
+    correct:'C' },
+  { section:'Tier 3 — Advanced PM Judgment', qn:36,
+    text:'Why should a PM always lead a cost overrun communication with a recommendation rather than a neutral presentation of options?',
+    options:['Executives will always choose the cheapest option without a recommendation','Presenting options without a recommendation forces the client to make a technical decision they are not equipped to make','A recommendation demonstrates the PM has read the contract SLA requirements','Without a recommendation the client will always request more options'],
+    correct:'B' },
+];
+
+// ── State ────────────────────────────────────────────────────────────────────
+function loadExamState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { attempts:[], inProgress:null }; } catch(e) { return { attempts:[], inProgress:null }; } }
+function saveExamState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+
+let answers    = {}; // qn → 'A'|'B'|'C'|'D'
+let timerInt   = null;
+let secsLeft   = TIME_LIMIT;
+let examStarted= false;
+
+// ── Intro screen ─────────────────────────────────────────────────────────────
+function initIntro() {
+  const state  = loadExamState();
+  const used   = state.attempts.length;
+  const left   = MAX_ATTEMPTS - used;
+  const passed = state.attempts.some(a => a.pct >= PASS_MARK);
+
+  document.getElementById('attemptsLeft').textContent = left + ' attempt' + (left !== 1 ? 's' : '');
+
+  const startBtn = document.getElementById('startBtn');
+  const info     = document.getElementById('attemptInfo');
+
+  if (passed) {
+    info.innerHTML = '<strong style="color:var(--green)">✓ Certification achieved!</strong> You have already passed this exam. You can retake it to improve your score.';
+    startBtn.textContent = left > 0 ? 'Retake exam →' : 'No attempts remaining';
+  } else if (used > 0) {
+    const last = state.attempts[state.attempts.length - 1];
+    info.innerHTML = `<strong>Previous attempt:</strong> ${Math.round(last.pct * 100)}% — ${last.correct}/36 correct. You have <strong>${left} attempt${left !== 1 ? 's' : ''}</strong> remaining.`;
+  }
+
+  if (left === 0) {
+    startBtn.disabled = true;
+    startBtn.textContent = 'No attempts remaining';
+  } else if (state.inProgress) {
+    startBtn.textContent = 'Resume exam →';
+  }
+
+  startBtn.addEventListener('click', startExam);
+}
+
+// ── Exam ─────────────────────────────────────────────────────────────────────
+function startExam() {
+  const state = loadExamState();
+  // Restore in-progress answers if any
+  if (state.inProgress) {
+    answers  = state.inProgress.answers || {};
+    secsLeft = state.inProgress.secsLeft || TIME_LIMIT;
+  } else {
+    answers  = {};
+    secsLeft = TIME_LIMIT;
+  }
+
+  showScreen('screenExam');
+  renderExam();
+  startTimer();
+}
+
+function renderExam() {
+  const body = document.getElementById('examBody');
+  let html   = '';
+  let lastSection = '';
+
+  EXAM_QUESTIONS.forEach(function(q, idx) {
+    if (q.section !== lastSection) {
+      html += `<div class="section-header">${q.section}</div>`;
+      lastSection = q.section;
+    }
+    const answered = answers['q' + q.qn];
+    html += `<div class="q-block${answered ? ' answered' : ''}" id="qblock-${q.qn}">
+      <div class="q-number">Question ${q.qn} of 36</div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-options">`;
+    ['A','B','C','D'].forEach(function(letter, oi) {
+      const selected = answered === letter;
+      html += `<label class="q-option${selected ? ' selected' : ''}">
+        <input type="radio" name="q${q.qn}" value="${letter}"${selected ? ' checked' : ''}>
+        <span><strong>${letter}.</strong> ${q.options[oi]}</span>
+      </label>`;
+    });
+    html += `</div></div>`;
+  });
+
+  body.innerHTML = html;
+
+  // Attach listeners
+  body.querySelectorAll('input[type="radio"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      answers[radio.name] = radio.value;
+      const qnum = radio.name; // 'q1', 'q2' etc
+      const block = document.getElementById('qblock-' + qnum.replace('q',''));
+      if (block) block.classList.add('answered');
+      // Update selected style
+      block.querySelectorAll('.q-option').forEach(function(opt) {
+        opt.classList.toggle('selected', opt.querySelector('input').value === radio.value);
+      });
+      updateProgress();
+      autoSave();
+    });
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const n  = Object.keys(answers).length;
+  const pct = (n / 36) * 100;
+  document.getElementById('progressLabel').textContent  = `${n} of 36 answered`;
+  document.getElementById('progressFill').style.width   = pct + '%';
+  document.getElementById('answeredCount').textContent  = n + ' answered';
+  const btn  = document.getElementById('submitExamBtn');
+  const note = document.getElementById('footerNote');
+  const remaining = 36 - n;
+  if (n === 36) {
+    btn.disabled       = false;
+    note.textContent   = 'All questions answered. Ready to submit.';
+  } else {
+    btn.disabled       = true;
+    note.textContent   = `${remaining} question${remaining !== 1 ? 's' : ''} remaining.`;
+  }
+}
+
+function autoSave() {
+  const state = loadExamState();
+  state.inProgress = { answers, secsLeft };
+  saveExamState(state);
+}
+
+function startTimer() {
+  clearInterval(timerInt);
+  updateTimerDisplay();
+  timerInt = setInterval(function() {
+    secsLeft--;
+    updateTimerDisplay();
+    if (secsLeft % 30 === 0) autoSave();
+    if (secsLeft <= 0) { clearInterval(timerInt); submitExam(true); }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m   = Math.floor(secsLeft / 60);
+  const s   = secsLeft % 60;
+  const str = m + ':' + (s < 10 ? '0' : '') + s;
+  const el  = document.getElementById('timerVal');
+  el.textContent = str;
+  el.className   = 'timer-val' + (secsLeft <= 300 ? ' danger' : secsLeft <= 600 ? ' warn' : '');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  initIntro();
+  document.getElementById('submitExamBtn').addEventListener('click', function() { submitExam(false); });
+});
+
+function submitExam(timeUp) {
+  clearInterval(timerInt);
+
+  let correct = 0;
+  EXAM_QUESTIONS.forEach(function(q) {
+    if (answers['q' + q.qn] === q.correct) correct++;
+  });
+
+  const pct   = correct / 36;
+  const pass  = pct >= PASS_MARK;
+  const state = loadExamState();
+
+  state.attempts.push({ correct, pct, submittedAt: new Date().toISOString(), timeUp, answers: Object.assign({}, answers) });
+  state.inProgress = null;
+  saveExamState(state);
+
+  showResults(correct, pct, pass, state.attempts.length, timeUp);
+}
+
+// ── Results ───────────────────────────────────────────────────────────────────
+function showResults(correct, pct, pass, attemptsUsed, timeUp) {
+  showScreen('screenResults');
+
+  const wrong = 36 - correct;
+  const pctStr = Math.round(pct * 100) + '%';
+
+  document.getElementById('resultBadge').textContent  = pass ? '✓ PASSED' : '✗ NOT PASSED';
+  document.getElementById('resultBadge').className    = 'result-badge ' + (pass ? 'pass' : 'fail');
+  document.getElementById('resultScore').textContent  = pctStr;
+  document.getElementById('resultScore').className    = 'result-score ' + (pass ? 'pass' : 'fail');
+  document.getElementById('resultTitle').textContent  = pass ? 'Congratulations — certification achieved!' : 'Not passed — review the course and try again';
+  document.getElementById('resultSub').textContent    = pass
+    ? `You scored ${correct}/36 (${pctStr}) — above the 70% pass mark. Your SF Certified AI-Augmented Project Manager certification is confirmed.`
+    : `You scored ${correct}/36 (${pctStr}). The pass mark is 70% (26/36). ${timeUp ? 'The exam timed out. ' : ''}Review the examples and retake when ready.`;
+  document.getElementById('resCorrect').textContent  = correct;
+  document.getElementById('resWrong').textContent    = wrong;
+  document.getElementById('resPct').textContent      = pctStr;
+
+  const left = MAX_ATTEMPTS - attemptsUsed;
+  document.getElementById('attemptsUsedNote').textContent = `Attempt ${attemptsUsed} of ${MAX_ATTEMPTS} used${left > 0 ? ` · ${left} remaining` : ' · No attempts remaining'}.`;
+
+  const retryBtn = document.getElementById('retryBtn');
+  if (left > 0 && !pass) {
+    retryBtn.style.display = 'inline-block';
+    retryBtn.addEventListener('click', function() { window.location.reload(); });
+  }
+
+  // Section breakdown
+  const sections = {};
+  EXAM_QUESTIONS.forEach(function(q) {
+    if (!sections[q.section]) sections[q.section] = { correct:0, total:0 };
+    sections[q.section].total++;
+    if (answers['q' + q.qn] === q.correct) sections[q.section].correct++;
+  });
+
+  let bdHtml = '<div class="breakdown-title">Section breakdown</div>';
+  Object.entries(sections).forEach(function([sec, data]) {
+    const p = data.correct / data.total;
+    const cls = p >= 0.8 ? 'good' : p >= 0.6 ? 'ok' : 'poor';
+    bdHtml += `<div class="breakdown-row">
+      <div class="br-label">${sec}</div>
+      <div class="br-score">${data.correct}/${data.total}</div>
+      <div class="br-bar-wrap"><div class="br-bar ${cls}" style="width:${Math.round(p*100)}%"></div></div>
+    </div>`;
+  });
+  document.getElementById('breakdown').innerHTML = bdHtml;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
