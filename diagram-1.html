@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagram 1 — Claude in the PM Workflow · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --pm:#0b6e4f; --pm-light:#e6f4ef; --pm-mid:#a8d5c2; --pm-dark:#074d37;
+    --blue:#1a6eb5; --blue-light:#e8f1fb;
+    --coral:#c0392b; --coral-light:#fdf0ee;
+    --green:#1a6b3a; --green-light:#e8f5ed;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; min-height:100vh; }
+
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--pm); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+
+  .hero-wrap { background:var(--bg2); border-bottom:2px solid var(--border); }
+  .hero { max-width:900px; margin:0 auto; padding:32px 40px 28px; }
+  .hero-eyebrow { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--pm); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-size:24px; font-weight:700; margin-bottom:8px; }
+  .hero h1 span { color:var(--pm); }
+  .hero-sub { font-size:14px; color:var(--text-dim); max-width:600px; line-height:1.7; }
+  .hero-hint { font-size:12px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:10px; }
+
+  /* Main layout */
+  .main { max-width:900px; margin:0 auto; padding:32px 40px; }
+
+  /* Diagram canvas */
+  .diagram-wrap { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:32px; margin-bottom:24px; position:relative; overflow:hidden; }
+
+  /* PM activity nodes */
+  .diagram-grid {
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto auto auto;
+    gap:12px;
+    position:relative;
+  }
+
+  .node {
+    border-radius:10px; padding:14px 16px; cursor:pointer;
+    transition:transform .15s, box-shadow .15s;
+    position:relative; border:2px solid transparent;
+    user-select:none;
+  }
+  .node:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.1); }
+  .node.active { box-shadow:0 0 0 3px var(--pm), 0 6px 20px rgba(11,110,79,.2); }
+
+  /* Node types */
+  .node-claude { background:var(--pm-light); border-color:var(--pm-mid); }
+  .node-human  { background:#fff8e6; border-color:#e8c97a; }
+  .node-both   { background:var(--blue-light); border-color:#b8d0ed; }
+  .node-header { background:var(--bg3); border-color:var(--border); cursor:default; }
+  .node-header:hover { transform:none; box-shadow:none; }
+
+  .node-icon { font-size:18px; margin-bottom:4px; }
+  .node-title { font-size:12px; font-weight:700; color:var(--text); margin-bottom:2px; }
+  .node-sub { font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); }
+  .node-badge {
+    position:absolute; top:8px; right:8px;
+    font-size:9px; font-family:'Source Code Pro',monospace;
+    padding:2px 6px; border-radius:8px; font-weight:700; letter-spacing:.04em;
+  }
+  .badge-claude { background:var(--pm-light); color:var(--pm-dark); border:1px solid var(--pm-mid); }
+  .badge-human  { background:#fff8e6; color:var(--amber); border:1px solid #e8c97a; }
+  .badge-both   { background:var(--blue-light); color:#0f4a7a; border:1px solid #b8d0ed; }
+
+  /* Legend */
+  .legend { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+  .legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-dim); }
+  .legend-dot { width:12px; height:12px; border-radius:3px; border:1.5px solid; }
+  .legend-dot.c { background:var(--pm-light); border-color:var(--pm-mid); }
+  .legend-dot.h { background:#fff8e6; border-color:#e8c97a; }
+  .legend-dot.b { background:var(--blue-light); border-color:#b8d0ed; }
+
+  /* Detail panel */
+  .detail-panel {
+    background:var(--bg2); border:1.5px solid var(--border);
+    border-radius:var(--radius); padding:24px 28px;
+    margin-bottom:24px; min-height:180px;
+    transition:opacity .2s;
+  }
+  .detail-panel.empty { display:flex; align-items:center; justify-content:center; color:var(--text-dimmer); font-size:13px; font-family:'Source Code Pro',monospace; }
+  .detail-eyebrow { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--pm); margin-bottom:6px; }
+  .detail-title { font-size:18px; font-weight:700; margin-bottom:12px; }
+  .detail-body { font-size:14px; color:var(--text-dim); line-height:1.7; margin-bottom:16px; }
+  .detail-prompt { background:var(--code-bg); border-radius:8px; padding:14px 18px; font-family:'Source Code Pro',monospace; font-size:12px; color:#a6e3a1; line-height:1.6; margin-top:12px; }
+  .detail-prompt-label { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#89b4fa; margin-bottom:6px; opacity:.7; }
+  .detail-watch { background:var(--amber-light); border-left:3px solid var(--amber); padding:10px 14px; border-radius:0 6px 6px 0; font-size:13px; color:var(--text-dim); margin-top:12px; }
+  .detail-watch strong { color:var(--amber); }
+
+  .nav-row { display:flex; justify-content:space-between; padding-top:16px; border-top:1px solid var(--border); }
+  .nav-btn { padding:10px 18px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
+  .nav-btn { background:var(--pm); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--pm-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+
+  footer { text-align:center; padding:28px 40px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); margin-top:16px; }
+
+  @media(max-width:640px) {
+    .topnav,.main,.hero { padding-left:20px; padding-right:20px; }
+    .diagram-grid { grid-template-columns:1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a>
+  <span class="sep">/</span>
+  <span>Diagram 1 — Claude in the PM workflow</span>
+</nav>
+
+<div class="hero-wrap">
+  <div class="hero">
+    <div class="hero-eyebrow">Foundation · Diagram 1 of 2</div>
+    <h1>Claude in the <span>PM Workflow</span></h1>
+    <p class="hero-sub">Where Claude accelerates — and where human judgment remains irreplaceable. Click any activity to see how Claude fits in, what to prompt, and what to watch out for.</p>
+    <p class="hero-hint">↓ Click any node to explore</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot c"></div> Claude-led — strong AI acceleration</div>
+    <div class="legend-item"><div class="legend-dot b"></div> Collaborative — Claude assists, PM decides</div>
+    <div class="legend-item"><div class="legend-dot h"></div> Human-led — PM judgment essential</div>
+  </div>
+
+  <div class="diagram-wrap">
+    <div class="diagram-grid">
+
+      <!-- Row 1: Initiation -->
+      <div class="node node-header" style="grid-column:1/-1; padding:10px 16px;">
+        <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 1 — Initiation & Scoping</div>
+      </div>
+
+      <div class="node node-claude" onclick="showDetail('scope')" id="node-scope">
+        <div class="node-badge badge-claude">Claude</div>
+        <div class="node-icon">📋</div>
+        <div class="node-title">Scope document</div>
+        <div class="node-sub">Brief → structured scope</div>
+      </div>
+
+      <div class="node node-both" onclick="showDetail('risks')" id="node-risks">
+        <div class="node-badge badge-both">Collaborative</div>
+        <div class="node-icon">⚠️</div>
+        <div class="node-title">Risk register</div>
+        <div class="node-sub">Identify + score risks</div>
+      </div>
+
+      <div class="node node-human" onclick="showDetail('kickoff')" id="node-kickoff">
+        <div class="node-badge badge-human">Human</div>
+        <div class="node-icon">🤝</div>
+        <div class="node-title">Kickoff facilitation</div>
+        <div class="node-sub">Client relationship + trust</div>
+      </div>
+
+      <!-- Row 2: Planning -->
+      <div class="node node-header" style="grid-column:1/-1; padding:10px 16px;">
+        <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 2 — Planning</div>
+      </div>
+
+      <div class="node node-claude" onclick="showDetail('plan')" id="node-plan">
+        <div class="node-badge badge-claude">Claude</div>
+        <div class="node-icon">📅</div>
+        <div class="node-title">Milestone plan</div>
+        <div class="node-sub">Scope → phased roadmap</div>
+      </div>
+
+      <div class="node node-both" onclick="showDetail('backlog')" id="node-backlog">
+        <div class="node-badge badge-both">Collaborative</div>
+        <div class="node-icon">📝</div>
+        <div class="node-title">Backlog decomposition</div>
+        <div class="node-sub">Epics → sprint stories</div>
+      </div>
+
+      <div class="node node-human" onclick="showDetail('resourcing')" id="node-resourcing">
+        <div class="node-badge badge-human">Human</div>
+        <div class="node-icon">👥</div>
+        <div class="node-title">Team resourcing</div>
+        <div class="node-sub">People decisions + fit</div>
+      </div>
+
+      <!-- Row 3: Execution -->
+      <div class="node node-header" style="grid-column:1/-1; padding:10px 16px;">
+        <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 3 — Execution & Tracking</div>
+      </div>
+
+      <div class="node node-claude" onclick="showDetail('status')" id="node-status">
+        <div class="node-badge badge-claude">Claude</div>
+        <div class="node-icon">📊</div>
+        <div class="node-title">Status updates</div>
+        <div class="node-sub">Data → audience-specific comms</div>
+      </div>
+
+      <div class="node node-both" onclick="showDetail('tracking')" id="node-tracking">
+        <div class="node-badge badge-both">Collaborative</div>
+        <div class="node-icon">📈</div>
+        <div class="node-title">Delivery forecasting</div>
+        <div class="node-sub">Velocity → risk scenarios</div>
+      </div>
+
+      <div class="node node-human" onclick="showDetail('escalation')" id="node-escalation">
+        <div class="node-badge badge-human">Human</div>
+        <div class="node-icon">🚨</div>
+        <div class="node-title">Escalation decisions</div>
+        <div class="node-sub">When + how to escalate</div>
+      </div>
+
+      <!-- Row 4: Stakeholder -->
+      <div class="node node-header" style="grid-column:1/-1; padding:10px 16px;">
+        <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 4 — Stakeholder & Change Management</div>
+      </div>
+
+      <div class="node node-claude" onclick="showDetail('reporting')" id="node-reporting">
+        <div class="node-badge badge-claude">Claude</div>
+        <div class="node-icon">📑</div>
+        <div class="node-title">Health reporting</div>
+        <div class="node-sub">Multi-workstream → exec narrative</div>
+      </div>
+
+      <div class="node node-both" onclick="showDetail('cr')" id="node-cr">
+        <div class="node-badge badge-both">Collaborative</div>
+        <div class="node-icon">🔄</div>
+        <div class="node-title">Change requests</div>
+        <div class="node-sub">Impact analysis + options</div>
+      </div>
+
+      <div class="node node-human" onclick="showDetail('negotiate')" id="node-negotiate">
+        <div class="node-badge badge-human">Human</div>
+        <div class="node-icon">💬</div>
+        <div class="node-title">Negotiation</div>
+        <div class="node-sub">Scope, timeline, budget</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="detail-panel empty" id="detailPanel">
+    ← Click any activity above to explore how Claude fits in
+  </div>
+
+  <div class="nav-row">
+    <a class="nav-btn secondary" href="course-map.html">← Course map</a>
+    <a class="nav-btn" href="diagram-2.html">Diagram 2 — Operating model →</a>
+  </div>
+
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+
+const details = {
+  scope: {
+    type: 'Claude-led',
+    title: 'Scope document',
+    body: 'Claude excels at turning vague briefs into structured scope documents — surfacing gaps, flagging assumptions, and organising what\'s in, out, and uncertain. The two-phase approach (analyse first, write second) is critical: ask Claude to identify gaps before generating the document.',
+    prompt: 'Read this brief and tell me: (1) what is explicitly in scope, (2) what is implied but unconfirmed, (3) what is missing. Do not make assumptions — flag everything uncertain. Then produce a scope document with [TO CONFIRM] markers for unresolved items.',
+    watch: 'Claude will fill gaps with plausible assumptions if not instructed otherwise. Always ask it to surface gaps, not hide them.'
+  },
+  risks: {
+    type: 'Collaborative',
+    title: 'Risk register',
+    body: 'Claude can rapidly generate a scored risk register from a project brief — but only if given specific context. Generic input produces generic risks ("timeline risk — monitor weekly"). Industry-specific and client-specific risks require the PM\'s domain knowledge to validate and supplement.',
+    prompt: 'Generate a risk register for the project below. Score each risk (Likelihood 1–5 × Impact 1–5). Flag client-side actions required. Each mitigation must be specific — not "monitor closely". Include a risk owner.',
+    watch: 'Claude will not surface risks it wasn\'t told about — regulatory changes, political dynamics, legacy system surprises. Always add domain-specific risks after reviewing Claude\'s output.'
+  },
+  kickoff: {
+    type: 'Human-led',
+    title: 'Kickoff facilitation',
+    body: 'Kickoff meetings are fundamentally relational. The PM reads the room — who is anxious, who is sceptical, who has unspoken concerns. Claude cannot do this. However, Claude can help prepare: generating the agenda, anticipating objections, and drafting the open questions list that makes the meeting productive.',
+    prompt: 'Help me prepare for a project kickoff with these stakeholders: [list]. What questions should I ask to surface unstated assumptions? What objections should I be prepared for?',
+    watch: 'Use Claude to prepare, not to run. The kickoff itself must be entirely PM-led.'
+  },
+  plan: {
+    type: 'Claude-led',
+    title: 'Milestone plan',
+    body: 'Claude can produce a constraint-aware milestone plan from scope + constraints + team capacity — but only if given all three inputs. The critical technique is backwards scheduling: always ask Claude to reason from the deadline backwards before producing forward-scheduled phases.',
+    prompt: 'Before producing the plan, analyse these constraints and tell me: what is the latest start date for each phase working backwards from [deadline]? Which constraint creates the most compression?',
+    watch: 'Claude will not add operational buffer unless asked. Always add your own buffer sprint — integration risk, client delays, and team variation are not reflected in Claude\'s baseline.'
+  },
+  backlog: {
+    type: 'Collaborative',
+    title: 'Backlog decomposition',
+    body: 'Claude can decompose epics into user stories with acceptance criteria and size estimates — but technical estimates must be validated by the tech lead. Claude is good at the structure (Given/When/Then, dependency flags, deferral rationale) but may underestimate AI/ML work and unfamiliar technical domains.',
+    prompt: 'Decompose this epic into sprint-ready stories. For each: user story format, 3–5 testable acceptance criteria (Given/When/Then), size estimate (1pt = 1 day), owner, and dependencies. State what should be deferred and why. Team capacity: [X]pts.',
+    watch: 'Always validate AI/ML story estimates with the technical lead. Claude tends to be optimistic on novel technology work.'
+  },
+  resourcing: {
+    type: 'Human-led',
+    title: 'Team resourcing',
+    body: 'Resourcing decisions involve people — their skills, availability, career stage, team dynamics, and political considerations within the organisation. Claude can help you think through role requirements and interview questions, but the resourcing decision itself is a human judgment call.',
+    prompt: 'Help me define the role requirements for a [role] on a [project type] project. What skills are essential vs nice-to-have? What questions should I ask to evaluate fit?',
+    watch: 'Never use Claude to make people decisions. Use it to structure your thinking before making them.'
+  },
+  status: {
+    type: 'Claude-led',
+    title: 'Status updates',
+    body: 'Claude is highly effective at transforming raw sprint data into audience-specific status updates. The key is providing audience context — not just the data. Tell Claude who will read this, what they care about, what they don\'t need to know, and what action you need from them.',
+    prompt: 'Write a status update for [audience]. They care about: [X, Y, Z]. They do not need: [technical detail]. Maximum [N] words. Lead with RAG status. If action is required from them, make it explicit and name the owner.',
+    watch: 'Claude softens bad news by default. Explicitly instruct it not to when the news is genuinely serious.'
+  },
+  tracking: {
+    type: 'Collaborative',
+    title: 'Delivery forecasting',
+    body: 'Claude can model delivery scenarios from velocity data and remaining scope — but needs both inputs to be useful. Ask for three scenarios (declining/stable/recovered) and for root cause analysis before options. The scenario model gives you the evidence base for the stakeholder conversation.',
+    prompt: 'Model delivery risk. Velocity data: [sprints + points]. Remaining scope: [X]pts. Deadline: [date]. Model three scenarios: declining trend, stable, recovery. For each: total delivered, gap vs required, deadline risk assessment.',
+    watch: 'Validate the remaining scope estimate with your tech leads before modelling. A 20% scope estimate error changes the risk profile significantly.'
+  },
+  escalation: {
+    type: 'Human-led',
+    title: 'Escalation decisions',
+    body: 'When and how to escalate is a judgment call that depends on organisational politics, client relationship maturity, stakeholder personality, and what the delivery head needs to know before the client does. Claude can help draft the escalation memo — but the PM decides when escalation is warranted.',
+    prompt: 'Help me structure an escalation memo for [audience] about [issue]. Tone: [confident/urgent/factual]. Include: what happened, current impact, what we\'re doing, what we need from them.',
+    watch: 'Claude cannot know your organisation\'s escalation norms. Always brief your delivery head before escalating to the client.'
+  },
+  reporting: {
+    type: 'Claude-led',
+    title: 'Health reporting',
+    body: 'Claude excels at synthesising multi-workstream data into a coherent programme narrative — but only if explicitly instructed to find cross-cutting themes rather than produce three separate workstream summaries. The consolidated client action section is the most important output.',
+    prompt: 'Synthesise these [N] workstream updates into one programme health report. Requirements: single overall RAG status, cross-cutting themes section, consolidated client action section, per-workstream RAG + 3 bullets. Do not produce three separate summaries.',
+    watch: 'Claude will produce N summaries unless told otherwise. The synthesis instruction is not optional.'
+  },
+  cr: {
+    type: 'Collaborative',
+    title: 'Change requests',
+    body: 'Claude can produce a structured change request impact analysis across schedule, budget, and risk dimensions — and often surfaces creative options the PM hasn\'t considered under pressure. The analysis before the response is the key habit: never reply to a scope change request without an impact analysis first.',
+    prompt: 'Analyse this change request across three dimensions: schedule impact, budget impact, risk impact. Then present three options I can offer the client, with a recommendation. Do not commit to any option.',
+    watch: 'Claude\'s cost estimates must be validated with your tech lead. And always create a formal CR record — even for informal requests from the CTO.'
+  },
+  negotiate: {
+    type: 'Human-led',
+    title: 'Negotiation',
+    body: 'Negotiating scope, timeline, or budget with a client involves relationship dynamics, power asymmetry, and real-time reading of the other party\'s position. Claude can help you prepare — anticipating their likely asks, drafting your positions, stress-testing your arguments — but the negotiation itself is entirely human.',
+    prompt: 'I\'m preparing to negotiate [scope/timeline/budget] with a client. Their likely position: [X]. My position: [Y]. What are the strongest arguments for my position? What concessions could I offer that cost SF least but give the client something? What\'s my BATNA?',
+    watch: 'Use Claude to stress-test your position before the meeting. Walk in prepared, not scripted.'
+  }
+};
+
+let activeNode = null;
+
+function showDetail(key) {
+  const d = details[key];
+  if (!d) return;
+
+  // Clear active state
+  document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+  document.getElementById('node-' + key)?.classList.add('active');
+  activeNode = key;
+
+  const typeColor = d.type === 'Claude-led' ? 'var(--pm)' : d.type === 'Collaborative' ? 'var(--blue)' : 'var(--amber)';
+
+  document.getElementById('detailPanel').classList.remove('empty');
+  document.getElementById('detailPanel').innerHTML = `
+    <div class="detail-eyebrow" style="color:${typeColor}">${d.type}</div>
+    <div class="detail-title">${d.title}</div>
+    <div class="detail-body">${d.body}</div>
+    <div class="detail-prompt">
+      <div class="detail-prompt-label">Example prompt pattern</div>
+      ${d.prompt}
+    </div>
+    <div class="detail-watch"><strong>⚠ Watch out:</strong> ${d.watch}</div>
+  `;
+}
+</script>
+</body>
+</html>
