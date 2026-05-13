@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example 9 — AI Project Reporting · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --pm:#1a6eb5; --pm-light:#e8f1fb; --pm-mid:#b8d0ed; --pm-dark:#0f4a7a;
+    --blue:#1a6eb5; --blue-light:#e8f1fb;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--pm); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; overflow-x:auto; }
+  .tabs { display:flex; }
+  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:14px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; font-family:'Merriweather Sans',sans-serif; }
+  .tab-btn .num { width:22px; height:22px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .tab-btn.active { color:var(--pm); border-bottom-color:var(--pm); }
+  .tab-btn.active .num { background:var(--pm); border-color:var(--pm); color:#fff; }
+  .main { max-width:1400px; margin:0 auto; padding:36px 32px; }
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num { width:48px; height:48px; border-radius:50%; background:var(--pm); color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:24px; font-weight:700; }
+  .prose { font-size:17px; color:var(--text-dim); line-height:1.9; margin-bottom:24px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .callout { border-left:3px solid var(--pm); background:var(--pm-light); padding:18px 22px; border-radius:0 8px 8px 0; margin:20px 0; font-size:16px; line-height:1.8; color:var(--text-dim); }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-size:16px; line-height:1.85; color:var(--text-dim); }
+  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
+  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:14.5px; line-height:1.8; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
+  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
+  .prompt-block .speaker.user { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
+  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:3px solid var(--green); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:14px; line-height:1.8; color:var(--text-dim); }
+  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:10px; font-weight:600; }
+  .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:20px 0; }
+  .compare-card { border-radius:var(--radius); padding:18px 20px; font-size:13px; line-height:1.7; }
+  .compare-bad  { background:var(--coral-light); border:1.5px solid var(--coral-mid); border-top:3px solid var(--coral); }
+  .compare-good { background:var(--green-light); border:1.5px solid var(--green-mid); border-top:3px solid var(--green); }
+  .compare-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.1em; text-transform:uppercase; font-weight:700; margin-bottom:10px; }
+  .compare-bad .compare-label  { color:var(--coral); }
+  .compare-good .compare-label { color:var(--green); }
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag { font-size:11px; font-family:'Source Code Pro',monospace; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:#0f4a7a; }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  .reviewer-bar { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:8px; margin:24px 0; background:var(--amber-light); border:1.5px solid #e8c97a; border-left:3px solid var(--amber); font-size:13px; font-family:'Source Code Pro',monospace; font-weight:600; color:var(--amber); }
+  .reviewer-bar.checked { background:var(--green-light); border-color:var(--green-mid); border-left-color:var(--green); color:var(--green); }
+  .reviewer-bar input[type="checkbox"] { width:16px; height:16px; accent-color:var(--green); }
+  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
+  .nav-btn { padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
+  .nav-btn { background:var(--pm); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--pm-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:28px 32px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .compare-grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a>
+  <span class="sep">/</span>
+  <span>Tier 2 examples</span>
+  <span class="sep">/</span>
+  <span>Example 9 — AI project reporting</span>
+</nav>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+    <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+    <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+    <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+    <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <section class="step-section active" id="step-1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-meta">
+        <div class="step-label">Step 1 of 5</div>
+        <div class="step-title">The problem</div>
+      </div>
+    </div>
+
+    <div class="tags-row">
+      <span class="tag pm">Example 9 · Tier 2</span>
+      <span class="tag">AI project reporting</span>
+      <span class="tag">Non-technical stakeholders</span>
+      <span class="tag">Multi-context</span>
+    </div>
+
+    <p class="prose">
+      The Meridian AI Assistant has been building for 6 weeks. Carlos's team has made significant technical progress — but the outputs they produce (RAG pipeline accuracy metrics, retrieval latency benchmarks, guardrail test results) mean nothing to Mark Donovan or the Meridian board.
+    </p>
+
+    <p class="prose">Mark has asked for a progress update ahead of the next board meeting. Sarah needs to translate Carlos's technical status dump into a narrative that answers the question the board actually cares about: <strong>is this thing going to work, and is it safe?</strong></p>
+
+    <div class="doc-block">
+      <div class="doc-label">Technical status dump — Carlos (AI lead)</div>
+      RAG pipeline: operational. Retrieval accuracy at 84% on 200-query test set (target: 90%). Top-3 chunk retrieval working. Latency: p50 1.8s, p95 3.2s (over target on p95 — working on chunk size optimisation). Guardrail: 97% out-of-scope query rejection rate. 3% hallucination rate on edge cases — being addressed with prompt engineering. Context window: 8K tokens, considering upgrade to 32K. Embedding model: ada-002. Vector store: Pinecone. 2 weeks to MVP demo readiness. Data: 60% of Meridian account data indexed (remaining 40% requires client data team access — blocked 1 week).
+    </div>
+
+    <p class="prose">
+      Sarah has three challenges with this update:
+    </p>
+
+    <div class="callout">
+      <strong>Challenge 1 — Translation:</strong> "84% retrieval accuracy on 200-query test set" needs to become "the assistant correctly answers 84 out of every 100 questions about client accounts in our tests — we're targeting 90 before launch."
+    </div>
+    <div class="callout" style="margin-top:8px;">
+      <strong>Challenge 2 — The 3% hallucination rate:</strong> This is technically a good result — but "hallucination" is a word that will alarm a financial services board. It needs context and framing without being dishonest.
+    </div>
+    <div class="callout" style="margin-top:8px;">
+      <strong>Challenge 3 — The data access blocker:</strong> 40% of Meridian's account data is not yet indexed because Meridian's own data team hasn't provided access. This is a client-side blocker that needs to be raised without sounding accusatory.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-1">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-1" data-step="1">
+      <label for="rev-cb-1">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step-section" id="step-2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-meta">
+        <div class="step-label">Step 2 of 5</div>
+        <div class="step-title">The naive approach</div>
+      </div>
+    </div>
+
+    <p class="prose">The naive approach passes Carlos's technical dump directly to Claude and asks for a summary:</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah (naive prompt)</div>Summarise this technical AI update for a non-technical client.
+
+[pastes Carlos's dump]</div>
+
+    <div class="doc-block">
+      <div class="doc-label">Naive output</div>
+      The AI assistant is making good progress. The RAG pipeline is operational with 84% accuracy. Response times are mostly within target. The guardrail system is working well with a 97% rejection rate for out-of-scope queries. There is a 3% hallucination rate being addressed. 60% of the data has been indexed. The team expects the assistant to be demo-ready in 2 weeks.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>What's wrong:</strong> "RAG pipeline" and "hallucination rate" are still in the output. A board reading "3% hallucination rate being addressed" will not read this as a positive — they'll read it as "the AI is making things up 3% of the time, and they're trying to fix it." The framing is technically accurate but contextually wrong for a financial services audience. And the data access blocker has been softened to "60% of data indexed" — with no mention that the missing 40% requires client action.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-2">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-2" data-step="2">
+      <label for="rev-cb-2">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-section" id="step-3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-meta">
+        <div class="step-label">Step 3 of 5</div>
+        <div class="step-title">The Claude interaction</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah gives Claude audience context, specific translation instructions, and explicit guidance on how to handle the sensitive items:</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 1</div>I'm a senior PM at a cloud consultancy. I need to translate a technical AI project update into language suitable for a financial services board. The audience has no AI/ML background and is highly sensitive to anything that sounds like a reliability or safety risk.
+
+Translation requirements:
+— Replace all technical jargon with plain language (RAG pipeline, embeddings, vector store, context window — all need to go)
+— Express accuracy metrics in plain terms (e.g. "84 out of 100 questions answered correctly in testing")
+— The "3% hallucination rate" must be reframed honestly — it is a good result in context, but the word "hallucination" will alarm a financial services board. Reframe as what it actually means: the assistant occasionally gives an incomplete or uncertain response on very unusual questions — and what we're doing about it
+— The data access blocker (40% of data not indexed due to client team access pending) must be flagged as requiring action from Meridian — but framed as a collaboration item, not a criticism
+— Overall tone: confident and specific, not promotional
+
+Technical status:
+[pastes Carlos's dump]
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 1</div><strong>Meridian AI Assistant — Progress Update for Board Review</strong>
+
+<strong>Where we are</strong>
+The AI assistant is in active development and on track for a demonstration-ready build in two weeks. The core system — which allows the assistant to search across Meridian's account data and generate accurate, cited responses — is built and being tested.
+
+<strong>Accuracy</strong>
+In testing against 200 representative client questions, the assistant correctly answered 84 out of 100. We are targeting 90 out of 100 before launch. The remaining gap is being addressed through refinements to how the assistant retrieves and prioritises information — we expect to reach the 90% target within the current sprint.
+
+<strong>Response speed</strong>
+Most responses are returned in under 2 seconds. A small proportion of complex questions take up to 3.2 seconds — we are making optimisations to bring these within our 3-second target.
+
+<strong>Safety and scope control</strong>
+The assistant is designed to only answer questions it can support with Meridian's actual account data. In testing, it correctly declined to answer out-of-scope questions 97 times out of 100 — flagging them as outside its scope and suggesting appropriate alternatives. On a small number of unusual questions (3 in 100), the assistant provides a response that is marked as uncertain rather than definitive. These cases are being addressed before launch and do not involve the assistant providing incorrect financial information — they involve the assistant appropriately expressing uncertainty on edge cases.
+
+<strong>Data coverage</strong>
+60% of Meridian's account data has been indexed and is available to the assistant. The remaining 40% is awaiting data access from Meridian's data team — we have an open request and are working with Lisa Park to resolve this. Full data coverage is required for the September 30 launch.
+
+<strong>Next milestone</strong>
+Demo-ready build: targeted in 2 weeks. This will allow Meridian stakeholders to interact with the assistant using real account data for the first time.
+<hr class="prompt-sep">
+<div class="speaker user">Sarah — Turn 2</div>Good. Now give me a one-paragraph version of the accuracy and safety section that I can read aloud at the board meeting in 60 seconds.
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 2</div>The assistant is performing well in testing. It correctly answers 84 out of every 100 questions about client accounts — we are targeting 90 before launch, and we're confident we'll get there. On safety: the system is designed to stay strictly within Meridian's data. In 97 out of 100 cases, it correctly recognises when a question is outside its scope and declines to answer. In the remaining 3 cases, it flags its response as uncertain rather than guessing — which is the right behaviour for a financial services application. We are not seeing the assistant fabricate information, which was the primary safety requirement for this project.</div>
+
+    <div class="callout callout-good" style="margin-top:20px;">
+      <strong>What changed:</strong> "Hallucination rate" is gone. "RAG pipeline" is gone. The 3% figure now reads as responsible behaviour (flagging uncertainty) rather than a failure mode. The data access blocker is framed as a collaboration item with a named owner. And Sarah has a 60-second verbal summary ready for the board meeting.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-3">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-3" data-step="3">
+      <label for="rev-cb-3">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step-section" id="step-4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-meta">
+        <div class="step-label">Step 4 of 5</div>
+        <div class="step-title">The refined output</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah does a side-by-side review before finalising — checking that the translated update is honest, not just palatable:</p>
+
+    <div class="compare-grid">
+      <div class="compare-card compare-bad">
+        <div class="compare-label">✗ Technical (Carlos's words)</div>
+        "3% hallucination rate on edge cases — being addressed with prompt engineering"<br><br>
+        "Retrieval accuracy at 84% on 200-query test set (target: 90%)"<br><br>
+        "60% of Meridian account data indexed — remaining 40% requires client data team access — blocked 1 week"
+      </div>
+      <div class="compare-card compare-good">
+        <div class="compare-label">✓ Board-ready (Claude's translation)</div>
+        "In 3 cases out of 100, it flags its response as uncertain rather than guessing — which is the right behaviour for a financial services application"<br><br>
+        "Correctly answers 84 out of every 100 questions in testing — targeting 90 before launch"<br><br>
+        "40% of data awaiting access from Meridian's data team — open request with Lisa Park"
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>The honesty test:</strong> Sarah reviews each translation against a simple question: "Is this still true?" The hallucination reframe is honest — the assistant does flag uncertainty, it doesn't fabricate. The accuracy translation is accurate. The data blocker is accurately attributed. The translation changes vocabulary, not facts. This is the line the PM must hold — reframing for an audience is legitimate; softening uncomfortable truths is not.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-4">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-4" data-step="4">
+      <label for="rev-cb-4">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step-section" id="step-5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-meta">
+        <div class="step-label">Step 5 of 5</div>
+        <div class="step-title">Watch out</div>
+      </div>
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>1. Translation can become spin</strong><br>
+      The line between translating technical language and softening bad news is thin. If the 3% hallucination rate were 30%, the reframe would be dishonest. Always validate with your tech lead that the translated version is still technically accurate — not just client-friendly.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>2. AI metrics are unfamiliar to most stakeholders</strong><br>
+      "84% accuracy" sounds bad if the client expects 100%. Always provide context: "84% is above industry average for RAG systems in their first month of development" — if that's true, say so. Claude will not add this context unless you provide it. Ask your AI lead for the benchmark before the board meeting.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>3. The PM must validate the translation with the tech lead</strong><br>
+      Sarah should send the translated update to Carlos before sending to Mark: "Does this accurately represent what you told me?" Claude's translation is linguistically clean but may miss a nuance that matters. The tech lead is the final authority on accuracy.
+    </div>
+
+    <div class="callout callout-good">
+      <strong>The prompting discipline that makes this work:</strong><br>
+      (1) Identify the specific terms that will alarm the audience and instruct Claude to reframe them explicitly — don't leave it to Claude's judgment. (2) Distinguish between translation (vocabulary change) and spin (fact change) — Claude will default to diplomatic framing; you need to ensure it stays accurate. (3) Always ask for a short verbal summary in addition to the written version — board meetings are verbal, not written. (4) Validate the translation with your tech lead before sending.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-5">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-5" data-step="5">
+      <label for="rev-cb-5">Mark step as reviewed</label>
+    </div>
+
+    <div class="bottom-nav">
+      <a class="nav-btn secondary" href="example-8-change.html">← Example 8</a>
+      <a class="nav-btn" href="example-10-rca.html">Example 10 — P1 RCA →</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+const REV_KEY = 'pm_example-9-model';
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+function revLoad() { try { return JSON.parse(localStorage.getItem(REV_KEY)) || {}; } catch(e) { return {}; } }
+function revSave(s) { localStorage.setItem(REV_KEY, JSON.stringify(s)); }
+document.querySelectorAll('.rev-checkbox').forEach(cb => {
+  const s = revLoad();
+  if (s['cb_' + cb.dataset.step]) { cb.checked = true; const bar = cb.closest('.reviewer-bar'); if (bar) { bar.classList.add('checked'); bar.querySelector('label').textContent = '✓ Step reviewed'; } }
+  cb.addEventListener('change', () => {
+    const s = revLoad(); s['cb_' + cb.dataset.step] = cb.checked; revSave(s);
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) { bar.classList.toggle('checked', cb.checked); bar.querySelector('label').textContent = cb.checked ? '✓ Step reviewed' : 'Mark step as reviewed'; }
+  });
+});
+</script>
+</body>
+</html>
