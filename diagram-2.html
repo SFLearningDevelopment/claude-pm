@@ -13,7 +13,7 @@
   :root {
     --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
     --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
-    --pm:#0b6e4f; --pm-light:#e6f4ef; --pm-mid:#a8d5c2; --pm-dark:#074d37;
+    --pm:#1a6eb5; --pm-light:#e8f1fb; --pm-mid:#b8d0ed; --pm-dark:#0f4a7a;
     --blue:#1a6eb5; --blue-light:#e8f1fb;
     --coral:#c0392b; --coral-light:#fdf0ee;
     --green:#1a6b3a; --green-light:#e8f5ed;
@@ -23,20 +23,20 @@
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
 
-  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 48px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
   .topnav a { color:var(--pm); text-decoration:none; }
   .topnav a:hover { text-decoration:underline; }
   .sep { opacity:.4; }
 
   .hero-wrap { background:var(--bg2); border-bottom:2px solid var(--border); }
-  .hero { max-width:900px; margin:0 auto; padding:32px 40px 28px; }
+  .hero { max-width:1180px; margin:0 auto; padding:32px 48px 28px; }
   .hero-eyebrow { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--pm); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
   .hero h1 { font-size:24px; font-weight:700; margin-bottom:8px; }
   .hero h1 span { color:var(--pm); }
   .hero-sub { font-size:14px; color:var(--text-dim); max-width:620px; line-height:1.7; }
   .hero-hint { font-size:12px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:10px; }
 
-  .main { max-width:900px; margin:0 auto; padding:32px 40px; }
+  .main { max-width:1180px; margin:0 auto; padding:32px 48px; }
 
   /* Operating model — horizontal lifecycle */
   .model-wrap { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:28px; margin-bottom:24px; }
@@ -61,7 +61,7 @@
   .stage-5 { background:var(--coral-light); border-color:#f0b8b2; }
 
   .stage-num { font-size:10px; font-family:'Source Code Pro',monospace; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
-  .stage-1 .stage-num { color:var(--pm-dark); }
+  .stage-1 .stage-num { color:#0f4a7a; }
   .stage-2 .stage-num { color:#0f4a7a; }
   .stage-3 .stage-num { color:var(--amber); }
   .stage-4 .stage-num { color:var(--green); }
