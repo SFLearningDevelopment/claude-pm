@@ -225,11 +225,11 @@
       </div>
     </div>
 
-  </div>
 
-  <!-- Detail panel -->
-  <div class="detail-panel empty" id="detailPanel">
-    ← Click any stage or touchpoint above to explore
+    <!-- Detail panel — inline below stages -->
+    <div class="detail-panel empty" id="detailPanel" style="margin-top:24px;">
+      ← Click any stage or touchpoint above to explore
+    </div>
   </div>
 
   <div class="nav-row">
@@ -384,6 +384,9 @@ function renderDetail(data) {
       </div>
     </div>
   `;
+  setTimeout(() => {
+    document.getElementById('detailPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 50);
 }
 
 function showStage(key) {
