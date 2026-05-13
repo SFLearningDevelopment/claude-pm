@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example 7 — Health Report · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --pm:#0b6e4f; --pm-light:#e6f4ef; --pm-mid:#a8d5c2; --pm-dark:#074d37;
+    --blue:#1a6eb5; --blue-light:#e8f1fb;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--pm); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; overflow-x:auto; }
+  .tabs { display:flex; }
+  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:13px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; font-family:'Merriweather Sans',sans-serif; }
+  .tab-btn .num { width:22px; height:22px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .tab-btn.active { color:var(--pm); border-bottom-color:var(--pm); }
+  .tab-btn.active .num { background:var(--pm); border-color:var(--pm); color:#fff; }
+  .main { max-width:860px; margin:0 auto; padding:40px; }
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num { width:48px; height:48px; border-radius:50%; background:var(--pm); color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:22px; font-weight:700; }
+  .prose { font-size:15px; color:var(--text-dim); line-height:1.8; margin-bottom:20px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .callout { border-left:3px solid var(--pm); background:var(--pm-light); padding:14px 18px; border-radius:0 8px 8px 0; margin:20px 0; font-size:14px; line-height:1.7; color:var(--text-dim); }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
+  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.7; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
+  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
+  .prompt-block .speaker.user { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
+  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:3px solid var(--green); border-radius:var(--radius); padding:24px 28px; margin:20px 0; font-size:14px; line-height:1.8; color:var(--text-dim); }
+  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:16px; font-weight:600; }
+
+  /* Health dashboard */
+  .health-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0; }
+  .health-card { border-radius:var(--radius); padding:16px; text-align:center; }
+  .health-card.red    { background:var(--coral-light); border:1.5px solid var(--coral-mid); }
+  .health-card.amber  { background:var(--amber-light); border:1.5px solid #e8c97a; }
+  .health-card.green  { background:var(--green-light); border:1.5px solid var(--green-mid); }
+  .health-card .rag   { font-size:24px; margin-bottom:4px; }
+  .health-card .label { font-size:11px; font-family:'Source Code Pro',monospace; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  .health-card.red .label    { color:var(--coral); }
+  .health-card.amber .label  { color:var(--amber); }
+  .health-card.green .label  { color:var(--green); }
+  .health-card .detail { font-size:12px; color:var(--text-dim); margin-top:6px; }
+
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag { font-size:11px; font-family:'Source Code Pro',monospace; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:var(--pm-dark); }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  .reviewer-bar { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:8px; margin:24px 0; background:var(--amber-light); border:1.5px solid #e8c97a; border-left:3px solid var(--amber); font-size:13px; font-family:'Source Code Pro',monospace; font-weight:600; color:var(--amber); }
+  .reviewer-bar.checked { background:var(--green-light); border-color:var(--green-mid); border-left-color:var(--green); color:var(--green); }
+  .reviewer-bar input[type="checkbox"] { width:16px; height:16px; accent-color:var(--green); }
+  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
+  .nav-btn { padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
+  .nav-btn { background:var(--pm); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--pm-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:32px 40px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .health-grid { grid-template-columns:1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a>
+  <span class="sep">/</span>
+  <span>Tier 2 examples</span>
+  <span class="sep">/</span>
+  <span>Example 7 — Health report</span>
+</nav>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+    <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+    <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+    <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+    <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <section class="step-section active" id="step-1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-meta">
+        <div class="step-label">Step 1 of 5</div>
+        <div class="step-title">The problem</div>
+      </div>
+    </div>
+
+    <div class="tags-row">
+      <span class="tag pm">Example 7 · Tier 2</span>
+      <span class="tag">Project reporting</span>
+      <span class="tag">Health narrative</span>
+      <span class="tag">Multi-context</span>
+    </div>
+
+    <p class="prose">
+      It is the end of Month 2 on the Meridian engagement. SF has a monthly project health reporting obligation — a structured report that goes to Raj Patel internally and to Lisa Park at Meridian. The report must cover all three workstreams: Cloud Migration, Meridian Portal, and Meridian AI Assistant.
+    </p>
+
+    <p class="prose">Sarah has three separate status dumps from her workstream leads:</p>
+
+    <div class="doc-block">
+      <div class="doc-label">Workstream data — Cloud Migration (Arjun)</div>
+      Status: On track overall. Legacy infrastructure discovery complete — found 2 undocumented applications not in original scope. Direct Connect ordered (Week 1). ETA provisioning: May 5. Oracle to Aurora conversion started — 3 of 14 workloads analysed. Zero-downtime plan drafted for trading platform. Budget: $62K of $180K (34% budget, 22% timeline — slightly ahead). Risk: undocumented apps need scope discussion with client.
+    </div>
+
+    <div class="doc-block">
+      <div class="doc-label">Workstream data — Meridian Portal (Priya)</div>
+      Status: Velocity declining (see sprint tracking). Authentication complete. Dashboard 80% done. Report generation not started — blocked on brand guide (10 days late now). Salesforce sandbox received but integration not started due to capacity. Budget: $47K of $380K (12%). Risk: velocity at 78% and declining. Frontend bottleneck. Brand guide still outstanding.
+    </div>
+
+    <div class="doc-block">
+      <div class="doc-label">Workstream data — AI Assistant (Carlos)</div>
+      Status: Discovery phase complete. RAG pipeline architecture agreed. Data access request submitted to Meridian IT — awaiting response (submitted 2 weeks ago, no response). Build cannot start without data access. Timeline at risk if not resolved this week. Budget: $8K of $120K (7% — behind plan due to blocked start).
+    </div>
+
+    <p class="prose">
+      The monthly report needs to synthesise these three dumps into a coherent executive narrative — not three separate summaries. The client wants to understand the overall programme health, the key risks across all workstreams, and what actions they need to take.
+    </p>
+
+    <div class="callout">
+      <strong>The synthesis challenge:</strong> Three workstreams each have their own issues — but the client reads this as one programme. Sarah needs to surface the cross-cutting themes (two of three workstreams have a client-side blocker), set an honest overall RAG status, and present a coherent picture without alarming the client unnecessarily or downplaying real risks.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-1">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-1" data-step="1">
+      <label for="rev-cb-1">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step-section" id="step-2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-meta">
+        <div class="step-label">Step 2 of 5</div>
+        <div class="step-title">The naive approach</div>
+      </div>
+    </div>
+
+    <p class="prose">The naive approach asks Claude to summarise the three workstreams without providing synthesis guidance:</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah (naive prompt)</div>Write a monthly project health report from these three workstream updates.
+
+[pastes three workstream dumps]</div>
+
+    <div class="doc-block">
+      <div class="doc-label">Naive output — three summaries stapled together</div>
+      <strong>Monthly Project Health Report — Month 2</strong><br><br>
+      <strong>Cloud Migration:</strong> On track. Discovery complete with 2 undocumented apps found. Direct Connect ordered. Oracle conversion started. Budget on track at 34%.<br><br>
+      <strong>Meridian Portal:</strong> Velocity declining at 78%. Authentication complete. Dashboard 80% done. Report generation blocked on brand guide. Salesforce integration not started.<br><br>
+      <strong>AI Assistant:</strong> Discovery complete. RAG architecture agreed. Build blocked pending data access from Meridian IT. Timeline at risk.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>What's wrong:</strong> This is not a health report — it's a copy-paste of the workstream leads' notes with headings added. There is no overall RAG status. No cross-cutting theme analysis. No client action section. The two client-side blockers (brand guide + data access) are buried separately in two workstream sections. A client reading this would not understand the programme's overall health or what they need to do.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-2">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-2" data-step="2">
+      <label for="rev-cb-2">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-section" id="step-3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-meta">
+        <div class="step-label">Step 3 of 5</div>
+        <div class="step-title">The Claude interaction</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah gives Claude a report structure, synthesis requirements, and explicit instructions to surface cross-cutting themes and client actions.</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 1</div>I'm a senior PM at a cloud consultancy. I need to write a monthly project health report covering three workstreams of a single client engagement. This goes to the client PMO lead (Lisa Park) and internally to my delivery head (Raj Patel).
+
+Requirements:
+— Set an overall programme RAG status (single RAG, not three separate ones)
+— Write an executive summary of 3–4 sentences covering overall health
+— Surface cross-cutting themes across workstreams (don't treat them as isolated)
+— Identify ALL client-side actions required across the programme in one consolidated section
+— Per-workstream section: RAG + 3 bullet summary + key risk
+— Do not soften client-side blockers — they need to be clearly flagged as actions required from Meridian
+
+Here are the three workstream data dumps:
+[pastes all three]
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 1</div><strong>Meridian Programme — Month 2 Health Report</strong>
+<em>Prepared: May 1, 2026 | PM: Sarah Chen | Overall status: AMBER</em>
+
+<strong>Executive summary</strong>
+The Meridian programme is progressing on plan for Cloud Migration and has completed discovery on the AI Assistant — however, two of three workstreams are currently blocked by outstanding actions from Meridian. The Portal's velocity trend requires monitoring and a corrective sprint has been proposed. The programme remains on track for the September 30 go-live provided the client-side blockers below are resolved this week.
+
+<strong>⚠ Client actions required — consolidated (all workstreams)</strong>
+1. Brand guide: 10 days overdue. Portal report generation cannot start until received. Required by: May 3 (this Friday). Owner: Meridian design team.
+2. Data access for AI Assistant: Submitted 2 weeks ago — no response from Meridian IT. AI Assistant build is blocked. Required by: May 3. Owner: Meridian IT / Lisa Park to escalate.
+3. Undocumented applications (Cloud Migration): 2 apps found outside original scope. Scope discussion required to determine whether these are in or out. Owner: Lisa Park + Mark Donovan.
+
+<strong>Cloud Migration — 🟢 Green</strong>
+— Discovery complete; all 14 documented workloads mapped and conversion started
+— Direct Connect ordered (ETA May 5); zero-downtime plan drafted for trading platform
+— Budget on track: 34% spent at 22% timeline elapsed
+⚠ Risk: 2 undocumented apps require scope decision — currently excluded from plan
+
+<strong>Meridian Portal — 🟡 Amber</strong>
+— Authentication delivered; dashboard 80% complete; report generation blocked (brand guide)
+— Velocity declining (78%, 4-sprint trend); corrective sprint proposed for Sprint 5
+— Budget healthy: 12% spent — but risk of acceleration needed if velocity not stabilised
+⚠ Risk: Velocity decline + Salesforce integration not yet started = compounding risk to August 29 build completion
+
+<strong>AI Assistant — 🟡 Amber</strong>
+— Discovery and RAG architecture complete; team ready to build
+— Entire build phase blocked pending Meridian IT data access approval (2 weeks outstanding)
+— Budget behind plan (7%) due to blocked start — this will correct once build begins
+⚠ Risk: Each week of delay compresses the build window for a technically complex workload
+<hr class="prompt-sep">
+<div class="speaker user">Sarah — Turn 2</div>Good. Add a "what went well" section — I don't want this to read as entirely negative. And add a forward look: what are the three most important things that need to happen in Month 3?
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 2</div><strong>What went well this month</strong>
+— Cloud Migration legacy discovery completed ahead of schedule — a risk item from the kickoff register that was resolved cleanly
+— Portal authentication delivered and signed off by Meridian — first visible client-facing feature complete
+— AI Assistant RAG architecture agreed with no significant rework — a technically complex decision resolved in discovery
+
+<strong>Month 3 priorities</strong>
+1. Resolve both client-side blockers (brand guide + data access) — these are the programme's critical path items right now
+2. Stabilise Portal velocity — Sprint 5 resolution sprint + frontend resource decision by May 10
+3. Start AI Assistant build — first sprint deliverable targeted for May 16 sprint end</div>
+
+    <div class="callout callout-good" style="margin-top:20px;">
+      <strong>What changed:</strong> The report now has a single overall RAG status, a coherent executive narrative, a consolidated client action section, and a forward look. The two client-side blockers are treated as programme-level issues — not buried in individual workstream sections. Lisa Park reads this and knows exactly what she needs to do by Friday.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-3">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-3" data-step="3">
+      <label for="rev-cb-3">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step-section" id="step-4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-meta">
+        <div class="step-label">Step 4 of 5</div>
+        <div class="step-title">The refined output</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah adds one thing Claude didn't include — a visual RAG summary at the top of the report, because Lisa Park uses this to brief her leadership team before reading the detail:</p>
+
+    <div class="output-block">
+      <div class="output-label">✓ Programme health — Month 2 visual summary</div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-size:13px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-bottom:12px; letter-spacing:.08em; text-transform:uppercase; font-size:10px;">Overall programme status</div>
+        <div style="display:inline-flex; align-items:center; gap:10px; background:var(--amber-light); border:2px solid #e8c97a; border-radius:8px; padding:10px 18px;">
+          <span style="font-size:20px;">🟡</span>
+          <span style="font-size:16px; font-weight:700; color:var(--amber); font-family:'Source Code Pro',monospace;">AMBER</span>
+          <span style="font-size:13px; color:var(--amber);">2 of 3 workstreams blocked by client actions</span>
+        </div>
+      </div>
+
+      <div class="health-grid">
+        <div class="health-card green">
+          <div class="rag">🟢</div>
+          <div class="label">Cloud Migration</div>
+          <div class="detail">On track · Discovery complete · Scope question pending</div>
+        </div>
+        <div class="health-card amber">
+          <div class="rag">🟡</div>
+          <div class="label">Meridian Portal</div>
+          <div class="detail">Velocity declining · Brand guide 10 days late</div>
+        </div>
+        <div class="health-card amber">
+          <div class="rag">🟡</div>
+          <div class="label">AI Assistant</div>
+          <div class="detail">Build blocked · Data access 2 weeks outstanding</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; padding:14px 16px; background:var(--coral-light); border:1.5px solid var(--coral-mid); border-left:3px solid var(--coral); border-radius:8px; font-size:13px; color:var(--text-dim);">
+        <strong style="color:var(--coral);">⚠ Client action required by May 3:</strong> Brand guide delivery (Meridian design team) · Data access approval for AI Assistant (Meridian IT). Both are critical path blockers.
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>The PM's final layer:</strong> Sarah knows Lisa Park uses the health dashboard visual in her own leadership briefings. The RAG cards and the consolidated blocker callout are things Sarah added based on how the client actually uses the report. Claude produced the narrative; Sarah added the presentation layer that matches the client's workflow.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-4">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-4" data-step="4">
+      <label for="rev-cb-4">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step-section" id="step-5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-meta">
+        <div class="step-label">Step 5 of 5</div>
+        <div class="step-title">Watch out</div>
+      </div>
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>1. Claude will produce three summaries, not one programme view</strong><br>
+      Without explicit synthesis instructions, Claude treats multi-workstream data as three separate reports. Always instruct Claude to identify cross-cutting themes — risks or blockers that appear in multiple workstreams are always more important than workstream-specific issues.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>2. Client-side blockers will be softened by default</strong><br>
+      Claude tends to frame client inaction diplomatically. "Data access request submitted — awaiting response" reads as a process step, not a blocker. Explicitly instruct Claude to flag client-side delays as programme risks, not administrative items.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>3. Overall RAG requires your judgment, not Claude's calculation</strong><br>
+      Claude will attempt to derive an overall RAG from the workstream statuses. But the overall RAG is a PM judgment call — it depends on what the client cares about most, what the contractual obligations are, and what the delivery head needs to know. Always review Claude's proposed overall RAG before publishing.
+    </div>
+
+    <div class="callout callout-good">
+      <strong>The prompting discipline that makes this work:</strong><br>
+      (1) Give Claude a report structure — don't let it invent one. (2) Instruct it to find cross-cutting themes before writing. (3) Ask for a consolidated client action section explicitly. (4) Ask for "what went well" separately — Claude defaults to risk-focused output. (5) Add the visual presentation layer yourself — Claude's text output won't match how your client actually uses the report.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-5">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-5" data-step="5">
+      <label for="rev-cb-5">Mark step as reviewed</label>
+    </div>
+
+    <div class="bottom-nav">
+      <a class="nav-btn secondary" href="example-6-tracking.html">← Example 6</a>
+      <a class="nav-btn" href="example-8-change.html">Example 8 — Change request →</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+const REV_KEY = 'pm_example-7-vendor';
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+function revLoad() { try { return JSON.parse(localStorage.getItem(REV_KEY)) || {}; } catch(e) { return {}; } }
+function revSave(s) { localStorage.setItem(REV_KEY, JSON.stringify(s)); }
+document.querySelectorAll('.rev-checkbox').forEach(cb => {
+  const s = revLoad();
+  if (s['cb_' + cb.dataset.step]) { cb.checked = true; const bar = cb.closest('.reviewer-bar'); if (bar) { bar.classList.add('checked'); bar.querySelector('label').textContent = '✓ Step reviewed'; } }
+  cb.addEventListener('change', () => {
+    const s = revLoad(); s['cb_' + cb.dataset.step] = cb.checked; revSave(s);
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) { bar.classList.toggle('checked', cb.checked); bar.querySelector('label').textContent = cb.checked ? '✓ Step reviewed' : 'Mark step as reviewed'; }
+  });
+});
+</script>
+</body>
+</html>
