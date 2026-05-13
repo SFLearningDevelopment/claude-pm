@@ -250,11 +250,11 @@
       </div>
 
     </div>
-  </div>
 
-  <!-- Detail panel -->
-  <div class="detail-panel empty" id="detailPanel">
-    ← Click any activity above to explore how Claude fits in
+    <!-- Detail panel — inline below nodes -->
+    <div class="detail-panel empty" id="detailPanel" style="margin-top:24px;">
+      ← Click any activity above to explore how Claude fits in
+    </div>
   </div>
 
   <div class="nav-row">
@@ -385,8 +385,9 @@ function showDetail(key) {
 
   const typeColor = d.type === 'Claude-led' ? 'var(--pm)' : d.type === 'Collaborative' ? 'var(--blue)' : 'var(--amber)';
 
-  document.getElementById('detailPanel').classList.remove('empty');
-  document.getElementById('detailPanel').innerHTML = `
+  const panel = document.getElementById('detailPanel');
+  panel.classList.remove('empty');
+  panel.innerHTML = `
     <div class="detail-eyebrow" style="color:${typeColor}">${d.type}</div>
     <div class="detail-title">${d.title}</div>
     <div class="detail-body">${d.body}</div>
@@ -396,6 +397,10 @@ function showDetail(key) {
     </div>
     <div class="detail-watch"><strong>⚠ Watch out:</strong> ${d.watch}</div>
   `;
+  // Scroll detail panel into view smoothly
+  setTimeout(() => {
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 50);
 }
 </script>
 </body>
