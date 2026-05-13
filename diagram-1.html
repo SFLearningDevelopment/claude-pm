@@ -40,7 +40,7 @@
   .main { max-width:1400px; margin:0 auto; padding:28px 32px; }
 
   /* Diagram canvas */
-  .diagram-wrap { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:32px; margin-bottom:24px; position:relative; overflow:hidden; }
+  .diagram-wrap { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:32px; margin-bottom:24px; position:relative; }
 
   /* PM activity nodes */
   .diagram-grid {
@@ -57,7 +57,7 @@
     position:relative; border:2px solid transparent;
     user-select:none;
   }
-  .node:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.1); }
+  .node:hover { box-shadow:0 6px 20px rgba(0,0,0,.14); border-color:var(--blue); }
   .node.active { box-shadow:0 0 0 3px var(--pm), 0 6px 20px rgba(11,110,79,.2); }
 
   /* Node types */
@@ -67,9 +67,9 @@
   .node-header { background:var(--bg3); border-color:var(--border); cursor:default; }
   .node-header:hover { transform:none; box-shadow:none; }
 
-  .node-icon { font-size:18px; margin-bottom:4px; }
-  .node-title { font-size:12px; font-weight:700; color:var(--text); margin-bottom:2px; }
-  .node-sub { font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); }
+  .node-icon { font-size:22px; margin-bottom:6px; }
+  .node-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .node-sub { font-size:12px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); }
   .node-badge {
     position:absolute; top:8px; right:8px;
     font-size:9px; font-family:'Source Code Pro',monospace;
@@ -96,8 +96,8 @@
   }
   .detail-panel.empty { display:flex; align-items:center; justify-content:center; color:var(--text-dimmer); font-size:13px; font-family:'Source Code Pro',monospace; }
   .detail-eyebrow { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--pm); margin-bottom:6px; }
-  .detail-title { font-size:18px; font-weight:700; margin-bottom:12px; }
-  .detail-body { font-size:14px; color:var(--text-dim); line-height:1.7; margin-bottom:16px; }
+  .detail-title { font-size:20px; font-weight:700; margin-bottom:14px; }
+  .detail-body { font-size:16px; color:var(--text-dim); line-height:1.8; margin-bottom:18px; }
   .detail-prompt { background:var(--code-bg); border-radius:8px; padding:14px 18px; font-family:'Source Code Pro',monospace; font-size:12px; color:#a6e3a1; line-height:1.6; margin-top:12px; }
   .detail-prompt-label { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#89b4fa; margin-bottom:6px; opacity:.7; }
   .detail-watch { background:var(--amber-light); border-left:3px solid var(--amber); padding:10px 14px; border-radius:0 6px 6px 0; font-size:13px; color:var(--text-dim); margin-top:12px; }
@@ -150,21 +150,21 @@
         <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 1 — Initiation & Scoping</div>
       </div>
 
-      <div class="node node-claude" onclick="showDetail('scope')" id="node-scope">
+      <div class="node node-claude" data-key="scope" id="node-scope">
         <div class="node-badge badge-claude">Claude</div>
         <div class="node-icon">📋</div>
         <div class="node-title">Scope document</div>
         <div class="node-sub">Brief → structured scope</div>
       </div>
 
-      <div class="node node-both" onclick="showDetail('risks')" id="node-risks">
+      <div class="node node-both" data-key="risks" id="node-risks">
         <div class="node-badge badge-both">Collaborative</div>
         <div class="node-icon">⚠️</div>
         <div class="node-title">Risk register</div>
         <div class="node-sub">Identify + score risks</div>
       </div>
 
-      <div class="node node-human" onclick="showDetail('kickoff')" id="node-kickoff">
+      <div class="node node-human" data-key="kickoff" id="node-kickoff">
         <div class="node-badge badge-human">Human</div>
         <div class="node-icon">🤝</div>
         <div class="node-title">Kickoff facilitation</div>
@@ -176,21 +176,21 @@
         <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 2 — Planning</div>
       </div>
 
-      <div class="node node-claude" onclick="showDetail('plan')" id="node-plan">
+      <div class="node node-claude" data-key="plan" id="node-plan">
         <div class="node-badge badge-claude">Claude</div>
         <div class="node-icon">📅</div>
         <div class="node-title">Milestone plan</div>
         <div class="node-sub">Scope → phased roadmap</div>
       </div>
 
-      <div class="node node-both" onclick="showDetail('backlog')" id="node-backlog">
+      <div class="node node-both" data-key="backlog" id="node-backlog">
         <div class="node-badge badge-both">Collaborative</div>
         <div class="node-icon">📝</div>
         <div class="node-title">Backlog decomposition</div>
         <div class="node-sub">Epics → sprint stories</div>
       </div>
 
-      <div class="node node-human" onclick="showDetail('resourcing')" id="node-resourcing">
+      <div class="node node-human" data-key="resourcing" id="node-resourcing">
         <div class="node-badge badge-human">Human</div>
         <div class="node-icon">👥</div>
         <div class="node-title">Team resourcing</div>
@@ -202,21 +202,21 @@
         <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 3 — Execution & Tracking</div>
       </div>
 
-      <div class="node node-claude" onclick="showDetail('status')" id="node-status">
+      <div class="node node-claude" data-key="status" id="node-status">
         <div class="node-badge badge-claude">Claude</div>
         <div class="node-icon">📊</div>
         <div class="node-title">Status updates</div>
         <div class="node-sub">Data → audience-specific comms</div>
       </div>
 
-      <div class="node node-both" onclick="showDetail('tracking')" id="node-tracking">
+      <div class="node node-both" data-key="tracking" id="node-tracking">
         <div class="node-badge badge-both">Collaborative</div>
         <div class="node-icon">📈</div>
         <div class="node-title">Delivery forecasting</div>
         <div class="node-sub">Velocity → risk scenarios</div>
       </div>
 
-      <div class="node node-human" onclick="showDetail('escalation')" id="node-escalation">
+      <div class="node node-human" data-key="escalation" id="node-escalation">
         <div class="node-badge badge-human">Human</div>
         <div class="node-icon">🚨</div>
         <div class="node-title">Escalation decisions</div>
@@ -228,21 +228,21 @@
         <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 4 — Stakeholder & Change Management</div>
       </div>
 
-      <div class="node node-claude" onclick="showDetail('reporting')" id="node-reporting">
+      <div class="node node-claude" data-key="reporting" id="node-reporting">
         <div class="node-badge badge-claude">Claude</div>
         <div class="node-icon">📑</div>
         <div class="node-title">Health reporting</div>
         <div class="node-sub">Multi-workstream → exec narrative</div>
       </div>
 
-      <div class="node node-both" onclick="showDetail('cr')" id="node-cr">
+      <div class="node node-both" data-key="cr" id="node-cr">
         <div class="node-badge badge-both">Collaborative</div>
         <div class="node-icon">🔄</div>
         <div class="node-title">Change requests</div>
         <div class="node-sub">Impact analysis + options</div>
       </div>
 
-      <div class="node node-human" onclick="showDetail('negotiate')" id="node-negotiate">
+      <div class="node node-human" data-key="negotiate" id="node-negotiate">
         <div class="node-badge badge-human">Human</div>
         <div class="node-icon">💬</div>
         <div class="node-title">Negotiation</div>
@@ -367,6 +367,12 @@ const details = {
 };
 
 let activeNode = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[data-key]').forEach(function(el) {
+    el.addEventListener('click', function() { showDetail(this.getAttribute('data-key')); });
+  });
+});
 
 function showDetail(key) {
   const d = details[key];
