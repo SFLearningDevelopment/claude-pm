@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example 11 — Contract Red Flags · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --blue:#1a6eb5; --blue-light:#e8f1fb; --blue-mid:#b8d0ed; --blue-dark:#0f4a7a;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--blue); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; overflow-x:auto; }
+  .tabs { display:flex; }
+  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:14px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; font-family:'Merriweather Sans',sans-serif; }
+  .tab-btn .num { width:24px; height:24px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .tab-btn.active { color:var(--blue); border-bottom-color:var(--blue); }
+  .tab-btn.active .num { background:var(--blue); border-color:var(--blue); color:#fff; }
+  .main { max-width:1400px; margin:0 auto; padding:36px 32px; }
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num { width:52px; height:52px; border-radius:50%; background:var(--blue); color:#fff; font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:24px; font-weight:700; }
+  .prose { font-size:17px; color:var(--text-dim); line-height:1.9; margin-bottom:24px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .callout { border-left:3px solid var(--blue); background:var(--blue-light); padding:18px 22px; border-radius:0 8px 8px 0; margin:20px 0; font-size:16px; line-height:1.8; color:var(--text-dim); }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-left:4px solid var(--blue); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-size:16px; line-height:1.85; color:var(--text-dim); }
+  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
+  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:14.5px; line-height:1.8; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
+  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
+  .prompt-block .speaker.user { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
+  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:4px solid var(--green); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-size:16px; line-height:1.85; color:var(--text-dim); }
+  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:12px; font-weight:600; }
+  /* Red flag table */
+  .flag-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:15px; }
+  .flag-table th { background:var(--bg3); border:1px solid var(--border); padding:10px 14px; text-align:left; font-size:11px; font-family:'Source Code Pro',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dimmer); }
+  .flag-table td { border:1px solid var(--border); padding:12px 14px; vertical-align:top; line-height:1.6; color:var(--text-dim); }
+  .flag-table tr:nth-child(even) td { background:var(--bg3); }
+  .sev-high { color:var(--coral); font-weight:700; font-family:'Source Code Pro',monospace; }
+  .sev-med  { color:var(--amber); font-weight:700; font-family:'Source Code Pro',monospace; }
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag { font-size:12px; font-family:'Source Code Pro',monospace; padding:4px 12px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag.tier3 { background:var(--amber-light); border-color:#e8c97a; color:var(--amber); }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  .assessment-wrap { background:var(--bg2); border:1.5px solid var(--border); border-left:4px solid var(--blue); border-radius:var(--radius); padding:28px 32px; margin:32px 0; }
+  .assessment-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .assessment-sub { font-size:15px; color:var(--text-dim); line-height:1.7; margin-bottom:24px; }
+  .question-block { margin-bottom:28px; padding-bottom:24px; border-bottom:1px solid var(--border); }
+  .question-block:last-of-type { border-bottom:none; }
+  .q-num { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--blue); letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; font-weight:600; }
+  .q-text { font-size:16px; font-weight:600; color:var(--text); line-height:1.5; margin-bottom:16px; }
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .option { display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:8px; border:1.5px solid var(--border); cursor:pointer; font-size:15px; color:var(--text-dim); line-height:1.5; transition:border-color .15s, background .15s; }
+  .option:hover { border-color:var(--blue-mid); background:var(--blue-light); }
+  .option input[type="radio"] { margin-top:3px; flex-shrink:0; accent-color:var(--blue); }
+  .submit-btn { margin-top:20px; padding:12px 28px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Merriweather Sans',sans-serif; }
+  .submit-btn:disabled { background:var(--border); color:var(--text-dimmer); cursor:not-allowed; }
+  .submit-btn:not(:disabled):hover { background:var(--blue-dark); color:#fff; }
+  .submit-note { font-size:13px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:8px; }
+  .submitted-wrap { text-align:center; padding:16px 0; }
+  .submitted-icon { font-size:36px; color:var(--green); margin-bottom:8px; }
+  .submitted-title { font-size:18px; font-weight:700; color:var(--green); margin-bottom:8px; }
+  .submitted-body { font-size:15px; color:var(--text-dim); line-height:1.7; }
+  .results-link { color:var(--blue); font-weight:600; }
+  .complete-bar { display:flex; align-items:center; gap:12px; padding:14px 20px; border-radius:8px; margin:16px 0 32px; font-size:14px; font-family:'Source Code Pro',monospace; font-weight:600; border:1.5px solid var(--border); background:var(--bg3); color:var(--text-dimmer); transition:all .2s; }
+  .complete-bar.disabled { opacity:.6; cursor:not-allowed; }
+  .complete-bar.ready { background:var(--blue-light); border-color:var(--blue-mid); border-left:3px solid var(--blue); color:var(--blue-dark); cursor:pointer; }
+  .complete-bar.done { background:var(--green-light); border-color:var(--green-mid); border-left:3px solid var(--green); color:var(--green); }
+  .complete-bar input[type="checkbox"] { width:18px; height:18px; accent-color:var(--green); }
+  .complete-bar.disabled input { cursor:not-allowed; }
+  .hidden { display:none !important; }
+  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:8px; }
+  .nav-btn { padding:12px 22px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; transition:background .15s; background:var(--blue); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--blue-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:32px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a href="course-map.html">Course map</a><span class="sep">/</span>
+  <span>Tier 3 examples</span><span class="sep">/</span>
+  <span>Example 11 — Contract red flags</span>
+</nav>
+<div class="tabs-wrap"><div class="tabs">
+  <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+  <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+  <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+  <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+  <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
+</div></div>
+<div class="main">
+
+<!-- STEP 1 -->
+<section class="step-section active" id="step-1">
+  <div class="step-header"><div class="step-num">1</div><div class="step-meta"><div class="step-label">Step 1 of 5</div><div class="step-title">The problem</div></div></div>
+  <div class="tags-row"><span class="tag tier3">Example 11 · Tier 3</span><span class="tag">Contract evaluation</span><span class="tag">Vendor · Legal</span><span class="tag">Signing deadline</span></div>
+  <p class="prose">The winning vendor from the Meridian AI Assistant RFP has sent their Master Services Agreement — 40 pages, standard legal language, sent on a Friday with a requested signing date of the following Wednesday. Legal at SF is backed up with two other contracts. Sarah has until Tuesday to either sign, request changes, or escalate.</p>
+  <p class="prose">Sarah is not a lawyer. Her job is not to interpret the contract — that is legal's role. Her job is to <strong>identify the clauses that need immediate legal attention</strong> so the limited legal review time is focused on the highest-risk items, and to brief Raj Patel on what she found before he talks to the vendor.</p>
+  <div class="doc-block">
+    <div class="doc-label">Contract context — what Sarah knows</div>
+    Vendor: CloudMind AI (winner of RFP, selected for RAG pipeline component of Meridian AI Assistant)<br>
+    Contract value: $180K over 18 months<br>
+    Meridian context: Financial services firm, SOC 2 Type II required, PII cannot be stored on third-party infrastructure, data residency requirement (US only)<br>
+    SF context: SF is the prime contractor — CloudMind is a subcontractor. SF carries liability to Meridian.<br>
+    Signing deadline: Wednesday (4 days away)<br>
+    Key concern: SF's liability exposure as prime contractor if CloudMind underperforms or causes a data incident
+  </div>
+  <div class="callout callout-warn"><strong>Why this is Tier 3:</strong> The PM must reason across multiple inputs simultaneously — contract language, the client's compliance requirements, SF's liability position as prime contractor, and a hard signing deadline — and produce a prioritised brief that is specific enough to direct legal review without overstepping into legal advice. Claude cannot replace a lawyer but can dramatically accelerate the triage.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 2 -->
+<section class="step-section" id="step-2">
+  <div class="step-header"><div class="step-num">2</div><div class="step-meta"><div class="step-label">Step 2 of 5</div><div class="step-title">The naive approach</div></div></div>
+  <p class="prose">The naive approach is to skim the contract, note a few things that look unusual, and forward it to legal with a covering email:</p>
+  <div class="prompt-block"><div class="speaker user">Sarah (naive — email to legal)</div>Hi — can you review the attached MSA from CloudMind AI? We need to sign by Wednesday. Key things I noticed: their liability cap seems low and they have some IP clauses worth checking. Let me know if you see anything. Thanks.</div>
+  <div class="callout callout-bad"><strong>What's wrong:</strong> "Liability cap seems low" and "some IP clauses worth checking" give legal no direction. A 40-page MSA will take 4–6 hours to review properly. Without a prioritised brief, legal will read sequentially — and may spend significant time on boilerplate while missing the clauses that actually matter for this specific engagement. The PII and data residency requirements — which are specific to Meridian and critical given SF's prime contractor liability — are not mentioned at all.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 3 -->
+<section class="step-section" id="step-3">
+  <div class="step-header"><div class="step-num">3</div><div class="step-meta"><div class="step-label">Step 3 of 5</div><div class="step-title">The Claude interaction</div></div></div>
+  <p class="prose">Sarah pastes the key contract clauses into Claude along with the project context and asks for a structured red flag analysis — not legal advice, but a prioritised list of clauses that need attention given the specific engagement context.</p>
+  <div class="prompt-block"><div class="speaker user">Sarah — Turn 1</div>I'm a senior PM (not a lawyer) reviewing a vendor MSA before passing it to legal for review. I need to identify the highest-risk clauses given my specific engagement context so legal review time is focused correctly.
+
+I am NOT asking for legal advice. I need a structured list of clauses that warrant legal attention, with the specific reason each clause is relevant to my context.
+
+Engagement context:
+— Vendor is a subcontractor to SF; SF is prime contractor to Meridian (financial services)
+— SF carries liability to Meridian if the vendor causes a data incident
+— Meridian requires: SOC 2 Type II, PII not stored on third-party infrastructure, US data residency only
+— Contract value: $180K / 18 months
+— Signing deadline: 4 days
+
+Key contract clauses (excerpts):
+
+Section 8.2 — Liability: "CloudMind's total liability under this agreement shall not exceed the fees paid in the 3 months preceding the claim."
+
+Section 12.1 — Data processing: "CloudMind may process customer data on infrastructure located within the United States or the European Union as operationally required."
+
+Section 14.3 — Subcontracting: "CloudMind may engage subcontractors to perform services under this agreement without prior written consent of the customer."
+
+Section 9.1 — Indemnification: "Each party shall indemnify the other against third-party claims arising from its own gross negligence or wilful misconduct."
+
+Section 11.2 — Security: "CloudMind will maintain security controls consistent with industry standards."
+
+Section 15.4 — SLA: "CloudMind will use commercially reasonable efforts to maintain 99% uptime. Credits for downtime shall be the customer's sole remedy for availability failures."
+
+Section 6.3 — IP: "Any deliverables created by CloudMind under this agreement shall remain the intellectual property of CloudMind, licensed to the customer on a non-exclusive basis."
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 1</div><strong>Contract Red Flag Analysis — CloudMind AI MSA</strong>
+<em>For legal review prioritisation — not legal advice</em>
+
+<strong>🔴 CRITICAL — Requires immediate legal attention before signing</strong>
+
+<strong>Section 12.1 — Data processing (EU data residency)</strong>
+The clause permits data processing in the EU "as operationally required." Meridian's requirement is US data residency only. This clause directly conflicts with the client requirement. If a data incident occurs on EU infrastructure, SF's liability to Meridian is not mitigated by this contract. Legal should either require deletion of "or the European Union" or add a rider restricting processing to US infrastructure only.
+
+<strong>Section 8.2 — Liability cap (3-month fees)</strong>
+The cap is fees paid in the preceding 3 months — approximately $10K on an $180K/18-month contract. For an AI component processing financial services data, a breach or data loss event could expose SF to client liability far exceeding $10K. Legal should negotiate a higher cap (typically 12 months' fees is standard) or at minimum carve out data breach events from the cap.
+
+<strong>Section 14.3 — Unlimited subcontracting</strong>
+CloudMind can engage subcontractors without SF's consent. If a subcontractor processes Meridian's PII on non-compliant infrastructure, SF carries the liability. Legal should require prior written consent for any subcontractor handling Meridian data, and flow-down of the data residency and SOC 2 requirements to subcontractors.
+
+<strong>🟡 AMBER — Review recommended</strong>
+
+<strong>Section 9.1 — Indemnification (gross negligence only)</strong>
+Indemnification is limited to gross negligence or wilful misconduct. Ordinary negligence — a misconfigured system, an unpatched vulnerability — would not trigger indemnification. For a financial services data processing context, legal should consider whether this standard is appropriate or whether a lower threshold should apply.
+
+<strong>Section 11.2 — Security controls ("industry standards")</strong>
+"Industry standards" is undefined and unenforceable as written. Given Meridian's SOC 2 Type II requirement, this should explicitly reference SOC 2 Type II compliance, with an obligation to provide audit reports on request. "Consistent with industry standards" gives SF no contractual basis to require SOC 2 evidence.
+
+<strong>Section 15.4 — SLA credits as sole remedy</strong>
+If CloudMind's availability failure causes SF to miss a client milestone or SLA, the sole remedy is credits — not damages. Legal should assess whether this is acceptable given SF's upstream SLA commitments to Meridian.
+
+<strong>Section 6.3 — IP ownership</strong>
+Deliverables remain CloudMind's IP, licensed non-exclusively. If the RAG pipeline is customised for Meridian's data and CloudMind is later acquired or goes out of business, SF has no ownership of the custom components. Legal should consider whether a work-for-hire clause or ownership transfer is required for Meridian-specific deliverables.</div>
+  <div class="callout callout-good" style="margin-top:20px;"><strong>What changed:</strong> Legal now has a prioritised brief — three critical items and four amber items, each with the specific reason it matters for this engagement. A 4-hour review can be focused on the critical items first. Sarah has not given legal advice — she has given direction. The data residency conflict was entirely missed in the naive approach and is the single highest-risk clause in the contract.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 4 -->
+<section class="step-section" id="step-4">
+  <div class="step-header"><div class="step-num">4</div><div class="step-meta"><div class="step-label">Step 4 of 5</div><div class="step-title">The refined output</div></div></div>
+  <p class="prose">Sarah formats the red flag analysis as a table for the brief to Raj Patel, adds her recommendation on the signing deadline, and attaches the full Claude analysis as an appendix for legal.</p>
+  <div class="output-block">
+    <div class="output-label">✓ Red flag summary — CloudMind AI MSA</div>
+    <table class="flag-table">
+      <thead><tr><th>Section</th><th>Issue</th><th>Severity</th><th>Specific risk to SF</th></tr></thead>
+      <tbody>
+        <tr><td>12.1</td><td>EU data residency permitted</td><td class="sev-high">Critical</td><td>Conflicts with Meridian's US-only requirement — direct liability gap</td></tr>
+        <tr><td>8.2</td><td>Liability cap ~$10K (3-month fees)</td><td class="sev-high">Critical</td><td>Insufficient for a financial services data breach scenario</td></tr>
+        <tr><td>14.3</td><td>Unlimited subcontracting, no consent</td><td class="sev-high">Critical</td><td>SF cannot control who processes Meridian PII</td></tr>
+        <tr><td>9.1</td><td>Indemnification: gross negligence only</td><td class="sev-med">Amber</td><td>Ordinary negligence not covered — high bar in practice</td></tr>
+        <tr><td>11.2</td><td>"Industry standards" — undefined</td><td class="sev-med">Amber</td><td>No contractual basis to require SOC 2 Type II evidence</td></tr>
+        <tr><td>15.4</td><td>SLA credits as sole remedy</td><td class="sev-med">Amber</td><td>No damages if availability failure causes SF to miss Meridian SLA</td></tr>
+        <tr><td>6.3</td><td>IP stays with CloudMind</td><td class="sev-med">Amber</td><td>Custom components not owned by SF or Meridian</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-bad"><strong>Sarah's recommendation to Raj:</strong> Do not sign by Wednesday. Request a 5-business-day extension from CloudMind — frame it as "standard legal review process." The three Critical items are deal-condition issues, not negotiating preferences. Section 12.1 (EU data residency) alone is sufficient grounds to delay signing — it directly conflicts with a written client requirement. If CloudMind declines to extend, escalate to Raj immediately.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 5 -->
+<section class="step-section" id="step-5">
+  <div class="step-header"><div class="step-num">5</div><div class="step-meta"><div class="step-label">Step 5 of 5</div><div class="step-title">Watch out</div></div></div>
+  <div class="callout callout-bad"><strong>1. Claude is not a lawyer — and this is not a legal opinion</strong><br>The red flag analysis is a triage tool, not a legal opinion. Claude can identify clauses that are unusual or that conflict with stated requirements — but it cannot assess enforceability, jurisdiction-specific implications, or negotiating strategy. Everything Claude flags must be reviewed by qualified legal counsel before any signing decision.</div>
+  <div class="callout callout-bad"><strong>2. Claude only sees what you paste</strong><br>A 40-page MSA cannot be fully pasted into a Claude session (context window limits). Sarah pasted the key clauses she identified on a skim read. If she missed a clause, Claude cannot flag it. Always do a manual skim first to identify candidate clauses — use Claude to analyse what you've found, not to replace the initial read.</div>
+  <div class="callout callout-bad"><strong>3. Standard clauses look standard until they aren't</strong><br>Section 14.3 (unlimited subcontracting) is extremely common in SaaS contracts and easy to overlook. It only becomes a red flag when combined with PII processing requirements. Claude identified it because Sarah provided the engagement context. Without that context, Claude would have no basis to flag it.</div>
+  <div class="callout callout-good"><strong>The discipline that makes this work:</strong><br>Provide the engagement context before the contract clauses — not after. Claude cannot identify what matters without knowing why it matters. The context (PII requirements, data residency, prime contractor liability) is what turns a generic contract review into a targeted risk analysis.</div>
+  <div class="divider"></div>
+
+  <div class="assessment-wrap" id="assessmentWrap">
+    <div class="questions-wrap" id="questionsWrap">
+      <div class="assessment-title">Check your understanding</div>
+      <p class="assessment-sub">Answer all three questions to complete this example. Your answers are saved — results shown on the Results page after completing the course.</p>
+      <div class="question-block">
+        <div class="q-num">Question 1 of 3</div>
+        <div class="q-text">What was the single highest-risk clause in the CloudMind MSA — and why was it missed in the naive approach?</div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q1" value="A"> Section 8.2 (low liability cap) — missed because the naive approach focused on IP clauses instead</label>
+          <label class="option"><input type="radio" name="q1" value="B"> Section 12.1 (EU data residency) — missed because the naive approach did not reference Meridian's specific US-only requirement</label>
+          <label class="option"><input type="radio" name="q1" value="C"> Section 6.3 (IP ownership) — missed because legal did not have time to read the full contract</label>
+          <label class="option"><input type="radio" name="q1" value="D"> Section 14.3 (unlimited subcontracting) — missed because it looks like standard boilerplate</label>
+        </div>
+      </div>
+      <div class="question-block">
+        <div class="q-num">Question 2 of 3</div>
+        <div class="q-text">What is the correct role of the PM when using Claude to review a vendor contract?</div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q2" value="A"> Use Claude to replace legal review entirely — it is faster and cheaper</label>
+          <label class="option"><input type="radio" name="q2" value="B"> Use Claude to identify clauses for legal to ignore — focusing legal attention on non-standard items only</label>
+          <label class="option"><input type="radio" name="q2" value="C"> Use Claude to produce a prioritised triage brief that directs limited legal review time to the highest-risk clauses</label>
+          <label class="option"><input type="radio" name="q2" value="D"> Use Claude to negotiate the contract terms directly with the vendor</label>
+        </div>
+      </div>
+      <div class="question-block">
+        <div class="q-num">Question 3 of 3</div>
+        <div class="q-text">Why must engagement context be provided to Claude before the contract clauses — not after?</div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q3" value="A"> Claude processes information sequentially and cannot reconsider earlier analysis</label>
+          <label class="option"><input type="radio" name="q3" value="B"> The context (PII requirements, data residency, liability position) determines what is a red flag — without it, standard clauses appear acceptable</label>
+          <label class="option"><input type="radio" name="q3" value="C"> Legal requires context before contract language in all formal reviews</label>
+          <label class="option"><input type="radio" name="q3" value="D"> Claude cannot read contract language without context as a reference framework</label>
+        </div>
+      </div>
+      <button class="submit-btn" id="submitAnswersBtn" disabled>Submit answers</button>
+      <div class="submit-note" id="submitNote">Select an answer for each question to submit.</div>
+    </div>
+    <div class="submitted-wrap hidden" id="submittedWrap">
+      <div class="submitted-icon">✓</div>
+      <div class="submitted-title">Answers saved</div>
+      <div class="submitted-body">Your answers have been recorded. View them on the <a href="results.html" class="results-link">Results page</a> after completing the course.</div>
+    </div>
+  </div>
+  <div class="complete-bar disabled" id="completeBar">
+    <input type="checkbox" id="completeCb" disabled>
+    <label for="completeCb" id="completeLabel">Answer all questions to unlock</label>
+  </div>
+
+  <div class="bottom-nav">
+    <a class="nav-btn secondary" href="example-10-rca.html">← Example 10</a>
+    <a class="nav-btn" href="example-12-cost.html">Example 12 — Cloud costs →</a>
+  </div>
+</section>
+
+</div>
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+const EXAMPLE_ID    = 'example-11-contract';
+const CORRECT       = { q1: 'B', q2: 'C', q3: 'B' };
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+const STORAGE_KEY = 'pm_learner_' + EXAMPLE_ID;
+function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; } }
+function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+document.addEventListener('DOMContentLoaded', function() {
+  const state = loadState();
+  if (state.submittedAt) { showSubmittedState(); activateCompleteBar(state.complete); return; }
+  document.querySelectorAll('.options input[type="radio"]').forEach(function(r) { r.addEventListener('change', checkAllAnswered); });
+  document.getElementById('submitAnswersBtn').addEventListener('click', submitAnswers);
+  const cb = document.getElementById('completeCb');
+  if (cb) cb.addEventListener('change', function() {
+    if (!cb.checked) return;
+    const s = loadState(); s.complete = true; saveState(s); activateCompleteBar(true);
+  });
+});
+function checkAllAnswered() {
+  const all = ['q1','q2','q3'].every(n => document.querySelector('input[name="'+n+'"]:checked'));
+  document.getElementById('submitAnswersBtn').disabled = !all;
+  document.getElementById('submitNote').textContent = all ? 'Ready to submit.' : 'Select an answer for each question to submit.';
+}
+function submitAnswers() {
+  const answers = {};
+  ['q1','q2','q3'].forEach(n => { const v = document.querySelector('input[name="'+n+'"]:checked')?.value; if(v) answers[n]=v; });
+  const s = loadState();
+  s.exampleId = EXAMPLE_ID; s.answers = answers; s.correct = CORRECT; s.submittedAt = new Date().toISOString();
+  saveState(s); showSubmittedState(); activateCompleteBar(false);
+}
+function showSubmittedState() {
+  document.getElementById('questionsWrap')?.classList.add('hidden');
+  document.getElementById('submittedWrap')?.classList.remove('hidden');
+}
+function activateCompleteBar(isDone) {
+  const bar = document.getElementById('completeBar');
+  const cb  = document.getElementById('completeCb');
+  const lbl = document.getElementById('completeLabel');
+  if (!bar) return;
+  if (isDone) { bar.className='complete-bar done'; cb.disabled=false; cb.checked=true; lbl.textContent='✓ Example complete'; }
+  else { bar.className='complete-bar ready'; cb.disabled=false; lbl.textContent='Mark example as complete'; }
+}
+</script>
+</body>
+</html>
