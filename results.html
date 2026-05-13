@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Results · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --blue:#1a6eb5; --blue-light:#e8f1fb; --blue-mid:#b8d0ed; --blue-dark:#0f4a7a;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--blue); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+
+  .hero { background:var(--bg2); border-bottom:2px solid var(--border); padding:32px; }
+  .hero-inner { max-width:1400px; margin:0 auto; }
+  .hero-eyebrow { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--blue); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-size:30px; font-weight:700; margin-bottom:8px; }
+  .hero-sub { font-size:16px; color:var(--text-dim); line-height:1.7; }
+
+  /* Score summary */
+  .summary-bar { max-width:1400px; margin:28px auto 0; padding:0 32px; }
+  .score-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+  .score-card { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px 24px; text-align:center; }
+  .score-card .val { font-size:32px; font-weight:700; font-family:'Source Code Pro',monospace; margin-bottom:4px; }
+  .score-card .lbl { font-size:12px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); text-transform:uppercase; letter-spacing:.08em; }
+  .score-card.correct .val { color:var(--green); }
+  .score-card.wrong   .val { color:var(--coral); }
+  .score-card.pending .val { color:var(--amber); }
+  .score-card.pct     .val { color:var(--blue); }
+
+  /* Example result blocks */
+  .main { max-width:1400px; margin:0 auto; padding:0 32px 48px; }
+  .example-block { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); margin-bottom:20px; overflow:hidden; }
+  .example-header { display:flex; align-items:center; gap:16px; padding:18px 24px; border-bottom:1px solid var(--border); background:var(--bg3); cursor:pointer; user-select:none; }
+  .example-header:hover { background:#e6edf5; }
+  .ex-num { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; }
+  .ex-title { font-size:16px; font-weight:700; flex:1; }
+  .ex-score { font-size:13px; font-family:'Source Code Pro',monospace; font-weight:700; padding:4px 12px; border-radius:20px; }
+  .ex-score.all-correct { background:var(--green-light); color:var(--green); border:1px solid var(--green-mid); }
+  .ex-score.some-wrong  { background:var(--coral-light); color:var(--coral); border:1px solid var(--coral-mid); }
+  .ex-score.not-done    { background:var(--bg3); color:var(--text-dimmer); border:1px solid var(--border); }
+  .ex-chevron { font-size:14px; color:var(--text-dimmer); transition:transform .2s; }
+  .ex-chevron.open { transform:rotate(90deg); }
+  .ex-date { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); }
+
+  .example-body { padding:24px; display:none; }
+  .example-body.open { display:block; }
+
+  /* Question result rows */
+  .q-row { display:grid; grid-template-columns:28px 1fr 120px 120px; gap:12px; align-items:start; padding:14px 0; border-bottom:1px solid var(--border); font-size:15px; }
+  .q-row:last-child { border-bottom:none; }
+  .q-row-header { display:grid; grid-template-columns:28px 1fr 120px 120px; gap:12px; padding:8px 0 10px; border-bottom:2px solid var(--border); font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); text-transform:uppercase; letter-spacing:.08em; font-weight:600; }
+  .q-idx { font-family:'Source Code Pro',monospace; font-size:13px; color:var(--text-dimmer); padding-top:2px; }
+  .q-text-cell { color:var(--text-dim); line-height:1.5; }
+  .answer-pill { display:inline-block; padding:3px 12px; border-radius:20px; font-size:13px; font-family:'Source Code Pro',monospace; font-weight:700; }
+  .pill-correct { background:var(--green-light); color:var(--green); border:1px solid var(--green-mid); }
+  .pill-wrong   { background:var(--coral-light); color:var(--coral); border:1px solid var(--coral-mid); }
+  .pill-correct-ans { background:var(--blue-light); color:var(--blue-dark); border:1px solid var(--blue-mid); }
+  .pill-pending { background:var(--bg3); color:var(--text-dimmer); border:1px solid var(--border); }
+
+  /* Not done state */
+  .not-done-msg { padding:20px; font-size:15px; color:var(--text-dimmer); font-style:italic; }
+
+  /* No data state */
+  .empty-state { text-align:center; padding:60px 32px; }
+  .empty-icon { font-size:48px; margin-bottom:16px; }
+  .empty-title { font-size:22px; font-weight:700; margin-bottom:8px; }
+  .empty-sub { font-size:16px; color:var(--text-dim); margin-bottom:24px; }
+  .empty-btn { display:inline-block; padding:12px 24px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-weight:600; font-size:15px; }
+
+  footer { text-align:center; padding:32px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); margin-top:16px; }
+  @media(max-width:700px) { .score-cards { grid-template-columns:1fr 1fr; } .q-row,.q-row-header { grid-template-columns:24px 1fr 80px 80px; font-size:13px; } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a><span class="sep">/</span>
+  <span>My results</span>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">SF Certified AI-Augmented Project Manager</div>
+    <h1>My Results</h1>
+    <p class="hero-sub" id="heroSub">Loading your answers...</p>
+  </div>
+</div>
+
+<div class="summary-bar">
+  <div class="score-cards" id="scoreCards">
+    <div class="score-card correct"><div class="val" id="cntCorrect">—</div><div class="lbl">Correct</div></div>
+    <div class="score-card wrong"><div class="val" id="cntWrong">—</div><div class="lbl">Incorrect</div></div>
+    <div class="score-card pending"><div class="val" id="cntPending">—</div><div class="lbl">Not yet answered</div></div>
+    <div class="score-card pct"><div class="val" id="cntPct">—</div><div class="lbl">Score</div></div>
+  </div>
+</div>
+
+<div class="main" id="mainContent"></div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+
+// All examples in order
+const EXAMPLES = [
+  { id:'example-1-scope',        title:'Example 1 — Scope document',          tier:'Tier 1', file:'example-1-scope.html' },
+  { id:'example-2-status',       title:'Example 2 — Status update',           tier:'Tier 1', file:'example-2-status.html' },
+  { id:'example-3-risk',         title:'Example 3 — Risk register',           tier:'Tier 1', file:'example-3-risk.html' },
+  { id:'example-4-sprint',       title:'Example 4 — Sprint planning',         tier:'Tier 1', file:'example-4-sprint.html' },
+  { id:'example-5-requirements', title:'Example 5 — Project plan',            tier:'Tier 2', file:'example-5-requirements.html' },
+  { id:'example-6-tracking',     title:'Example 6 — Sprint tracking',         tier:'Tier 2', file:'example-6-tracking.html' },
+  { id:'example-7-reporting',    title:'Example 7 — Health report',           tier:'Tier 2', file:'example-7-reporting.html' },
+  { id:'example-8-change',       title:'Example 8 — Change request',          tier:'Tier 2', file:'example-8-change.html' },
+  { id:'example-9-model',        title:'Example 9 — AI project reporting',    tier:'Tier 2', file:'example-9-model.html' },
+  { id:'example-10-rca',         title:'Example 10 — P1 RCA',                 tier:'Tier 3', file:'example-10-rca.html' },
+  { id:'example-11-contract',    title:'Example 11 — Contract red flags',     tier:'Tier 3', file:'example-11-contract.html' },
+  { id:'example-12-cost',        title:'Example 12 — Cloud cost narrative',   tier:'Tier 3', file:'example-12-cost.html' },
+];
+
+// Question text lookup (for display)
+const Q_TEXT = {
+  'example-1-scope':        ['When Claude is given a vague brief and asked to "write a scope document," what is its most likely default behaviour?','In the two-phase prompting approach, what is the correct order?','Sarah added the PII constraint. Why couldn\'t Claude have included it without Sarah\'s input?'],
+  'example-2-status':       ['What is the most critical element missing from a one-size-fits-all status update?','When writing for a C-suite executive, which of these should be excluded?','What should a PM explicitly include in their prompt to prevent Claude from softening bad news?'],
+  'example-3-risk':         ['What is the primary failure of a generic risk register prompt?','What made the Meridian risk register genuinely useful compared to the naive output?','Sarah added Risk 7 (regulatory change). What does this illustrate?'],
+  'example-4-sprint':       ['What is the key difference between the naive and Claude-assisted story decomposition?','Why was the AI-01 estimate increased from 8 to 10 points?','What is the most important PM action after receiving Claude\'s story decomposition?'],
+  'example-5-requirements': ['What is the critical technique for fixed-deadline project planning?','The SOC 2 audit created what hidden compression on the build window?','What did Sarah add that Claude had not included — and why?'],
+  'example-6-tracking':     ['What information must be provided to Claude for delivery risk modelling to be useful?','At what point should a delivery risk be surfaced to stakeholders?','What were the two root causes of the declining velocity trend?'],
+  'example-7-reporting':    ['Without synthesis instructions, how does Claude handle a multi-workstream update?','What is the single most valuable output of the Claude-assisted health report?','What did Sarah add that Claude did not include?'],
+  'example-8-change':       ['What is the most dangerous PM behaviour when receiving a scope change request?','What creative option did Claude surface that Sarah had not considered?','Why is a formal Change Request reference number important?'],
+  'example-9-model':        ['When translating "3% hallucination rate" for a financial services board, what is the correct framing?','What is the key test a PM should apply before sending a translated AI update?','Why should a PM validate the translated update with the tech lead?'],
+  'example-10-rca':         ['What is the correct order of operations when managing a P1 incident with two audiences?','Why should the engineering RCA never be sent to the client?','What did Sarah add to the board communication that Claude could not have provided?'],
+  'example-11-contract':    ['What was the single highest-risk clause in the CloudMind MSA — and why was it missed?','What is the correct role of the PM when using Claude to review a vendor contract?','Why must engagement context be provided before the contract clauses?'],
+  'example-12-cost':        ['What is the most important structural change Sarah made to Claude\'s cost narrative?','Claude stated 3–5× cost overruns are "seen consistently across the industry." What should a PM do?','Why should a PM always include a recommendation when presenting cost options?'],
+};
+
+function loadState(id) {
+  try { return JSON.parse(localStorage.getItem('pm_learner_' + id)) || null; }
+  catch(e) { return null; }
+}
+
+function isCorrect(ans, correct, q) {
+  return ans && correct && ans[q] && correct[q] && ans[q] === correct[q];
+}
+
+function renderResults() {
+  const main = document.getElementById('mainContent');
+  let totalCorrect = 0, totalWrong = 0, totalPending = 0;
+  let anyData = false;
+  let html = '';
+
+  EXAMPLES.forEach(function(ex, idx) {
+    const state = loadState(ex.id);
+    const answered = state && state.submittedAt;
+    if (answered) anyData = true;
+
+    const questions = Q_TEXT[ex.id] || [];
+    let exCorrect = 0, exWrong = 0;
+
+    if (answered) {
+      ['q1','q2','q3'].forEach(function(q) {
+        if (isCorrect(state.answers, state.correct, q)) exCorrect++;
+        else if (state.answers && state.answers[q]) exWrong++;
+      });
+      totalCorrect += exCorrect;
+      totalWrong   += exWrong;
+    } else {
+      totalPending += 3;
+    }
+
+    const scoreClass = !answered ? 'not-done' : (exWrong === 0 ? 'all-correct' : 'some-wrong');
+    const scoreText  = !answered ? 'Not answered' : (exCorrect + '/3 correct');
+    const dateStr    = answered ? new Date(state.submittedAt).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '';
+
+    html += `
+    <div class="example-block" id="block-${ex.id}">
+      <div class="example-header" onclick="toggleBlock('${ex.id}')">
+        <div>
+          <div class="ex-num">${ex.tier} · ${idx < 4 ? 'Ex '+(idx+1) : 'Ex '+(idx+1)}</div>
+          <div class="ex-title">${ex.title}</div>
+        </div>
+        <span class="ex-score ${scoreClass}">${scoreText}</span>
+        <span class="ex-date">${dateStr}</span>
+        <span class="ex-chevron" id="chev-${ex.id}">▶</span>
+      </div>
+      <div class="example-body" id="body-${ex.id}">`;
+
+    if (!answered) {
+      html += `<div class="not-done-msg">You haven't answered the questions for this example yet. <a href="${ex.file}" style="color:var(--blue);font-weight:600;">Go to example →</a></div>`;
+    } else {
+      html += `
+        <div class="q-row-header">
+          <div>#</div><div>Question</div><div>Your answer</div><div>Correct answer</div>
+        </div>`;
+      ['q1','q2','q3'].forEach(function(q, qi) {
+        const userAns    = state.answers?.[q] || '—';
+        const correctAns = state.correct?.[q]  || '—';
+        const correct    = isCorrect(state.answers, state.correct, q);
+        const qText      = questions[qi] || q;
+        const pillClass  = !state.answers?.[q] ? 'pill-pending' : (correct ? 'pill-correct' : 'pill-wrong');
+        html += `
+        <div class="q-row">
+          <div class="q-idx">${qi+1}</div>
+          <div class="q-text-cell">${qText}</div>
+          <div><span class="answer-pill ${pillClass}">${userAns}</span></div>
+          <div><span class="answer-pill pill-correct-ans">${correctAns}</span></div>
+        </div>`;
+      });
+    }
+
+    html += `</div></div>`;
+  });
+
+  if (!anyData) {
+    main.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">No answers yet</div>
+        <div class="empty-sub">Complete the examples and answer the questions — your results will appear here.</div>
+        <a class="empty-btn" href="example-1-scope.html">Start with Example 1 →</a>
+      </div>`;
+    document.getElementById('heroSub').textContent = 'Complete the examples to see your results here.';
+    return;
+  }
+
+  main.innerHTML = html;
+
+  const total    = totalCorrect + totalWrong + totalPending;
+  const answered = totalCorrect + totalWrong;
+  const pct      = answered > 0 ? Math.round((totalCorrect / answered) * 100) : 0;
+
+  document.getElementById('cntCorrect').textContent = totalCorrect;
+  document.getElementById('cntWrong').textContent   = totalWrong;
+  document.getElementById('cntPending').textContent = totalPending;
+  document.getElementById('cntPct').textContent     = answered > 0 ? pct + '%' : '—';
+  document.getElementById('heroSub').textContent    = `${answered} of 36 questions answered · ${totalCorrect} correct · ${pct}% score`;
+}
+
+function toggleBlock(id) {
+  const body = document.getElementById('body-' + id);
+  const chev = document.getElementById('chev-' + id);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chev.classList.toggle('open', !isOpen);
+}
+
+document.addEventListener('DOMContentLoaded', renderResults);
+</script>
+</body>
+</html>
