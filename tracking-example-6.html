@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example 6 — Sprint Tracking · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --pm:#0b6e4f; --pm-light:#e6f4ef; --pm-mid:#a8d5c2; --pm-dark:#074d37;
+    --blue:#1a6eb5; --blue-light:#e8f1fb;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--pm); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; overflow-x:auto; }
+  .tabs { display:flex; }
+  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:13px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; font-family:'Merriweather Sans',sans-serif; }
+  .tab-btn .num { width:22px; height:22px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .tab-btn.active { color:var(--pm); border-bottom-color:var(--pm); }
+  .tab-btn.active .num { background:var(--pm); border-color:var(--pm); color:#fff; }
+  .main { max-width:860px; margin:0 auto; padding:40px; }
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num { width:48px; height:48px; border-radius:50%; background:var(--pm); color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:22px; font-weight:700; }
+  .prose { font-size:15px; color:var(--text-dim); line-height:1.8; margin-bottom:20px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .callout { border-left:3px solid var(--pm); background:var(--pm-light); padding:14px 18px; border-radius:0 8px 8px 0; margin:20px 0; font-size:14px; line-height:1.7; color:var(--text-dim); }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
+  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.7; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
+  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
+  .prompt-block .speaker.user { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
+  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:3px solid var(--green); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:10px; font-weight:600; }
+
+  /* Velocity chart */
+  .velocity-chart { display:flex; align-items:flex-end; gap:12px; height:120px; padding:12px 16px; background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); margin:20px 0; }
+  .vel-bar-wrap { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; height:100%; justify-content:flex-end; }
+  .vel-bar { width:100%; border-radius:4px 4px 0 0; min-height:4px; }
+  .vel-bar.planned { background:var(--border); }
+  .vel-bar.actual  { background:var(--pm); }
+  .vel-bar.forecast { background:var(--pm); opacity:.4; }
+  .vel-label { font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); }
+  .vel-val { font-size:11px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--text); }
+  .chart-legend { display:flex; gap:16px; margin-top:8px; }
+  .chart-legend-item { display:flex; align-items:center; gap:6px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); }
+  .chart-legend-dot { width:10px; height:10px; border-radius:2px; }
+
+  /* Forecast table */
+  .forecast-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:13px; }
+  .forecast-table th { background:var(--bg3); border:1px solid var(--border); padding:8px 12px; text-align:left; font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dimmer); }
+  .forecast-table td { border:1px solid var(--border); padding:8px 12px; color:var(--text-dim); }
+  .forecast-table tr.risk td { background:var(--coral-light); }
+  .forecast-table tr.warn td { background:var(--amber-light); }
+  .forecast-table tr.ok   td { background:var(--green-light); }
+
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag { font-size:11px; font-family:'Source Code Pro',monospace; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:var(--pm-dark); }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  .reviewer-bar { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:8px; margin:24px 0; background:var(--amber-light); border:1.5px solid #e8c97a; border-left:3px solid var(--amber); font-size:13px; font-family:'Source Code Pro',monospace; font-weight:600; color:var(--amber); }
+  .reviewer-bar.checked { background:var(--green-light); border-color:var(--green-mid); border-left-color:var(--green); color:var(--green); }
+  .reviewer-bar input[type="checkbox"] { width:16px; height:16px; accent-color:var(--green); }
+  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
+  .nav-btn { padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
+  .nav-btn { background:var(--pm); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--pm-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:32px 40px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a>
+  <span class="sep">/</span>
+  <span>Tier 2 examples</span>
+  <span class="sep">/</span>
+  <span>Example 6 — Sprint tracking</span>
+</nav>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+    <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+    <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+    <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+    <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <section class="step-section active" id="step-1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-meta">
+        <div class="step-label">Step 1 of 5</div>
+        <div class="step-title">The problem</div>
+      </div>
+    </div>
+
+    <div class="tags-row">
+      <span class="tag pm">Example 6 · Tier 2</span>
+      <span class="tag">Sprint tracking</span>
+      <span class="tag">Delivery forecasting</span>
+      <span class="tag">5–6 turn interaction</span>
+    </div>
+
+    <p class="prose">
+      It is the end of Sprint 4 on the Meridian Portal project. Sarah has four sprints of velocity data and a milestone plan with a hard September 30 deadline. Something in the numbers is making her uncomfortable — but she can't yet articulate exactly what the risk is or how severe it is.
+    </p>
+
+    <div class="doc-block">
+      <div class="doc-label">Sprint velocity data — Sprints 1–4</div>
+      Sprint 1: Planned 42pts · Delivered 38pts · Velocity 90% · Carried: 0<br>
+      Sprint 2: Planned 42pts · Delivered 34pts · Velocity 81% · Carried: 3 stories<br>
+      Sprint 3: Planned 38pts · Delivered 30pts · Velocity 79% · Carried: 4 stories (incl. 2 from S2)<br>
+      Sprint 4: Planned 36pts · Delivered 28pts · Velocity 78% · Carried: 5 stories (incl. 3 from S3)<br><br>
+      Average velocity trend: declining (90% → 78%)<br>
+      Total carried stories to date: 5 active, 8 resolved<br>
+      Current sprint: 5 (starts Monday)
+    </div>
+
+    <div class="doc-block">
+      <div class="doc-label">Remaining scope — as of Sprint 4 complete</div>
+      Phase 2 remaining: 2 stories (authentication edge cases, report export formats)<br>
+      Phase 3 full: document upload, user management — est. 48pts<br>
+      Salesforce integration: 60pts remaining (sandbox issues caused 2-sprint delay)<br>
+      SOC 2 hardening: 56pts (scheduled July 28 start)<br>
+      Buffer sprint: 18pts<br>
+      Total remaining: ~184pts<br>
+      Sprints remaining before August 29 (end of build): 9 sprints
+    </div>
+
+    <p class="prose">
+      The milestone plan assumed ~34pts per sprint. With 9 sprints remaining and 184pts of work, the plan needs 20.4pts average velocity. But the actual velocity is 28pts and declining. Sarah needs to understand what this means for the September 30 deadline — specifically, whether it's a manageable risk or a delivery-threatening one.
+    </p>
+
+    <div class="callout">
+      <strong>Why this matters now:</strong> Week 8 of 26 is the right time to surface a delivery risk — not Week 20. If the plan needs corrective action (scope reduction, resource addition, timeline extension), Sarah needs to raise it now while there are still options. Claude can help her model the scenarios and prepare the conversation with Raj and Mark.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-1">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-1" data-step="1">
+      <label for="rev-cb-1">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step-section" id="step-2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-meta">
+        <div class="step-label">Step 2 of 5</div>
+        <div class="step-title">The naive approach</div>
+      </div>
+    </div>
+
+    <p class="prose">The naive approach asks Claude to analyse the velocity without providing the milestone plan context or asking for scenario modelling:</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah (naive prompt)</div>My sprint velocity is declining. Is this a problem?
+
+Sprint 1: 38pts, Sprint 2: 34pts, Sprint 3: 30pts, Sprint 4: 28pts</div>
+
+    <div class="doc-block">
+      <div class="doc-label">Naive output</div>
+      Your velocity is declining from 38 to 28 points over four sprints, a 26% reduction. This is worth monitoring. Common causes include increasing technical complexity, team capacity issues, scope creep, or accumulated technical debt. I'd recommend investigating the root cause and taking corrective action if the trend continues.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>What's wrong:</strong> This is a generic observation. "Worth monitoring" and "take corrective action" are non-answers. Sarah already knows the velocity is declining — she needs to know whether the project will miss the deadline, by how much, and what her options are. Without the remaining scope and deadline context, Claude cannot give her anything useful.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-2">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-2" data-step="2">
+      <label for="rev-cb-2">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-section" id="step-3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-meta">
+        <div class="step-label">Step 3 of 5</div>
+        <div class="step-title">The Claude interaction</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah provides the full context — velocity data, remaining scope, deadline, and the milestone plan — and asks Claude to model scenarios.</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 1</div>I'm a senior PM on a fixed-deadline project. I need you to model delivery risk based on the data below.
+
+Velocity data (story points delivered per sprint):
+Sprint 1: 38 | Sprint 2: 34 | Sprint 3: 30 | Sprint 4: 28
+Trend: declining ~2pts per sprint
+
+Remaining scope: 184 story points
+Sprints remaining before August 29 (end of build window): 9
+Hard deadline: September 30 (includes 3-week UAT + SOC 2 compliance window after August 29)
+
+Model three scenarios:
+1. Current trend continues (velocity declines 2pts per sprint)
+2. Velocity stabilises at Sprint 4 level (28pts)
+3. Velocity recovers to Sprint 1 level (38pts)
+
+For each scenario: total points delivered in 9 sprints, gap vs 184pts required, and plain-English assessment of deadline risk.
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 1</div><strong>Delivery risk model — Meridian Portal</strong>
+
+<strong>Scenario 1: Declining trend continues (−2pts/sprint)</strong>
+Sprint velocities: 26, 24, 22, 20, 18, 16, 14, 12, 10
+Total delivered: 162pts | Gap: −22pts | <span style="color:#c0392b">🔴 RED — DEADLINE AT RISK</span>
+Assessment: At this trajectory, 22 story points of committed scope will not be delivered by August 29. With no buffer remaining, this directly delays the SOC 2 hardening phase, which pushes the UAT start and breaks the September 30 go-live. Corrective action is required now.
+
+<strong>Scenario 2: Velocity stabilises at 28pts</strong>
+Total delivered: 252pts | Gap: +68pts | <span style="color:#e67e22">🟡 AMBER — MANAGEABLE WITH MONITORING</span>
+Assessment: At stable velocity, there is theoretical headroom. However, the Salesforce integration (60pts) is the highest-risk item — it has already caused a 2-sprint delay and sandbox issues are unresolved. If the integration runs long, it will consume the apparent surplus. Monitor weekly.
+
+<strong>Scenario 3: Velocity recovers to 38pts</strong>
+Total delivered: 342pts | Gap: +158pts | <span style="color:#1a6b3a">🟢 GREEN — ON TRACK</span>
+Assessment: Recovery to Sprint 1 velocity would deliver the plan comfortably. However, the declining trend over 4 sprints suggests a structural issue, not a temporary dip. A recovery of this magnitude would require a specific intervention — not just optimism.
+
+<strong>Key question for Sarah:</strong> What is causing the decline? If it is the accumulated carried stories (5 currently active), a dedicated "carried story resolution sprint" before Sprint 5 could stabilise velocity. If it is a team capacity issue, the intervention is different.
+<hr class="prompt-sep">
+<div class="speaker user">Sarah — Turn 2</div>The decline appears to be caused by two factors: (1) accumulated carried stories consuming sprint capacity, and (2) the Salesforce sandbox issues causing rework on integration stories.
+
+Given this, what are my realistic options for getting to Scenario 2 (stable at 28pts), and what would I need to ask Raj and Mark for?
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 2</div><strong>Corrective action options — targeting Scenario 2 stability</strong>
+
+<strong>Option A: Carried story resolution sprint</strong>
+Dedicate Sprint 5 entirely to clearing the 5 active carried stories before taking on new scope. This costs one sprint of new development but stabilises the team and eliminates the velocity drag from rework.
+Ask from Raj: Approval to pause new feature development for Sprint 5.
+Ask from Mark: Understanding that Sprint 5 will not deliver new visible features — frame as "technical debt resolution to protect the September 30 deadline."
+
+<strong>Option B: Salesforce integration scope reduction</strong>
+The integration is 60pts and has already slipped 2 sprints. Reduce to a read-only sync for go-live (estimated 30pts) with bi-directional sync delivered in a post-go-live patch (4–6 weeks after September 30).
+Ask from Mark: Formal scope change approval — this changes a confirmed scope item.
+Risk: Meridian may not accept this. Prepare a business case showing the September 30 risk if full scope is maintained.
+
+<strong>Option C: Additional frontend resource</strong>
+Priya's team is the velocity bottleneck (80% capacity). One additional senior frontend engineer for 8 weeks could recover 10–15pts of velocity.
+Ask from Raj: Resource allocation and budget approval (~$28K at blended rate).
+Budget impact: $28K of $380K budget (currently $47K spent — headroom exists).
+
+<strong>Recommended combination:</strong> Option A (Sprint 5 resolution) + Option C (additional resource). Option B should be held in reserve — raising it now as the first option will alarm the client unnecessarily.</div>
+
+    <div class="callout callout-good" style="margin-top:20px;">
+      <strong>What changed:</strong> Sarah now has a scenario model, root cause analysis, and a set of options with specific asks prepared for Raj and Mark. She walked into this analysis with a feeling of discomfort; she walks out with a structured risk brief and a recommended course of action.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-3">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-3" data-step="3">
+      <label for="rev-cb-3">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step-section" id="step-4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-meta">
+        <div class="step-label">Step 4 of 5</div>
+        <div class="step-title">The refined output</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah uses the scenario model to build the velocity chart and decision brief she'll present to Raj Patel before the client call:</p>
+
+    <div class="output-block">
+      <div class="output-label">✓ Sprint velocity — 4-sprint actuals + scenario forecasts</div>
+
+      <div class="velocity-chart">
+        <div class="vel-bar-wrap">
+          <div class="vel-val">38</div>
+          <div class="vel-bar actual" style="height:95%"></div>
+          <div class="vel-label">S1</div>
+        </div>
+        <div class="vel-bar-wrap">
+          <div class="vel-val">34</div>
+          <div class="vel-bar actual" style="height:85%"></div>
+          <div class="vel-label">S2</div>
+        </div>
+        <div class="vel-bar-wrap">
+          <div class="vel-val">30</div>
+          <div class="vel-bar actual" style="height:75%"></div>
+          <div class="vel-label">S3</div>
+        </div>
+        <div class="vel-bar-wrap">
+          <div class="vel-val">28</div>
+          <div class="vel-bar actual" style="height:70%"></div>
+          <div class="vel-label">S4</div>
+        </div>
+        <div class="vel-bar-wrap">
+          <div class="vel-val">28→</div>
+          <div class="vel-bar forecast" style="height:70%"></div>
+          <div class="vel-label">S5+</div>
+        </div>
+      </div>
+
+      <table class="forecast-table">
+        <thead>
+          <tr><th>Scenario</th><th>9-sprint total</th><th>vs 184pts</th><th>Deadline risk</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr class="risk">
+            <td>Declining trend (−2/sprint)</td>
+            <td>162pts</td>
+            <td>−22pts</td>
+            <td>🔴 Red</td>
+            <td>Immediate escalation</td>
+          </tr>
+          <tr class="warn">
+            <td>Stable at 28pts</td>
+            <td>252pts</td>
+            <td>+68pts</td>
+            <td>🟡 Amber</td>
+            <td>Monitor + Salesforce watch</td>
+          </tr>
+          <tr class="ok">
+            <td>Recovery to 38pts</td>
+            <td>342pts</td>
+            <td>+158pts</td>
+            <td>🟢 Green</td>
+            <td>Requires intervention</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>Sarah's recommendation to Raj:</strong> Proceed with Option A (Sprint 5 resolution sprint) and Option C (additional frontend resource). Raise Option B (Salesforce scope reduction) only if Raj determines the client conversation is necessary. Frame the delivery risk as "currently Amber, trending Red without intervention" — not as a missed deadline.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-4">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-4" data-step="4">
+      <label for="rev-cb-4">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step-section" id="step-5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-meta">
+        <div class="step-label">Step 5 of 5</div>
+        <div class="step-title">Watch out</div>
+      </div>
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>1. Scenario modelling is only as good as the remaining scope estimate</strong><br>
+      Sarah's 184pts remaining is an estimate — it could be wrong by 20% in either direction. Always ask Claude to model the impact of a scope estimate error: "What if remaining scope is actually 220pts?" This gives you the worst-case scenario you need for the executive conversation.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>2. Claude will not challenge your velocity data</strong><br>
+      If Sprint 1's 38pts included unusually simple stories and Sprint 4's 28pts included unusually complex ones, the declining trend may be misleading. Claude takes the numbers at face value. You need to apply judgment about whether the velocity data reflects true team performance or just story complexity variation.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>3. Options presented by Claude are not pre-approved</strong><br>
+      Claude's "Option C: additional frontend resource" is financially and operationally viable — but it requires Raj's approval and may affect other SF project staffing. Never present Claude's options directly to stakeholders as confirmed courses of action. Always validate feasibility with your delivery head first.
+    </div>
+
+    <div class="callout callout-good">
+      <strong>The prompting discipline that makes this work:</strong><br>
+      (1) Always provide remaining scope AND the deadline — Claude cannot model risk without both. (2) Ask for scenario modelling explicitly — optimistic, realistic, and pessimistic. (3) Ask for root cause analysis before options — options without root cause analysis are guesses. (4) Ask Claude to frame the options as "asks" — it forces you to think about what you actually need from each stakeholder.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-5">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-5" data-step="5">
+      <label for="rev-cb-5">Mark step as reviewed</label>
+    </div>
+
+    <div class="bottom-nav">
+      <a class="nav-btn secondary" href="example-5-requirements.html">← Example 5</a>
+      <a class="nav-btn" href="example-7-reporting.html">Example 7 — Health report →</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+const REV_KEY = 'pm_example-6-escalation';
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+function revLoad() { try { return JSON.parse(localStorage.getItem(REV_KEY)) || {}; } catch(e) { return {}; } }
+function revSave(s) { localStorage.setItem(REV_KEY, JSON.stringify(s)); }
+document.querySelectorAll('.rev-checkbox').forEach(cb => {
+  const s = revLoad();
+  if (s['cb_' + cb.dataset.step]) { cb.checked = true; const bar = cb.closest('.reviewer-bar'); if (bar) { bar.classList.add('checked'); bar.querySelector('label').textContent = '✓ Step reviewed'; } }
+  cb.addEventListener('change', () => {
+    const s = revLoad(); s['cb_' + cb.dataset.step] = cb.checked; revSave(s);
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) { bar.classList.toggle('checked', cb.checked); bar.querySelector('label').textContent = cb.checked ? '✓ Step reviewed' : 'Mark step as reviewed'; }
+  });
+});
+</script>
+</body>
+</html>
