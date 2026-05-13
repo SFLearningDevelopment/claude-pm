@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example 8 — Change Request · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --pm:#0b6e4f; --pm-light:#e6f4ef; --pm-mid:#a8d5c2; --pm-dark:#074d37;
+    --blue:#1a6eb5; --blue-light:#e8f1fb;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--pm); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; overflow-x:auto; }
+  .tabs { display:flex; }
+  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:13px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; font-family:'Merriweather Sans',sans-serif; }
+  .tab-btn .num { width:22px; height:22px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .tab-btn.active { color:var(--pm); border-bottom-color:var(--pm); }
+  .tab-btn.active .num { background:var(--pm); border-color:var(--pm); color:#fff; }
+  .main { max-width:860px; margin:0 auto; padding:40px; }
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num { width:48px; height:48px; border-radius:50%; background:var(--pm); color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:22px; font-weight:700; }
+  .prose { font-size:15px; color:var(--text-dim); line-height:1.8; margin-bottom:20px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .callout { border-left:3px solid var(--pm); background:var(--pm-light); padding:14px 18px; border-radius:0 8px 8px 0; margin:20px 0; font-size:14px; line-height:1.7; color:var(--text-dim); }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
+  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.7; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
+  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
+  .prompt-block .speaker.user { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
+  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:3px solid var(--green); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:10px; font-weight:600; }
+
+  /* CR impact table */
+  .cr-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:13px; }
+  .cr-table th { background:var(--bg3); border:1px solid var(--border); padding:10px 12px; text-align:left; font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dimmer); }
+  .cr-table td { border:1px solid var(--border); padding:10px 12px; color:var(--text-dim); vertical-align:top; }
+  .cr-table tr.header-row td { background:var(--bg3); font-weight:700; font-size:12px; color:var(--text); }
+  .impact-high { color:var(--coral); font-weight:700; font-family:'Source Code Pro',monospace; }
+  .impact-med  { color:var(--amber); font-weight:700; font-family:'Source Code Pro',monospace; }
+  .impact-low  { color:var(--green); font-weight:700; font-family:'Source Code Pro',monospace; }
+
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag { font-size:11px; font-family:'Source Code Pro',monospace; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:var(--pm-dark); }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  .reviewer-bar { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:8px; margin:24px 0; background:var(--amber-light); border:1.5px solid #e8c97a; border-left:3px solid var(--amber); font-size:13px; font-family:'Source Code Pro',monospace; font-weight:600; color:var(--amber); }
+  .reviewer-bar.checked { background:var(--green-light); border-color:var(--green-mid); border-left-color:var(--green); color:var(--green); }
+  .reviewer-bar input[type="checkbox"] { width:16px; height:16px; accent-color:var(--green); }
+  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
+  .nav-btn { padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
+  .nav-btn { background:var(--pm); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--pm-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:32px 40px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a>
+  <span class="sep">/</span>
+  <span>Tier 2 examples</span>
+  <span class="sep">/</span>
+  <span>Example 8 — Change request</span>
+</nav>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+    <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+    <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+    <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+    <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <section class="step-section active" id="step-1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-meta">
+        <div class="step-label">Step 1 of 5</div>
+        <div class="step-title">The problem</div>
+      </div>
+    </div>
+
+    <div class="tags-row">
+      <span class="tag pm">Example 8 · Tier 2</span>
+      <span class="tag">Change request</span>
+      <span class="tag">Impact analysis</span>
+      <span class="tag">Multi-context</span>
+    </div>
+
+    <p class="prose">
+      It is Month 3 on the Meridian Portal project. Mark Donovan has sent an email to Sarah asking whether the AI query assistant — explicitly deferred to Phase 2 in the signed scope document — can be added back to the current phase in time for September 30.
+    </p>
+
+    <div class="doc-block">
+      <div class="doc-label">Change request — Mark Donovan (email)</div>
+      Sarah — we've had some board pressure to show the AI capability at our October investor day (Oct 15). Is there any way we can include the AI assistant in the September 30 release? Even a basic version? We'd obviously cover any cost implications. Happy to discuss. — Mark
+    </div>
+
+    <p class="prose">Sarah has three inputs to assess the impact of this request against:</p>
+
+    <div class="doc-block">
+      <div class="doc-label">Input 1 — Current plan state (from Example 6)</div>
+      Portal velocity: 28pts/sprint (stabilising after resolution sprint). Remaining scope: ~156pts. Sprints to August 29: 8. Current trajectory: Amber — manageable but no surplus. Budget: $47K spent of $380K. Additional frontend resource approved (+$28K). SOC 2 hardening scheduled July 28.
+    </div>
+
+    <div class="doc-block">
+      <div class="doc-label">Input 2 — AI Assistant scope estimate (from Example 4)</div>
+      MVP AI Assistant (RAG pipeline, query interface, guardrail, QA): ~23pts Sprint 3 scope. Full production-ready AI assistant with conversation history, monitoring, fine-tuning: estimated 80–100pts total. Build not yet started (data access only just received).
+    </div>
+
+    <div class="doc-block">
+      <div class="doc-label">Input 3 — Constraints</div>
+      SOC 2 audit requires 30-day operation window — starts September 1. UAT: 3 weeks from September 9. September 30 hard deadline is contractual. Budget ceiling: $380K. Carlos (AI lead) currently building AI Assistant on the separate workstream — not part of Portal team.
+    </div>
+
+    <p class="prose">
+      This is a classic scope change request that arrives with emotional pressure (board investor day) and vague parameters ("even a basic version"). Sarah needs to evaluate the actual impact before responding — and produce a formal change request analysis that gives Mark a clear-eyed view of the options and their consequences.
+    </p>
+
+    <div class="callout">
+      <strong>Why PMs need to resist the pressure to say yes:</strong> "We'd obviously cover any cost implications" sounds generous — but the real constraint is not budget, it is timeline. The September 30 deadline is contractual. Adding scope to a project already at Amber delivery risk is not a cost decision; it is a delivery decision. Sarah needs to present that reality clearly without being adversarial.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-1">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-1" data-step="1">
+      <label for="rev-cb-1">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step-section" id="step-2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-meta">
+        <div class="step-label">Step 2 of 5</div>
+        <div class="step-title">The naive approach</div>
+      </div>
+    </div>
+
+    <p class="prose">The naive approach produces a response to Mark without a structured impact analysis — which either under-commits or over-commits depending on the PM's instinct under pressure:</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah (naive approach — no Claude used)</div>Emails Mark: "Hi Mark, happy to explore this. We'll need to assess the impact and get back to you. The AI assistant was scoped for Phase 2 but we can look at what a basic version might involve. I'll come back to you by end of week."</div>
+
+    <div class="callout callout-bad">
+      <strong>What's wrong:</strong> "Happy to explore this" signals possible agreement without any analysis. "A basic version" is undefined — Mark will interpret this as a commitment to something. "End of week" gives Sarah four days but no structure for the analysis. And she hasn't yet told Raj that a potential scope change is in play. This is how scope creep begins — not with a formal request, but with a soft yes that becomes an expectation.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-2">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-2" data-step="2">
+      <label for="rev-cb-2">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-section" id="step-3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-meta">
+        <div class="step-label">Step 3 of 5</div>
+        <div class="step-title">The Claude interaction</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah uses Claude to build a structured change request impact analysis before responding to Mark — and before talking to Raj.</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 1</div>I'm a senior PM. A client has asked to add a previously deferred feature (AI query assistant) back into the current phase, targeting the same hard deadline (September 30). Before I respond, I need a formal change request impact analysis.
+
+Analyse this across four dimensions:
+1. Schedule impact — what does adding this scope do to the August 29 build completion date?
+2. Budget impact — what additional cost is required?
+3. Risk impact — how does this change the delivery risk profile?
+4. Options — what are the realistic options I can present to the client?
+
+Current project state:
+[pastes all three inputs]
+
+Change request:
+[pastes Mark's email]
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 1</div><strong>Change Request Impact Analysis — AI Assistant addition to Portal Phase 1</strong>
+
+<strong>1. Schedule impact</strong>
+Current state: 156pts remaining, 8 sprints to August 29, 28pts/sprint = 224pts capacity = 68pts theoretical surplus (but this is the Amber buffer — not real headroom).
+
+AI Assistant MVP (23pts minimum): Consumes the entire theoretical surplus. Zero buffer for integration issues. Build completion would need to move from August 29 to September 12 — directly into the UAT window.
+
+AI Assistant full scope (80–100pts): Requires either a 5-sprint extension (September 30 → December) or a 40–60% scope cut to the Portal itself.
+
+Conclusion: <span style="color:#c0392b; font-weight:700;">September 30 deadline cannot be maintained with any meaningful AI Assistant addition without cutting Portal scope.</span>
+
+<strong>2. Budget impact</strong>
+AI Assistant MVP: Carlos currently on the AI Assistant workstream (separate budget). Adding to Portal phase requires either dual-allocation (risk: quality impact on both) or new resource. Estimated additional cost: $35–50K for MVP.
+Full scope: $80–120K additional, excluding testing and SOC 2 scope review.
+Mark's offer to "cover cost implications" is helpful — but the constraint is schedule, not budget.
+
+<strong>3. Risk impact</strong>
+Current risk profile: Amber (manageable with monitoring). Adding AI Assistant MVP changes risk profile to Red — the SOC 2 30-day clock cannot flex, and UAT cannot be shortened below 3 weeks. The September 30 deadline becomes dependent on zero integration issues, zero QA failures, and perfect Meridian responsiveness. This is not a realistic assumption.
+
+Additional risk: SOC 2 scope. Adding an AI component (with its own data flows and third-party API calls) to a portal undergoing SOC 2 audit may expand the audit scope — adding 4–6 weeks of compliance work.
+
+<strong>4. Options for the client</strong>
+
+Option A — No change to September 30 scope
+AI Assistant remains Phase 2. September 30 is protected. AI capability for October 15 investor day: demonstrate the Phase 2 roadmap and architecture, not a live feature.
+Budget impact: $0 | Schedule impact: None | Risk: Amber maintained
+
+Option B — AI Assistant demo environment (not production)
+Build a non-production AI demonstration environment alongside the Portal build, using synthetic data. This can be shown at the October 15 investor day without being part of the SOC 2 scope or the September 30 release.
+Budget impact: ~$20K | Schedule impact: Minimal (Carlos parallel work) | Risk: Low — kept out of production
+
+Option C — AI Assistant MVP in production (September 30)
+Accept delivery risk escalation to Red. Requires scope cuts to Portal (deferred features TBD) and formal SOC 2 scope review. September 30 is possible but not low-risk.
+Budget impact: +$45K | Schedule impact: High risk | Risk: Red
+<hr class="prompt-sep">
+<div class="speaker user">Sarah — Turn 2</div>Option B is interesting — I hadn't thought of a demo environment approach. Draft a response to Mark presenting all three options clearly, without committing to any of them, and asking him to decide.
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 2</div>Subject: Re: AI Assistant for October investor day — options
+
+Hi Mark,
+
+Thank you for raising this — the investor day is a strong motivation and I've done a quick impact analysis to give you clear options.
+
+The honest picture: the September 30 deadline can be protected, but adding the AI Assistant to the production release creates a real delivery risk. The constraint is schedule, not budget — the SOC 2 compliance window and UAT timeline don't flex.
+
+Here are your three options:
+
+<strong>Option A — Keep September 30 scope as agreed</strong>
+Portal goes live September 30 as planned. AI Assistant launches in Phase 2 (estimated January 2027). For October 15, we present the Phase 2 roadmap and architecture — demonstrating the strategic direction rather than a live feature. No cost or schedule impact.
+
+<strong>Option B — AI demonstration environment for October 15 (recommended)</strong>
+We build a non-production AI demonstration environment alongside the Portal build, using representative synthetic data. This can be shown live at the investor day without affecting the September 30 release or the SOC 2 audit scope. Estimated additional cost: ~$20K. No impact on September 30 deadline.
+
+<strong>Option C — AI Assistant MVP in the September 30 production release</strong>
+Possible, but it requires a formal scope change, a SOC 2 audit scope review, and acceptance that delivery risk increases from Amber to Red. I would need your sign-off on which Portal features to defer to accommodate this. Cost: ~$45K additional. Deadline: at risk.
+
+My recommendation is Option B — it gives you a compelling live demonstration for October 15 at a fraction of the risk and cost, while protecting the contractual September 30 deadline.
+
+Happy to discuss. I can set up a call with you and Raj Patel this week if that would help.
+
+Sarah</div>
+
+    <div class="callout callout-good" style="margin-top:20px;">
+      <strong>What changed:</strong> Sarah responds with a structured analysis, three options, a clear recommendation, and no commitment. Option B — the demo environment — emerged from the Claude interaction and gives Mark a face-saving path that serves the investor day goal without breaking the delivery plan. Sarah found this option by letting Claude analyse before responding.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-3">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-3" data-step="3">
+      <label for="rev-cb-3">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step-section" id="step-4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-meta">
+        <div class="step-label">Step 4 of 5</div>
+        <div class="step-title">The refined output</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah reviews the email and makes two changes before sending: she moves the recommendation to the top (Mark is a CTO, he reads the recommendation first), and she adds a formal Change Request reference number for the audit trail:</p>
+
+    <div class="output-block">
+      <div class="output-label">✓ Formal change request impact summary — CR-001</div>
+      <table class="cr-table">
+        <thead>
+          <tr><th>CR-001</th><th>AI Assistant — Phase 1 addition</th><th>Requested by: Mark Donovan</th><th>Date: May 14, 2026</th></tr>
+        </thead>
+        <tbody>
+          <tr class="header-row"><td colspan="4">Impact summary</td></tr>
+          <tr>
+            <td>Option A</td>
+            <td>No change — Phase 2 as agreed</td>
+            <td class="impact-low">Schedule: None | Budget: $0</td>
+            <td class="impact-low">Risk: Amber maintained</td>
+          </tr>
+          <tr>
+            <td>Option B ⭐</td>
+            <td>Demo environment for investor day</td>
+            <td class="impact-low">Schedule: Minimal | Budget: +$20K</td>
+            <td class="impact-low">Risk: Low</td>
+          </tr>
+          <tr>
+            <td>Option C</td>
+            <td>AI MVP in September 30 production</td>
+            <td class="impact-high">Schedule: At risk | Budget: +$45K</td>
+            <td class="impact-high">Risk: Red</td>
+          </tr>
+          <tr class="header-row"><td colspan="4">Recommendation: Option B — demo environment</td></tr>
+          <tr><td colspan="4">Decision required from: Mark Donovan | Decision deadline: May 21, 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>The CR reference number:</strong> Small detail, significant practice. Every scope change request — even informal ones from the CTO — should have a CR number, an impact analysis, and a decision record. If Mark chooses Option C and the deadline slips, Sarah has a documented record that the risk was presented, analysed, and accepted by the client. This is what protects both the PM and SF in a post-project dispute.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-4">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-4" data-step="4">
+      <label for="rev-cb-4">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step-section" id="step-5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-meta">
+        <div class="step-label">Step 5 of 5</div>
+        <div class="step-title">Watch out</div>
+      </div>
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>1. Claude will not know what "a basic version" means</strong><br>
+      The client's request was vague — "even a basic version." Claude will attempt to scope this, but its estimate may not match what the client actually envisages. Always validate the scope estimate with your tech lead (Carlos in this case) before presenting cost and schedule numbers to the client.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>2. Emotional pressure from senior stakeholders is invisible to Claude</strong><br>
+      Claude cannot know that Mark is under board pressure or that saying no directly risks the client relationship. The PM's job is to frame the options in a way that gives the client a face-saving path (Option B) while being honest about the risks of the high-pressure option (Option C). Claude provides the analysis; the PM provides the relationship judgment.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>3. Always talk to your delivery head before responding</strong><br>
+      Sarah should brief Raj Patel before sending the options email to Mark — not after. A potential scope change that affects the contractual deadline is a delivery head decision, not just a PM decision. Claude's analysis gives Sarah the ammunition for that internal conversation.
+    </div>
+
+    <div class="callout callout-good">
+      <strong>The prompting discipline that makes this work:</strong><br>
+      (1) Analyse before responding — never reply to a scope change request without an impact analysis. (2) Ask Claude to evaluate across schedule, budget, AND risk — not just cost. (3) Ask Claude to generate options — it will often surface creative solutions (like the demo environment) that the PM hasn't considered under pressure. (4) Always create a formal CR record, even for informal requests.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-5">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-5" data-step="5">
+      <label for="rev-cb-5">Mark step as reviewed</label>
+    </div>
+
+    <div class="bottom-nav">
+      <a class="nav-btn secondary" href="example-7-reporting.html">← Example 7</a>
+      <a class="nav-btn" href="example-9-model.html">Example 9 — AI project reporting →</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+const REV_KEY = 'pm_example-8-reporting';
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+function revLoad() { try { return JSON.parse(localStorage.getItem(REV_KEY)) || {}; } catch(e) { return {}; } }
+function revSave(s) { localStorage.setItem(REV_KEY, JSON.stringify(s)); }
+document.querySelectorAll('.rev-checkbox').forEach(cb => {
+  const s = revLoad();
+  if (s['cb_' + cb.dataset.step]) { cb.checked = true; const bar = cb.closest('.reviewer-bar'); if (bar) { bar.classList.add('checked'); bar.querySelector('label').textContent = '✓ Step reviewed'; } }
+  cb.addEventListener('change', () => {
+    const s = revLoad(); s['cb_' + cb.dataset.step] = cb.checked; revSave(s);
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) { bar.classList.toggle('checked', cb.checked); bar.querySelector('label').textContent = cb.checked ? '✓ Step reviewed' : 'Mark step as reviewed'; }
+  });
+});
+</script>
+</body>
+</html>
