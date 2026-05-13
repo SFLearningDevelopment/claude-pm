@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example 5 — Project Plan · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --pm:#0b6e4f; --pm-light:#e6f4ef; --pm-mid:#a8d5c2; --pm-dark:#074d37;
+    --blue:#1a6eb5; --blue-light:#e8f1fb; --blue-mid:#b8d0ed;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--pm); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; overflow-x:auto; }
+  .tabs { display:flex; }
+  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:13px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; font-family:'Merriweather Sans',sans-serif; }
+  .tab-btn .num { width:22px; height:22px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .tab-btn.active { color:var(--pm); border-bottom-color:var(--pm); }
+  .tab-btn.active .num { background:var(--pm); border-color:var(--pm); color:#fff; }
+  .main { max-width:860px; margin:0 auto; padding:40px; }
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num { width:48px; height:48px; border-radius:50%; background:var(--pm); color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:22px; font-weight:700; }
+  .prose { font-size:15px; color:var(--text-dim); line-height:1.8; margin-bottom:20px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .callout { border-left:3px solid var(--pm); background:var(--pm-light); padding:14px 18px; border-radius:0 8px 8px 0; margin:20px 0; font-size:14px; line-height:1.7; color:var(--text-dim); }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
+  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.7; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
+  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
+  .prompt-block .speaker.user { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
+  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:3px solid var(--green); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:10px; font-weight:600; }
+
+  /* Milestone timeline */
+  .timeline { margin:24px 0; }
+  .milestone-row { display:flex; gap:0; margin-bottom:3px; align-items:stretch; }
+  .ms-label { width:200px; flex-shrink:0; font-size:12px; color:var(--text-dim); padding:10px 12px; background:var(--bg3); border:1px solid var(--border); border-right:none; font-family:'Source Code Pro',monospace; display:flex; align-items:center; }
+  .ms-bar-wrap { flex:1; background:var(--bg3); border:1px solid var(--border); padding:6px 8px; display:flex; align-items:center; gap:8px; }
+  .ms-bar { height:20px; border-radius:4px; min-width:4px; }
+  .ms-bar.phase-1 { background:var(--pm); }
+  .ms-bar.phase-2 { background:var(--blue); }
+  .ms-bar.phase-3 { background:var(--amber); }
+  .ms-bar.phase-4 { background:var(--coral); }
+  .ms-bar.milestone { background:#7c3aed; width:12px; border-radius:2px; }
+  .ms-date { font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); white-space:nowrap; }
+  .ms-dep { font-size:10px; font-family:'Source Code Pro',monospace; color:var(--coral); }
+  .timeline-header { display:flex; gap:0; margin-bottom:8px; }
+  .tl-spacer { width:200px; flex-shrink:0; }
+  .tl-months { flex:1; display:flex; }
+  .tl-month { flex:1; font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); text-align:center; letter-spacing:.06em; }
+  .legend { display:flex; gap:16px; flex-wrap:wrap; margin:12px 0; }
+  .legend-item { display:flex; align-items:center; gap:6px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); }
+  .legend-dot { width:12px; height:12px; border-radius:3px; }
+
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag { font-size:11px; font-family:'Source Code Pro',monospace; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:var(--pm-dark); }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  .reviewer-bar { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:8px; margin:24px 0; background:var(--amber-light); border:1.5px solid #e8c97a; border-left:3px solid var(--amber); font-size:13px; font-family:'Source Code Pro',monospace; font-weight:600; color:var(--amber); }
+  .reviewer-bar.checked { background:var(--green-light); border-color:var(--green-mid); border-left-color:var(--green); color:var(--green); }
+  .reviewer-bar input[type="checkbox"] { width:16px; height:16px; accent-color:var(--green); }
+  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
+  .nav-btn { padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
+  .nav-btn { background:var(--pm); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--pm-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:32px 40px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .ms-label { width:120px; font-size:10px; } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a>
+  <span class="sep">/</span>
+  <span>Tier 2 examples</span>
+  <span class="sep">/</span>
+  <span>Example 5 — Project plan</span>
+</nav>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+    <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+    <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+    <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+    <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <section class="step-section active" id="step-1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-meta">
+        <div class="step-label">Step 1 of 5</div>
+        <div class="step-title">The problem</div>
+      </div>
+    </div>
+
+    <div class="tags-row">
+      <span class="tag pm">Example 5 · Tier 2</span>
+      <span class="tag">Project planning</span>
+      <span class="tag">Multi-context</span>
+      <span class="tag">5–7 turn interaction</span>
+    </div>
+
+    <p class="prose">
+      The Meridian Portal v1.0 scope document has been signed off. Sarah now needs to produce a milestone plan — the high-level delivery roadmap that shows the client when things will be built, what the dependencies are, and what the critical path looks like through to the September 30 go-live.
+    </p>
+
+    <p class="prose">She has three inputs to work with simultaneously:</p>
+
+    <div class="doc-block">
+      <div class="doc-label">Input 1 — Confirmed scope (from Example 1 v1.0)</div>
+      In scope: client account dashboard, report generation, document upload, user management, mobile-responsive frontend, Salesforce bi-directional sync, SOC 2 Type II compliance, full replacement of legacy Rails portal.<br>
+      Hard go-live: September 30, 2026 | Budget: $380K | Team: Priya (web lead, 3 FE engineers), Rohan (backend lead, 1 BE engineer), QA shared
+    </div>
+
+    <div class="doc-block">
+      <div class="doc-label">Input 2 — Known constraints and dependencies</div>
+      — Salesforce integration requires Meridian IT to provision sandbox (estimated: 2 weeks from contract sign)<br>
+      — SOC 2 audit requires minimum 30 days of system operation before audit can begin<br>
+      — Brand guide from client: due Week 2, required before UI development can begin<br>
+      — Legacy Rails portal: must remain live until new portal is fully validated in UAT<br>
+      — UAT: Meridian requires 3 weeks minimum for client-side testing<br>
+      — Contract signed: April 7, 2026
+    </div>
+
+    <div class="doc-block">
+      <div class="doc-label">Input 3 — Team velocity baseline</div>
+      Based on Sprint 1 and 2 data: ~34 story points per sprint (2-week sprints). Frontend is the constraint — Priya's team at 80% due to one part-time engineer.
+    </div>
+
+    <p class="prose">
+      This is a Tier 2 task because Sarah needs to reason across three inputs simultaneously — scope, constraints, and team capacity — to produce a plan that is both realistic and defensible to the client.
+    </p>
+
+    <div class="callout">
+      <strong>What makes this hard:</strong> The September 30 deadline is fixed. The SOC 2 requirement adds a hidden constraint — the system must be live in a staging-like environment by September 1 at the latest to allow 30 days of operation before the audit. The Salesforce dependency and UAT window further compress the available build time. A naive plan will miss these compounding constraints.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-1">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-1" data-step="1">
+      <label for="rev-cb-1">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step-section" id="step-2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-meta">
+        <div class="step-label">Step 2 of 5</div>
+        <div class="step-title">The naive approach</div>
+      </div>
+    </div>
+
+    <p class="prose">The naive approach passes only the scope to Claude and asks for a plan — ignoring the constraints and capacity inputs:</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah (naive prompt)</div>Create a project plan for the Meridian Portal. Go-live is September 30. The scope includes account dashboard, report generation, document upload, user management, mobile frontend, Salesforce integration, and SOC 2 compliance.</div>
+
+    <div class="doc-block">
+      <div class="doc-label">Naive output — generic phase plan</div>
+      Phase 1 — Discovery (Weeks 1–2): Requirements gathering, technical architecture<br>
+      Phase 2 — Development (Weeks 3–18): Build all features<br>
+      Phase 3 — Testing (Weeks 19–22): QA and UAT<br>
+      Phase 4 — Go-live (Week 23): Deploy and launch<br><br>
+      Milestones: Design complete Week 4 · Development complete Week 18 · UAT complete Week 22 · Go-live Week 23
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>What's wrong:</strong> This plan is structurally useless. "Development (Weeks 3–18)" hides 16 weeks of undifferentiated build work — the client has no visibility into what gets built when. The SOC 2 constraint is completely missing. There is no Salesforce integration dependency. UAT is 3 weeks but the Meridian requirement is also 3 weeks — so the plan has zero buffer. And "Phase 2 — Build all features" assumes parallel development that the team capacity doesn't support.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-2">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-2" data-step="2">
+      <label for="rev-cb-2">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-section" id="step-3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-meta">
+        <div class="step-label">Step 3 of 5</div>
+        <div class="step-title">The Claude interaction</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah provides all three inputs and asks Claude to reason through the constraints before producing a plan.</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 1</div>I'm a senior PM at a cloud consultancy. Before you produce a project plan, analyse the constraints below and tell me:
+1. What is the latest possible start date for each phase, working backwards from September 30?
+2. Which constraint creates the most compression on the build window?
+3. Are there any constraints that conflict with the September 30 deadline?
+
+Contract start: April 7, 2026
+Hard go-live: September 30, 2026
+Constraints:
+— SOC 2 audit requires 30 days of system operation in a production-equivalent environment before audit
+— UAT: 3 weeks minimum, Meridian-side
+— Salesforce sandbox: 2 weeks to provision from contract sign (available ~April 21)
+— Brand guide required before UI development begins (due April 14, now April 19 — 5 days late)
+— Legacy portal must remain live until UAT complete
+— Team velocity: ~34 story points per 2-week sprint
+— Frontend is the bottleneck (Priya at 80% capacity)
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 1</div><strong>Backwards scheduling analysis — September 30 go-live</strong>
+
+Working back from September 30:
+
+<strong>Latest possible dates (working backwards):</strong>
+— Go-live: September 30
+— UAT complete: September 30 → UAT start: September 9 (3 weeks)
+— SOC 2: requires 30 days operation → staging must be live by September 1
+— Staging deploy: September 1 → all development must be complete by August 29
+— Development window: April 21 (Salesforce available) to August 29 = 18.5 weeks = ~9 sprints
+— UI development start: blocked until brand guide received (currently April 19)
+
+<strong>Most compressive constraint:</strong>
+SOC 2. The 30-day operation requirement means the system must be in a production-equivalent environment by September 1 — not September 30. This compresses the available build window by 4 weeks that most plans would incorrectly treat as buffer.
+
+<strong>Conflicts with September 30:</strong>
+One potential conflict: if UAT starts September 9 and the SOC 2 clock starts September 1, these run in parallel. This is feasible IF staging is fully deployed by September 1, but there is zero buffer for a delayed staging deploy. Any slip in development completion beyond August 29 pushes both UAT and the SOC 2 clock — and risks the audit deadline, not just the go-live date.
+
+<strong>The real constraint:</strong> The effective end of build is August 29. That gives 18.5 weeks of development from April 21, with a frontend bottleneck. This is tight but achievable if Salesforce integration and compliance work are sequenced correctly.
+<hr class="prompt-sep">
+<div class="speaker user">Sarah — Turn 2</div>Good. Now build the milestone plan. Use these phases:
+— Discovery and architecture (can begin April 7, before Salesforce sandbox)
+— Core portal build (authentication, dashboard, report generation)
+— Document upload + user management
+— Salesforce integration (cannot start before April 21)
+— SOC 2 compliance hardening
+— UAT (Meridian-side, 3 weeks)
+— Go-live
+
+For each phase: start date, end date, key deliverables, dependencies, and risk flags. Mark the critical path.
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 2</div><strong>Meridian Portal — Milestone Plan v0.1</strong>
+Start: April 7, 2026 | Go-live: September 30, 2026
+
+<strong>Phase 1 — Discovery and architecture</strong>
+April 7 – April 25 (3 weeks)
+Deliverables: Technical architecture document, data model, API contract, deployment architecture
+Dependencies: None (can begin immediately)
+⚠ Risk: Brand guide delay (5 days) compresses UI design time — flag to client
+
+<strong>Phase 2 — Core portal build</strong>
+April 28 – June 6 (6 weeks / 3 sprints)
+Deliverables: Authentication, client dashboard, report generation
+Dependencies: Architecture complete, brand guide received
+⚠ Risk: Frontend bottleneck — Priya at 80% capacity. Dashboard and report generation are frontend-heavy.
+
+<strong>Phase 3 — Document upload + user management</strong>
+June 9 – June 27 (3 weeks / 1.5 sprints)
+Deliverables: Document upload module, admin user management interface
+Dependencies: Core portal complete (authentication required)
+
+<strong>Phase 4 — Salesforce integration</strong>
+April 21 – July 11 (runs partially in parallel with Phase 2 and 3)
+Deliverables: Bi-directional Salesforce sync, data mapping, integration tests
+Dependencies: Salesforce sandbox live (April 21)
+⚠ Risk: Salesforce integration scope is undefined (data entities, sync frequency). Must be confirmed in Phase 1.
+
+<strong>Phase 5 — SOC 2 compliance hardening</strong>
+July 14 – August 29 (7 weeks)
+Deliverables: Security controls implementation, logging, access management, evidence collection
+Dependencies: All features complete (cannot harden a moving target)
+⚠ CRITICAL PATH: Compliance hardening must complete by August 29. System must be in production-equivalent environment by September 1 (30-day SOC 2 clock).
+
+<strong>Phase 6 — UAT (Meridian-side)</strong>
+September 9 – September 30 (3 weeks)
+Deliverables: Client sign-off on all portal functions, defect resolution
+Dependencies: SOC 2 staging complete, legacy portal remains live
+⚠ Risk: Zero buffer. Any Phase 5 slip pushes UAT into the go-live date.
+
+<strong>Go-live: September 30, 2026</strong>
+
+<strong>Critical path: Phase 1 → Phase 2 (brand guide dependency) → Phase 5 (SOC 2 clock) → Phase 6 (UAT) → Go-live</strong></div>
+
+    <div class="callout callout-good" style="margin-top:20px;">
+      <strong>What changed:</strong> The plan is now constraint-aware. The SOC 2 compression is visible. The Salesforce integration runs in parallel — correctly. The critical path is explicitly identified. Sarah can present this to Raj Patel and Mark Donovan with confidence that it reflects reality, not aspiration.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-3">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-3" data-step="3">
+      <label for="rev-cb-3">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step-section" id="step-4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-meta">
+        <div class="step-label">Step 4 of 5</div>
+        <div class="step-title">The refined output</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah adds one refinement Claude missed — a buffer sprint between Phase 3 and Phase 5 to absorb integration risk — and visualises the plan as a timeline for the client presentation:</p>
+
+    <div class="output-block">
+      <div class="output-label">✓ Meridian Portal — Milestone Plan v1.0</div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--pm)"></div>Discovery/Architecture</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Build phases</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Compliance/SOC 2</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--coral)"></div>UAT / Go-live</div>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-header">
+          <div class="tl-spacer"></div>
+          <div class="tl-months">
+            <div class="tl-month">Apr</div>
+            <div class="tl-month">May</div>
+            <div class="tl-month">Jun</div>
+            <div class="tl-month">Jul</div>
+            <div class="tl-month">Aug</div>
+            <div class="tl-month">Sep</div>
+          </div>
+        </div>
+
+        <div class="milestone-row">
+          <div class="ms-label">Phase 1 · Discovery</div>
+          <div class="ms-bar-wrap">
+            <div class="ms-bar phase-1" style="width:12%"></div>
+            <div class="ms-date">Apr 7 – Apr 25</div>
+          </div>
+        </div>
+        <div class="milestone-row">
+          <div class="ms-label">Phase 2 · Core build</div>
+          <div class="ms-bar-wrap">
+            <div style="width:12%"></div>
+            <div class="ms-bar phase-2" style="width:24%"></div>
+            <div class="ms-date">Apr 28 – Jun 6</div>
+          </div>
+        </div>
+        <div class="milestone-row">
+          <div class="ms-label">Phase 3 · Upload + UMgt</div>
+          <div class="ms-bar-wrap">
+            <div style="width:36%"></div>
+            <div class="ms-bar phase-2" style="width:12%"></div>
+            <div class="ms-date">Jun 9 – Jun 27</div>
+          </div>
+        </div>
+        <div class="milestone-row">
+          <div class="ms-label">Salesforce integration</div>
+          <div class="ms-bar-wrap">
+            <div style="width:6%"></div>
+            <div class="ms-bar phase-2" style="width:36%"></div>
+            <div class="ms-date">Apr 21 – Jul 11</div>
+          </div>
+        </div>
+        <div class="milestone-row">
+          <div class="ms-label">Integration buffer</div>
+          <div class="ms-bar-wrap">
+            <div style="width:48%"></div>
+            <div class="ms-bar phase-3" style="width:8%"></div>
+            <div class="ms-date">Jul 14 – Jul 25</div>
+          </div>
+        </div>
+        <div class="milestone-row">
+          <div class="ms-label">Phase 5 · SOC 2 hardening</div>
+          <div class="ms-bar-wrap">
+            <div style="width:56%"></div>
+            <div class="ms-bar phase-3" style="width:28%"></div>
+            <div class="ms-date">Jul 28 – Aug 29 ⚠ critical</div>
+          </div>
+        </div>
+        <div class="milestone-row">
+          <div class="ms-label">Phase 6 · UAT</div>
+          <div class="ms-bar-wrap">
+            <div style="width:84%"></div>
+            <div class="ms-bar phase-4" style="width:12%"></div>
+            <div class="ms-date">Sep 9 – Sep 30</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>What Sarah added that Claude missed:</strong> A 2-week integration buffer (July 14–25) between the Salesforce integration and SOC 2 hardening. Salesforce integrations consistently surface unexpected data mapping issues in financial services environments. Without this buffer, any integration defect discovered in Phase 5 has nowhere to go. This is the PM's judgment layer — Claude produced the constraint-aware structure; Sarah added the operational realism.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-4">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-4" data-step="4">
+      <label for="rev-cb-4">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step-section" id="step-5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-meta">
+        <div class="step-label">Step 5 of 5</div>
+        <div class="step-title">Watch out</div>
+      </div>
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>1. Claude reasons forward, not backward</strong><br>
+      Left to its own devices, Claude will produce a forward-scheduled plan — starting from Day 1 and working to the deadline. For fixed-deadline projects, always ask Claude to reason backwards first. The backwards analysis surfaces compression that forward scheduling hides.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>2. Compliance constraints are often underspecified</strong><br>
+      SOC 2 "30-day operation" is a real constraint — but what counts as "production-equivalent" varies by auditor. Claude will model what you tell it; it cannot know your specific auditor's interpretation. Always validate compliance timeline assumptions with your compliance lead before presenting to the client.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>3. Parallel phases need explicit sequencing rules</strong><br>
+      Claude correctly ran the Salesforce integration in parallel with the build phases — but only because Sarah specified it. If you don't tell Claude what can run in parallel, it will default to sequential phases and produce an unrealistically long plan.
+    </div>
+
+    <div class="callout callout-good">
+      <strong>The prompting discipline that makes this work:</strong><br>
+      (1) Separate the constraint analysis from the plan generation — two turns, not one. (2) Always ask for backwards scheduling on fixed-deadline projects. (3) Specify which phases can run in parallel. (4) Add your own operational buffer — Claude will not add it unless asked. (5) The plan Claude produces is a first draft — validate every date with your tech leads before sharing with the client.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-5">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-5" data-step="5">
+      <label for="rev-cb-5">Mark step as reviewed</label>
+    </div>
+
+    <div class="bottom-nav">
+      <a class="nav-btn secondary" href="example-4-sprint.html">← Example 4</a>
+      <a class="nav-btn" href="example-6-tracking.html">Example 6 — Sprint tracking →</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+const REV_KEY = 'pm_example-5-requirements';
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+function revLoad() { try { return JSON.parse(localStorage.getItem(REV_KEY)) || {}; } catch(e) { return {}; } }
+function revSave(s) { localStorage.setItem(REV_KEY, JSON.stringify(s)); }
+document.querySelectorAll('.rev-checkbox').forEach(cb => {
+  const s = revLoad();
+  if (s['cb_' + cb.dataset.step]) { cb.checked = true; const bar = cb.closest('.reviewer-bar'); if (bar) { bar.classList.add('checked'); bar.querySelector('label').textContent = '✓ Step reviewed'; } }
+  cb.addEventListener('change', () => {
+    const s = revLoad(); s['cb_' + cb.dataset.step] = cb.checked; revSave(s);
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) { bar.classList.toggle('checked', cb.checked); bar.querySelector('label').textContent = cb.checked ? '✓ Step reviewed' : 'Mark step as reviewed'; }
+  });
+});
+</script>
+</body>
+</html>
