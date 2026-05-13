@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example 10 — P1 RCA · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --blue:#1a6eb5; --blue-light:#e8f1fb; --blue-mid:#b8d0ed; --blue-dark:#0f4a7a;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--blue); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; overflow-x:auto; }
+  .tabs { display:flex; }
+  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:14px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; font-family:'Merriweather Sans',sans-serif; }
+  .tab-btn .num { width:24px; height:24px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .tab-btn.active { color:var(--blue); border-bottom-color:var(--blue); }
+  .tab-btn.active .num { background:var(--blue); border-color:var(--blue); color:#fff; }
+  .main { max-width:1400px; margin:0 auto; padding:36px 32px; }
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num { width:52px; height:52px; border-radius:50%; background:var(--blue); color:#fff; font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:24px; font-weight:700; }
+  .prose { font-size:17px; color:var(--text-dim); line-height:1.9; margin-bottom:24px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .callout { border-left:3px solid var(--blue); background:var(--blue-light); padding:18px 22px; border-radius:0 8px 8px 0; margin:20px 0; font-size:16px; line-height:1.8; color:var(--text-dim); }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-left:4px solid var(--blue); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-size:16px; line-height:1.85; color:var(--text-dim); }
+  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
+  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:14.5px; line-height:1.8; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
+  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
+  .prompt-block .speaker.user { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
+  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:4px solid var(--green); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-size:16px; line-height:1.85; color:var(--text-dim); }
+  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:12px; font-weight:600; }
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag { font-size:12px; font-family:'Source Code Pro',monospace; padding:4px 12px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag.tier3 { background:var(--amber-light); border-color:#e8c97a; color:var(--amber); }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  /* Assessment */
+  .assessment-wrap { background:var(--bg2); border:1.5px solid var(--border); border-left:4px solid var(--blue); border-radius:var(--radius); padding:28px 32px; margin:32px 0; }
+  .assessment-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .assessment-sub { font-size:15px; color:var(--text-dim); line-height:1.7; margin-bottom:24px; }
+  .question-block { margin-bottom:28px; padding-bottom:24px; border-bottom:1px solid var(--border); }
+  .question-block:last-of-type { border-bottom:none; }
+  .q-num { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--blue); letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; font-weight:600; }
+  .q-text { font-size:16px; font-weight:600; color:var(--text); line-height:1.5; margin-bottom:16px; }
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .option { display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:8px; border:1.5px solid var(--border); cursor:pointer; font-size:15px; color:var(--text-dim); line-height:1.5; transition:border-color .15s, background .15s; }
+  .option:hover { border-color:var(--blue-mid); background:var(--blue-light); }
+  .option input[type="radio"] { margin-top:3px; flex-shrink:0; accent-color:var(--blue); }
+  .submit-btn { margin-top:20px; padding:12px 28px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Merriweather Sans',sans-serif; }
+  .submit-btn:disabled { background:var(--border); color:var(--text-dimmer); cursor:not-allowed; }
+  .submit-btn:not(:disabled):hover { background:var(--blue-dark); color:#fff; }
+  .submit-note { font-size:13px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:8px; }
+  .submitted-wrap { text-align:center; padding:16px 0; }
+  .submitted-icon { font-size:36px; color:var(--green); margin-bottom:8px; }
+  .submitted-title { font-size:18px; font-weight:700; color:var(--green); margin-bottom:8px; }
+  .submitted-body { font-size:15px; color:var(--text-dim); line-height:1.7; }
+  .results-link { color:var(--blue); font-weight:600; }
+  .complete-bar { display:flex; align-items:center; gap:12px; padding:14px 20px; border-radius:8px; margin:16px 0 32px; font-size:14px; font-family:'Source Code Pro',monospace; font-weight:600; border:1.5px solid var(--border); background:var(--bg3); color:var(--text-dimmer); transition:all .2s; }
+  .complete-bar.disabled { opacity:.6; cursor:not-allowed; }
+  .complete-bar.ready { background:var(--blue-light); border-color:var(--blue-mid); border-left:3px solid var(--blue); color:var(--blue-dark); cursor:pointer; }
+  .complete-bar.done { background:var(--green-light); border-color:var(--green-mid); border-left:3px solid var(--green); color:var(--green); }
+  .complete-bar input[type="checkbox"] { width:18px; height:18px; accent-color:var(--green); }
+  .complete-bar.disabled input { cursor:not-allowed; }
+  .hidden { display:none !important; }
+  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:8px; }
+  .nav-btn { padding:12px 22px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; transition:background .15s; background:var(--blue); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--blue-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:32px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a href="course-map.html">Course map</a><span class="sep">/</span>
+  <span>Tier 3 examples</span><span class="sep">/</span>
+  <span>Example 10 — P1 RCA</span>
+</nav>
+<div class="tabs-wrap"><div class="tabs">
+  <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+  <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+  <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+  <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+  <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
+</div></div>
+<div class="main">
+
+<!-- STEP 1 -->
+<section class="step-section active" id="step-1">
+  <div class="step-header"><div class="step-num">1</div><div class="step-meta"><div class="step-label">Step 1 of 5</div><div class="step-title">The problem</div></div></div>
+  <div class="tags-row"><span class="tag tier3">Example 10 · Tier 3</span><span class="tag">P1 Incident</span><span class="tag">Dual audience</span><span class="tag">Time pressure</span></div>
+  <p class="prose">It is 11:47am on a Tuesday. The Meridian Cloud Migration has been live in staging for three weeks. Arjun messages Sarah: the trading platform — one of the three zero-downtime applications — has been unavailable for 47 minutes. Mark Donovan has been notified and will call at 2pm.</p>
+  <p class="prose">Sarah has two hours to produce two completely different documents simultaneously:</p>
+  <div class="callout"><strong>Document 1 — Engineering RCA:</strong> Technical root cause analysis for Arjun and SF leadership — what happened, why, what failed in the process, immediate remediation steps, and what changes to prevent recurrence.</div>
+  <div class="callout" style="margin-top:8px;"><strong>Document 2 — Board communication:</strong> A non-technical incident summary for Mark Donovan — business impact, what SF did, current status, and what Meridian can expect. Zero jargon. Confident and factual, not defensive.</div>
+  <div class="doc-block">
+    <div class="doc-label">Incident data — Arjun's raw log (11:51am)</div>
+    Trading platform (trade-api) down since 11:00am. Alert triggered 11:03am — 3-min monitoring lag. Root cause: EBS volume IOPS throttling after migration to gp2 — should have been gp3 (provisioned IOPS). trade-api requires consistent 6,000 IOPS. gp2 at 500GB = 1,500 IOPS baseline, burst to 3,000 — insufficient under load. Volume migrated from on-prem SAN with dedicated 8,000 IOPS — not captured in infrastructure discovery doc. Failover did not trigger — auto-scaling group health check misconfigured (checked HTTP 200 on /status endpoint which returns 200 even when DB connection pool is exhausted). Fix: volume type migration to gp3, 6,000 IOPS provisioned. ETA 35 minutes. Rollback: restore from 6am snapshot — 5 hours data loss, not acceptable. Service restored: 12:24pm. Total downtime: 84 minutes.
+  </div>
+  <div class="callout callout-warn"><strong>Why this is Tier 3:</strong> The PM is under real time pressure managing two completely different stakeholder tracks from a single raw technical log. The naive approach — forwarding Arjun's log to Mark — would be a career-limiting move. The PM must triage, translate, and structure under pressure without losing accuracy.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 2 -->
+<section class="step-section" id="step-2">
+  <div class="step-header"><div class="step-num">2</div><div class="step-meta"><div class="step-label">Step 2 of 5</div><div class="step-title">The naive approach</div></div></div>
+  <p class="prose">Under pressure, a PM might write one document and adapt it slightly for both audiences — or worse, forward Arjun's log with a covering note.</p>
+  <div class="prompt-block"><div class="speaker user">Sarah (naive — email to Mark)</div>Hi Mark — wanted to give you a quick update ahead of our 2pm call. We had an incident this morning with the trading platform. The EBS volume was provisioned as gp2 instead of gp3, causing IOPS throttling. The auto-scaling health check was also misconfigured. We've resolved it — total downtime was 84 minutes. Happy to walk through the details at 2pm.</div>
+  <div class="callout callout-bad"><strong>What's wrong:</strong> "EBS volume," "gp2," "gp3," "IOPS throttling," and "auto-scaling health check" mean nothing to a CTO from a financial services background. The email reads as technical excuse-making. Mark will arrive at the 2pm call confused, anxious, and without the context to brief his board. "Happy to walk through the details" signals that Sarah hasn't prepared a proper response — she's deferring to the call.</div>
+  <div class="callout callout-bad" style="margin-top:8px;"><strong>The second failure:</strong> The engineering RCA was never written. Without it, the 2pm call will be a stream-of-consciousness explanation rather than a structured account. Every minute spent explaining instead of presenting is a credibility loss.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 3 -->
+<section class="step-section" id="step-3">
+  <div class="step-header"><div class="step-num">3</div><div class="step-meta"><div class="step-label">Step 3 of 5</div><div class="step-title">The Claude interaction</div></div></div>
+  <p class="prose">Sarah works in two turns — engineering RCA first, board communication second. She provides the raw log and asks Claude to produce each document with explicit audience and format instructions.</p>
+  <div class="prompt-block"><div class="speaker user">Sarah — Turn 1 (Engineering RCA)</div>I'm a senior PM. We've had a P1 incident on a cloud migration project. I need a structured engineering RCA from the raw incident log below.
+
+Format:
+— Incident summary (2 sentences)
+— Timeline (key events with times)
+— Root cause (technical, specific — no softening)
+— Contributing factors
+— Immediate remediation steps taken
+— Process failures (what in our process allowed this to happen)
+— Corrective actions (specific, with owners and deadlines)
+
+Raw log:
+[pastes Arjun's log]
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 1</div><strong>Engineering RCA — Trade-API Outage — May 13, 2026</strong>
+<em>Severity: P1 | Duration: 84 minutes | Status: Resolved</em>
+
+<strong>Incident summary</strong>
+The Meridian trading platform (trade-api) experienced an 84-minute outage due to EBS volume IOPS throttling caused by incorrect volume type selection during migration. A misconfigured auto-scaling health check prevented automatic failover, extending the outage duration.
+
+<strong>Timeline</strong>
+11:00am — trade-api becomes unavailable (IOPS exhaustion)
+11:03am — Monitoring alert triggered (3-minute lag)
+11:47am — PM notified, incident response initiated
+12:24pm — Service restored (gp3 volume migration complete)
+
+<strong>Root cause</strong>
+The trade-api EBS volume was provisioned as gp2 (general purpose SSD) during migration. The on-premise SAN provided 8,000 dedicated IOPS; gp2 at 500GB provides only 1,500 baseline IOPS with burst to 3,000 — insufficient under production load. This misconfiguration was not caught during migration because the IOPS requirement was not documented in the infrastructure discovery artefact.
+
+<strong>Contributing factors</strong>
+— Infrastructure discovery document did not capture IOPS requirements for migrated volumes
+— Auto-scaling health check validated HTTP 200 on /status endpoint, which returns 200 even when the DB connection pool is exhausted — masking the actual service failure and preventing automatic failover
+
+<strong>Immediate remediation</strong>
+— EBS volume migrated from gp2 to gp3 with 6,000 IOPS provisioned
+— Auto-scaling health check reconfigured to validate DB connection pool health
+— Service restored 12:24pm
+
+<strong>Process failures</strong>
+1. Infrastructure discovery did not include performance requirements (IOPS, throughput) as a mandatory field
+2. Pre-migration validation checklist did not include a production-load IOPS validation step
+3. Health check configuration was not reviewed against actual service failure modes
+
+<strong>Corrective actions</strong>
+— Update infrastructure discovery template to include IOPS/throughput requirements — Owner: Arjun — Due: May 20
+— Audit all 14 migrated workloads for correct EBS volume type — Owner: Arjun — Due: May 17
+— Update health check configurations for all migrated services — Owner: Arjun — Due: May 17
+— Add IOPS validation to pre-migration checklist — Owner: Arjun — Due: May 20
+— Review monitoring alert lag (3-minute delay is too long for P1 services) — Owner: Arjun — Due: May 20
+<hr class="prompt-sep">
+<div class="speaker user">Sarah — Turn 2 (Board communication)</div>Now write the board-level incident communication for Mark Donovan (Meridian CTO). He will share this with his board.
+
+Requirements:
+— No technical jargon (no EBS, gp2, gp3, IOPS, auto-scaling)
+— Lead with current status (resolved)
+— Plain-language explanation of what happened and why
+— What SF did to fix it
+— What we are doing to prevent recurrence
+— Confident and factual — not defensive, not over-apologetic
+— Maximum 200 words
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 2</div><strong>Subject: Trading Platform Incident — Resolved | SF Update</strong>
+
+Mark —
+
+The trading platform was unavailable for 84 minutes this morning (11:00am–12:24pm). It is fully restored and operating normally.
+
+<strong>What happened:</strong> During the cloud migration, one component of the trading platform's storage configuration was not matched to the performance specifications of the original system. Under normal operating load, this caused the service to become unresponsive. An automated failover mechanism that should have activated did not do so because of a misconfiguration in the monitoring setup.
+
+<strong>What we did:</strong> Our engineering team identified and resolved the root cause within the incident window. The storage configuration has been corrected and the monitoring has been updated.
+
+<strong>What we are doing to prevent recurrence:</strong> We are auditing all migrated services this week to confirm performance configurations match original specifications. We are also updating our migration process to include this as a mandatory validation step before any future service goes live.
+
+I will send a full written RCA by end of day and will walk through it with you and Lisa on our standing call tomorrow.
+
+Sarah Chen | SF Senior PM</div>
+  <div class="callout callout-good" style="margin-top:20px;"><strong>What changed:</strong> Two documents, two turns, 25 minutes. The engineering RCA is structured and actionable with named owners and deadlines. The board communication is 178 words, jargon-free, and leads with resolution — not explanation. Mark reads it and knows the situation is under control before the 2pm call.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 4 -->
+<section class="step-section" id="step-4">
+  <div class="step-header"><div class="step-num">4</div><div class="step-meta"><div class="step-label">Step 4 of 5</div><div class="step-title">The refined output</div></div></div>
+  <p class="prose">Sarah makes two additions before sending. To the engineering RCA she adds a lessons-learned note that connects this incident to the risk register from project kickoff — Risk 1 (legacy infrastructure documentation gaps) was rated Red at the start of the project. To the board communication she adds the financial impact assessment she gets from Arjun.</p>
+  <div class="output-block">
+    <div class="output-label">✓ Addition to engineering RCA</div>
+    <strong>Risk register cross-reference:</strong> This incident maps directly to Risk 1 in the project risk register (Legacy infrastructure documentation gaps — Likelihood 4, Impact 4, Score 16, RAG Red). The corrective actions above address the root cause of this risk. The risk register will be updated to reflect the remediation actions taken and the residual risk reassessed at the next project review.
+  </div>
+  <div class="output-block">
+    <div class="output-label">✓ Addition to board communication</div>
+    <strong>Business impact:</strong> The trading platform was unavailable for 84 minutes. Based on information from Meridian's operations team, no transactions were lost — the platform queues requests during downtime and processed them on restoration. We are confirming with Meridian IT that no data integrity issues resulted from the outage.
+  </div>
+  <div class="callout"><strong>The PM's final layer:</strong> The risk register cross-reference turns the RCA from an incident report into a project management artefact — it shows Raj Patel that Sarah is connecting operational events to the project risk framework. The business impact addition gives Mark what his board will actually ask about: were any transactions lost? Claude could not have provided either — one required Sarah's knowledge of the risk register, the other required a conversation with Arjun.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 5 -->
+<section class="step-section" id="step-5">
+  <div class="step-header"><div class="step-num">5</div><div class="step-meta"><div class="step-label">Step 5 of 5</div><div class="step-title">Watch out</div></div></div>
+  <div class="callout callout-bad"><strong>1. Never send the engineering RCA to the client</strong><br>The RCA contains phrases like "process failures" and "health check misconfigured" that will be read as admissions of negligence by a client's legal team. The board communication is the client-facing document. The RCA is internal. Keep them strictly separate.</div>
+  <div class="callout callout-bad"><strong>2. Claude will be diplomatic about process failures</strong><br>Without explicit instruction, Claude frames failures as "areas for improvement." In an RCA, this is insufficient — process failures need to be named plainly. The prompt explicitly asked for "no softening" on root cause and process failures. Always include this instruction.</div>
+  <div class="callout callout-bad"><strong>3. Corrective action owners must be confirmed</strong><br>Claude assigned all corrective actions to Arjun — which is correct in this case, but Claude doesn't know your team. Always confirm that the named owners have actually accepted the actions before the RCA is circulated.</div>
+  <div class="callout callout-good"><strong>The discipline that makes this work:</strong><br>Produce the engineering RCA first — it forces you to understand the incident precisely. The board communication is then a translation exercise, not a creative one. Two turns, two documents, two audiences served. Never produce a single document for both.</div>
+  <div class="divider"></div>
+
+  <!-- Assessment -->
+  <div class="assessment-wrap" id="assessmentWrap">
+    <div class="questions-wrap" id="questionsWrap">
+      <div class="assessment-title">Check your understanding</div>
+      <p class="assessment-sub">Answer all three questions to complete this example. Your answers are saved — results shown on the Results page after completing the course.</p>
+      <div class="question-block">
+        <div class="q-num">Question 1 of 3</div>
+        <div class="q-text">What is the correct order of operations when managing a P1 incident with two different audiences?</div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q1" value="A"> Write the board communication first — the client is the highest priority stakeholder</label>
+          <label class="option"><input type="radio" name="q1" value="B"> Produce the engineering RCA first — it forces precise understanding, making the board communication a translation exercise</label>
+          <label class="option"><input type="radio" name="q1" value="C"> Write one document and adjust the tone for each audience</label>
+          <label class="option"><input type="radio" name="q1" value="D"> Wait for the incident to be fully resolved before writing either document</label>
+        </div>
+      </div>
+      <div class="question-block">
+        <div class="q-num">Question 2 of 3</div>
+        <div class="q-text">Why should the engineering RCA never be sent to the client?</div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q2" value="A"> It contains too much technical detail for a non-technical audience</label>
+          <label class="option"><input type="radio" name="q2" value="B"> It is written in a format that only engineers can understand</label>
+          <label class="option"><input type="radio" name="q2" value="C"> Phrases like "process failures" can be read as admissions of negligence by the client's legal team</label>
+          <label class="option"><input type="radio" name="q2" value="D"> It contains budget information that should not be shared with clients</label>
+        </div>
+      </div>
+      <div class="question-block">
+        <div class="q-num">Question 3 of 3</div>
+        <div class="q-text">What did Sarah add to the board communication that Claude could not have provided?</div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q3" value="A"> The current status of the incident (resolved)</label>
+          <label class="option"><input type="radio" name="q3" value="B"> The plain-language explanation of the root cause</label>
+          <label class="option"><input type="radio" name="q3" value="C"> The business impact — whether any transactions were lost — which required a conversation with Arjun</label>
+          <label class="option"><input type="radio" name="q3" value="D"> The corrective action plan and timeline</label>
+        </div>
+      </div>
+      <button class="submit-btn" id="submitAnswersBtn" disabled>Submit answers</button>
+      <div class="submit-note" id="submitNote">Select an answer for each question to submit.</div>
+    </div>
+    <div class="submitted-wrap hidden" id="submittedWrap">
+      <div class="submitted-icon">✓</div>
+      <div class="submitted-title">Answers saved</div>
+      <div class="submitted-body">Your answers have been recorded. View them on the <a href="results.html" class="results-link">Results page</a> after completing the course.</div>
+    </div>
+  </div>
+  <div class="complete-bar disabled" id="completeBar">
+    <input type="checkbox" id="completeCb" disabled>
+    <label for="completeCb" id="completeLabel">Answer all questions to unlock</label>
+  </div>
+
+  <div class="bottom-nav">
+    <a class="nav-btn secondary" href="example-9-model.html">← Example 9</a>
+    <a class="nav-btn" href="example-11-contract.html">Example 11 — Contract →</a>
+  </div>
+</section>
+
+</div>
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+const EXAMPLE_ID    = 'example-10-rca';
+const CORRECT       = { q1: 'B', q2: 'C', q3: 'C' };
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+const STORAGE_KEY = 'pm_learner_' + EXAMPLE_ID;
+function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; } }
+function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+document.addEventListener('DOMContentLoaded', function() {
+  const state = loadState();
+  if (state.submittedAt) { showSubmittedState(); activateCompleteBar(state.complete); return; }
+  document.querySelectorAll('.options input[type="radio"]').forEach(function(r) { r.addEventListener('change', checkAllAnswered); });
+  document.getElementById('submitAnswersBtn').addEventListener('click', submitAnswers);
+  const cb = document.getElementById('completeCb');
+  if (cb) cb.addEventListener('change', function() {
+    if (!cb.checked) return;
+    const s = loadState(); s.complete = true; saveState(s); activateCompleteBar(true);
+  });
+});
+function checkAllAnswered() {
+  const all = ['q1','q2','q3'].every(n => document.querySelector('input[name="'+n+'"]:checked'));
+  document.getElementById('submitAnswersBtn').disabled = !all;
+  document.getElementById('submitNote').textContent = all ? 'Ready to submit.' : 'Select an answer for each question to submit.';
+}
+function submitAnswers() {
+  const answers = {};
+  ['q1','q2','q3'].forEach(n => { const v = document.querySelector('input[name="'+n+'"]:checked')?.value; if(v) answers[n]=v; });
+  const s = loadState();
+  s.exampleId = EXAMPLE_ID; s.answers = answers; s.correct = CORRECT; s.submittedAt = new Date().toISOString();
+  saveState(s); showSubmittedState(); activateCompleteBar(false);
+}
+function showSubmittedState() {
+  document.getElementById('questionsWrap')?.classList.add('hidden');
+  document.getElementById('submittedWrap')?.classList.remove('hidden');
+}
+function activateCompleteBar(isDone) {
+  const bar = document.getElementById('completeBar');
+  const cb  = document.getElementById('completeCb');
+  const lbl = document.getElementById('completeLabel');
+  if (!bar) return;
+  if (isDone) { bar.className='complete-bar done'; cb.disabled=false; cb.checked=true; lbl.textContent='✓ Example complete'; }
+  else { bar.className='complete-bar ready'; cb.disabled=false; lbl.textContent='Mark example as complete'; }
+}
+</script>
+</body>
+</html>
