@@ -74,9 +74,6 @@
   .tag { font-size:11px; font-family:'Source Code Pro',monospace; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
   .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:#0f4a7a; }
   .divider { height:1px; background:var(--border); margin:32px 0; }
-  .reviewer-bar { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:8px; margin:24px 0; background:var(--amber-light); border:1.5px solid #e8c97a; border-left:3px solid var(--amber); font-size:13px; font-family:'Source Code Pro',monospace; font-weight:600; color:var(--amber); }
-  .reviewer-bar.checked { background:var(--green-light); border-color:var(--green-mid); border-left-color:var(--green); color:var(--green); }
-  .reviewer-bar input[type="checkbox"] { width:16px; height:16px; accent-color:var(--green); }
   .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
   .nav-btn { padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
   .nav-btn { background:var(--pm); color:#fff; border:none; }
@@ -84,6 +81,68 @@
   .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
   footer { text-align:center; padding:28px 32px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
   @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .health-grid { grid-template-columns:1fr 1fr; } }
+/* ── Learner assessment ─────────────────────────────────────────────────── */
+  .assessment-wrap {
+    background:var(--bg2); border:1.5px solid var(--border);
+    border-left:4px solid var(--blue); border-radius:var(--radius);
+    padding:28px 32px; margin:32px 0;
+  }
+  .assessment-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .assessment-sub { font-size:15px; color:var(--text-dim); line-height:1.7; margin-bottom:24px; }
+
+  /* Questions */
+  .question-block { margin-bottom:28px; padding-bottom:24px; border-bottom:1px solid var(--border); }
+  .question-block:last-of-type { border-bottom:none; }
+  .q-num { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--blue); letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; font-weight:600; }
+  .q-text { font-size:16px; font-weight:600; color:var(--text); line-height:1.5; margin-bottom:16px; }
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .option {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:12px 16px; border-radius:8px; border:1.5px solid var(--border);
+    cursor:pointer; font-size:15px; color:var(--text-dim); line-height:1.5;
+    transition:border-color .15s, background .15s;
+  }
+  .option:hover { border-color:var(--blue-mid); background:var(--blue-light); }
+  .option input[type="radio"] { margin-top:3px; flex-shrink:0; accent-color:var(--blue); }
+  .option input[type="radio"]:checked ~ * { color:var(--text); }
+
+  .submit-btn {
+    margin-top:20px; padding:12px 28px; background:var(--blue); color:#fff;
+    border:none; border-radius:8px; font-size:15px; font-weight:600;
+    cursor:pointer; font-family:'Merriweather Sans',sans-serif;
+  }
+  .submit-btn:disabled { background:var(--border); color:var(--text-dimmer); cursor:not-allowed; }
+  .submit-btn:not(:disabled):hover { background:var(--blue-dark); color:#fff; }
+  .submit-note { font-size:13px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:8px; }
+
+  /* Submitted state */
+  .submitted-wrap { text-align:center; padding:16px 0; }
+  .submitted-icon { font-size:36px; color:var(--green); margin-bottom:8px; }
+  .submitted-title { font-size:18px; font-weight:700; color:var(--green); margin-bottom:8px; }
+  .submitted-body { font-size:15px; color:var(--text-dim); line-height:1.7; }
+  .results-link { color:var(--blue); font-weight:600; }
+
+  /* Complete bar */
+  .complete-bar {
+    display:flex; align-items:center; gap:12px;
+    padding:14px 20px; border-radius:8px; margin:16px 0 32px;
+    font-size:14px; font-family:'Source Code Pro',monospace; font-weight:600;
+    border:1.5px solid var(--border); background:var(--bg3);
+    color:var(--text-dimmer); transition:all .2s;
+  }
+  .complete-bar.disabled { opacity:.6; cursor:not-allowed; }
+  .complete-bar.ready {
+    background:var(--blue-light); border-color:var(--blue-mid);
+    border-left:3px solid var(--blue); color:var(--blue-dark); cursor:pointer;
+  }
+  .complete-bar.done {
+    background:var(--green-light); border-color:var(--green-mid);
+    border-left:3px solid var(--green); color:var(--green);
+  }
+  .complete-bar input[type="checkbox"] { width:18px; height:18px; accent-color:var(--green); }
+  .complete-bar.disabled input { cursor:not-allowed; }
+  .hidden { display:none !important; }
+
 </style>
 </head>
 <body>
@@ -155,10 +214,6 @@
     </div>
 
     <div class="divider"></div>
-    <div class="reviewer-bar" id="rev-bar-1">
-      <input type="checkbox" class="rev-checkbox" id="rev-cb-1" data-step="1">
-      <label for="rev-cb-1">Mark step as reviewed</label>
-    </div>
   </section>
 
   <!-- STEP 2 -->
@@ -191,10 +246,6 @@
     </div>
 
     <div class="divider"></div>
-    <div class="reviewer-bar" id="rev-bar-2">
-      <input type="checkbox" class="rev-checkbox" id="rev-cb-2" data-step="2">
-      <label for="rev-cb-2">Mark step as reviewed</label>
-    </div>
   </section>
 
   <!-- STEP 3 -->
@@ -269,10 +320,6 @@ The Meridian programme is progressing on plan for Cloud Migration and has comple
     </div>
 
     <div class="divider"></div>
-    <div class="reviewer-bar" id="rev-bar-3">
-      <input type="checkbox" class="rev-checkbox" id="rev-cb-3" data-step="3">
-      <label for="rev-cb-3">Mark step as reviewed</label>
-    </div>
   </section>
 
   <!-- STEP 4 -->
@@ -327,10 +374,6 @@ The Meridian programme is progressing on plan for Cloud Migration and has comple
     </div>
 
     <div class="divider"></div>
-    <div class="reviewer-bar" id="rev-bar-4">
-      <input type="checkbox" class="rev-checkbox" id="rev-cb-4" data-step="4">
-      <label for="rev-cb-4">Mark step as reviewed</label>
-    </div>
   </section>
 
   <!-- STEP 5 -->
@@ -364,24 +407,87 @@ The Meridian programme is progressing on plan for Cloud Migration and has comple
     </div>
 
     <div class="divider"></div>
-    <div class="reviewer-bar" id="rev-bar-5">
-      <input type="checkbox" class="rev-checkbox" id="rev-cb-5" data-step="5">
-      <label for="rev-cb-5">Mark step as reviewed</label>
-    </div>
-
     <div class="bottom-nav">
       <a class="nav-btn secondary" href="example-6-tracking.html">← Example 6</a>
       <a class="nav-btn" href="example-8-change.html">Example 8 — Change request →</a>
     </div>
+    <!-- ── Learner assessment ──────────────────────────────────────────────── -->
+    <div class="assessment-wrap" id="assessmentWrap">
+
+      <!-- Questions -->
+      <div class="questions-wrap" id="questionsWrap">
+        <div class="assessment-title">Check your understanding</div>
+        <p class="assessment-sub">Answer all three questions to complete this example. Your answers are saved — results shown at the end of the course.</p>
+
+        <!-- Q1 -->
+        <div class="question-block" id="qblock-1">
+          <div class="q-num">Question 1 of 3</div>
+          <div class="q-text">Without explicit synthesis instructions, how does Claude typically handle a multi-workstream status update request?</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q1" value="A"> It produces one integrated programme view with cross-cutting themes</label>
+            <label class="option"><input type="radio" name="q1" value="B"> It produces N separate workstream summaries with no cross-cutting analysis</label>
+            <label class="option"><input type="radio" name="q1" value="C"> It refuses to process more than one workstream at a time</label>
+            <label class="option"><input type="radio" name="q1" value="D"> It combines all workstreams into a single status without distinguishing between them</label>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="question-block" id="qblock-2">
+          <div class="q-num">Question 2 of 3</div>
+          <div class="q-text">What is the single most valuable output of the Claude-assisted health report in this example?</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q2" value="A"> The consolidated client action section — making Meridian's accountability visible in one place</label>
+            <label class="option"><input type="radio" name="q2" value="B"> The per-workstream RAG status — giving each lead their own section</label>
+            <label class="option"><input type="radio" name="q2" value="C"> The budget utilisation table — showing spend across all three workstreams</label>
+            <label class="option"><input type="radio" name="q2" value="D"> The executive summary — a three-sentence overview of programme health</label>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="question-block" id="qblock-3">
+          <div class="q-num">Question 3 of 3</div>
+          <div class="q-text">What did Sarah add to the report that Claude did not include in its output?</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q3" value="A"> The consolidated client action section</label>
+            <label class="option"><input type="radio" name="q3" value="B"> The overall programme RAG status</label>
+            <label class="option"><input type="radio" name="q3" value="C"> The visual RAG summary cards used by Lisa Park in her own leadership briefings</label>
+            <label class="option"><input type="radio" name="q3" value="D"> The "what went well" section</label>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="submitAnswersBtn" disabled>Submit answers</button>
+        <div class="submit-note" id="submitNote">Select an answer for each question to submit.</div>
+      </div>
+
+      <!-- Submitted state -->
+      <div class="submitted-wrap hidden" id="submittedWrap">
+        <div class="submitted-icon">✓</div>
+        <div class="submitted-title">Answers saved</div>
+        <div class="submitted-body">Your answers have been recorded. You can review all your answers and the correct answers on the <a href="results.html" class="results-link">Results page</a> after completing the course.</div>
+      </div>
+
+    </div>
+
+    <!-- Mark as complete -->
+    <div class="complete-bar disabled" id="completeBar">
+      <input type="checkbox" id="completeCb" disabled>
+      <label for="completeCb" id="completeLabel">Answer all questions to unlock</label>
+    </div>
+
   </section>
 
 </div>
 
 <footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
 
+</body>
+</html>
 <script>
 const CACHE_VERSION = '2026-04-05-v1';
-const REV_KEY = 'pm_example-7-vendor';
+const EXAMPLE_ID    = 'example-7-reporting';
+const CORRECT       = { q1: 'B', q2: 'A', q3: 'C' };
+
+// Cache busting
 (function() {
   function addVersion(url) {
     if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
@@ -392,23 +498,102 @@ const REV_KEY = 'pm_example-7-vendor';
   }
   document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
 })();
+
+// Tab navigation
 function showTab(n) {
   document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('step-' + n).classList.add('active');
   document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
 }
-function revLoad() { try { return JSON.parse(localStorage.getItem(REV_KEY)) || {}; } catch(e) { return {}; } }
-function revSave(s) { localStorage.setItem(REV_KEY, JSON.stringify(s)); }
-document.querySelectorAll('.rev-checkbox').forEach(cb => {
-  const s = revLoad();
-  if (s['cb_' + cb.dataset.step]) { cb.checked = true; const bar = cb.closest('.reviewer-bar'); if (bar) { bar.classList.add('checked'); bar.querySelector('label').textContent = '✓ Step reviewed'; } }
-  cb.addEventListener('change', () => {
-    const s = revLoad(); s['cb_' + cb.dataset.step] = cb.checked; revSave(s);
-    const bar = cb.closest('.reviewer-bar');
-    if (bar) { bar.classList.toggle('checked', cb.checked); bar.querySelector('label').textContent = cb.checked ? '✓ Step reviewed' : 'Mark step as reviewed'; }
+
+// Storage
+const STORAGE_KEY = 'pm_learner_' + EXAMPLE_ID;
+function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; } }
+function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const state = loadState();
+
+  // Already completed
+  if (state.complete) {
+    showSubmittedState();
+    activateCompleteBar(true);
+    return;
+  }
+
+  // Already submitted but not marked complete
+  if (state.submittedAt && !state.complete) {
+    showSubmittedState();
+    activateCompleteBar(false);
+    return;
+  }
+
+  // Track selections
+  document.querySelectorAll('.options input[type="radio"]').forEach(function(radio) {
+    radio.addEventListener('change', checkAllAnswered);
   });
+
+  // Submit
+  const submitBtn = document.getElementById('submitAnswersBtn');
+  if (submitBtn) submitBtn.addEventListener('click', submitAnswers);
+
+  // Complete checkbox
+  const completeCb = document.getElementById('completeCb');
+  if (completeCb) {
+    completeCb.addEventListener('change', function() {
+      if (!completeCb.checked) return;
+      const s = loadState();
+      s.complete = true;
+      saveState(s);
+      activateCompleteBar(true);
+    });
+  }
 });
+
+function checkAllAnswered() {
+  const allAnswered = [document.querySelector('input[name="q1"]:checked'), document.querySelector('input[name="q2"]:checked'), document.querySelector('input[name="q3"]:checked')].every(Boolean);
+  const btn  = document.getElementById('submitAnswersBtn');
+  const note = document.getElementById('submitNote');
+  if (btn)  btn.disabled = !allAnswered;
+  if (note) note.textContent = allAnswered ? 'Ready to submit.' : 'Select an answer for each question to submit.';
+}
+
+function submitAnswers() {
+  const answers = {};
+    const a1 = document.querySelector('input[name="q1"]:checked')?.value; if (a1) answers['q1'] = a1;
+  const a2 = document.querySelector('input[name="q2"]:checked')?.value; if (a2) answers['q2'] = a2;
+  const a3 = document.querySelector('input[name="q3"]:checked')?.value; if (a3) answers['q3'] = a3;
+  const s = loadState();
+  s.exampleId   = EXAMPLE_ID;
+  s.answers     = answers;
+  s.correct     = CORRECT;
+  s.submittedAt = new Date().toISOString();
+  saveState(s);
+  showSubmittedState();
+  activateCompleteBar(false);
+}
+
+function showSubmittedState() {
+  document.getElementById('questionsWrap')?.classList.add('hidden');
+  document.getElementById('submittedWrap')?.classList.remove('hidden');
+}
+
+function activateCompleteBar(isDone) {
+  const bar   = document.getElementById('completeBar');
+  const cb    = document.getElementById('completeCb');
+  const label = document.getElementById('completeLabel');
+  if (!bar) return;
+  if (isDone) {
+    bar.className = 'complete-bar done';
+    cb.disabled   = false; cb.checked = true;
+    label.textContent = '✓ Example complete';
+  } else {
+    bar.className = 'complete-bar ready';
+    cb.disabled   = false;
+    label.textContent = 'Mark example as complete';
+  }
+}
 </script>
 </body>
 </html>
