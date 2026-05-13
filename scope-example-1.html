@@ -6,428 +6,545 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Course Map — Claude for PM</title>
+<title>Example 1 — Scope Document · Claude for PM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:           #eef2f7;
-    --bg2:          #ffffff;
-    --bg3:          #f0f4f9;
-    --border:       #d0dae8;
-    --text:         #1a2332;
-    --text-dim:     #4a5568;
-    --text-dimmer:  #8fa3bc;
-    --pm:           #0b6e4f;
-    --pm-light:     #e6f4ef;
-    --pm-mid:       #a8d5c2;
-    --pm-dark:      #074d37;
-    --blue:         #1a6eb5;
-    --blue-light:   #e8f1fb;
-    --coral:        #c0392b;
-    --green:        #1a6b3a;
-    --green-light:  #e8f5ed;
-    --amber:        #92600a;
-    --amber-light:  #fdf3e3;
-    --radius:       12px;
-    --code-bg:      #1e2433;
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --pm:#1a6eb5; --pm-light:#e8f1fb; --pm-mid:#b8d0ed; --pm-dark:#0f4a7a;
+    --blue:#1a6eb5; --blue-light:#e8f1fb;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+
+  /* Topnav */
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 48px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--pm); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+
+  /* Step tabs */
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; overflow-x:auto; }
+  .tabs { display:flex; gap:0; }
+  .tab-btn {
+    display:flex; align-items:center; gap:8px; padding:14px 18px;
+    font-size:13px; font-weight:600; color:var(--text-dimmer);
+    border-bottom:2px solid transparent; cursor:pointer;
+    background:none; border-top:none; border-left:none; border-right:none;
+    white-space:nowrap; transition:color .15s;
+    font-family:'Merriweather Sans',sans-serif;
+  }
+  .tab-btn .num {
+    width:22px; height:22px; border-radius:50%; background:var(--bg3);
+    border:1.5px solid var(--border); display:flex; align-items:center;
+    justify-content:center; font-size:11px; font-weight:700;
+    font-family:'Source Code Pro',monospace; flex-shrink:0; transition:all .15s;
+  }
+  .tab-btn.active { color:var(--pm); border-bottom-color:var(--pm); }
+  .tab-btn.active .num { background:var(--pm); border-color:var(--pm); color:#fff; }
+
+  /* Main */
+  .main { max-width:1180px; margin:0 auto; padding:36px 48px; }
+
+  /* Step section */
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+
+  /* Step header */
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num {
+    width:48px; height:48px; border-radius:50%; background:var(--pm);
+    color:#fff; font-size:20px; font-weight:700; display:flex;
+    align-items:center; justify-content:center; flex-shrink:0;
+    font-family:'Source Code Pro',monospace;
+  }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:24px; font-weight:700; }
+
+  /* Content blocks */
+  .prose { font-size:16px; color:var(--text-dim); line-height:1.85; margin-bottom:22px; }
+  .prose strong { color:var(--text); font-weight:600; }
+
+  .callout {
+    border-left:3px solid var(--pm); background:var(--pm-light);
+    padding:14px 18px; border-radius:0 8px 8px 0; margin:20px 0;
+    font-size:14px; line-height:1.7; color:var(--text-dim);
+  }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+
+  /* Document block */
+  .doc-block {
+    background:var(--bg3); border:1.5px solid var(--border);
+    border-radius:var(--radius); padding:20px 24px; margin:20px 0;
+    font-size:13.5px; line-height:1.8; color:var(--text-dim);
+  }
+  .doc-block .doc-label {
+    font-size:10px; font-family:'Source Code Pro',monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer);
+    margin-bottom:10px;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Merriweather Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-
-  /* ── Topnav ── */
-  .topnav {
-    background: var(--bg2); border-bottom: 1px solid var(--border);
-    padding: 0 40px; height: 52px; display: flex; align-items: center;
-    gap: 8px; font-size: 12px; color: var(--text-dimmer);
-    font-family: 'Source Code Pro', monospace;
+  /* Code / prompt block */
+  .prompt-block {
+    background:var(--code-bg); border-radius:var(--radius);
+    padding:20px 24px; margin:20px 0; font-family:'Source Code Pro',monospace;
+    font-size:14px; line-height:1.75; color:var(--code-text); overflow-x:auto;
   }
-  .topnav a { color: var(--pm); text-decoration: none; }
-  .topnav a:hover { text-decoration: underline; }
-  .sep { opacity: .4; }
-
-  /* ── Hero ── */
-  .hero-wrap { background: var(--bg2); border-bottom: 2px solid var(--border); }
-  .hero { max-width: 900px; margin: 0 auto; padding: 48px 40px 40px; }
-  .hero-eyebrow {
-    font-size: 11px; font-family: 'Source Code Pro', monospace;
-    color: var(--pm); letter-spacing: .12em; text-transform: uppercase;
-    margin-bottom: 12px;
+  .prompt-block .speaker {
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    margin-bottom:8px; opacity:.6;
   }
-  .hero h1 { font-size: 30px; font-weight: 700; line-height: 1.25; margin-bottom: 16px; }
-  .hero h1 span { color: var(--pm); }
-  .hero-sub { font-size: 15px; color: var(--text-dim); max-width: 620px; line-height: 1.7; margin-bottom: 24px; }
+  .prompt-block .speaker.user  { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
 
-  /* ── Progress bar ── */
-  .progress-row { display: flex; align-items: center; gap: 12px; }
-  .progress-label { font-size: 11px; font-family: 'Source Code Pro', monospace; color: var(--text-dimmer); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
-  .progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; width: 0%; background: var(--pm); border-radius: 3px; transition: width 0.6s ease; }
-  .progress-count { font-size: 11px; font-family: 'Source Code Pro', monospace; color: var(--text-dimmer); white-space: nowrap; }
-
-  /* ── Meta pills ── */
-  .meta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
-  .meta-pill {
-    font-size: 11px; font-family: 'Source Code Pro', monospace;
-    padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border);
-    color: var(--text-dimmer); background: var(--bg3);
+  /* Output block */
+  .output-block {
+    background:var(--bg2); border:1.5px solid var(--green-mid);
+    border-left:3px solid var(--green);
+    border-radius:var(--radius); padding:20px 24px; margin:20px 0;
+    font-size:13.5px; line-height:1.8; color:var(--text-dim);
   }
-  .meta-pill.pm { background: var(--pm-light); border-color: var(--pm-mid); color: var(--pm-dark); }
-
-  /* ── Main layout ── */
-  .main { max-width: 900px; margin: 0 auto; padding: 40px; }
-
-  /* ── Section headings ── */
-  .section-eyebrow {
-    font-size: 10px; font-family: 'Source Code Pro', monospace;
-    letter-spacing: .15em; text-transform: uppercase;
-    color: var(--text-dimmer); margin-bottom: 6px;
-  }
-  .section-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-  .section-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; font-weight: 300; max-width: 680px; line-height: 1.7; }
-
-  /* ── Tier badge ── */
-  .tier-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-  .tier-icon {
-    width: 36px; height: 36px; border-radius: 8px;
-    background: var(--pm-light); border: 1.5px solid var(--pm-mid);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; flex-shrink: 0;
-  }
-  .tier-info { flex: 1; }
-  .tier-name { font-size: 14px; font-weight: 700; color: var(--text); }
-  .tier-sub { font-size: 12px; color: var(--text-dimmer); font-family: 'Source Code Pro', monospace; }
-  .tier-status {
-    font-size: 10px; font-family: 'Source Code Pro', monospace;
-    padding: 3px 8px; border-radius: 10px; font-weight: 600;
-    letter-spacing: .06em; text-transform: uppercase;
-  }
-  .status-active { background: var(--pm-light); color: var(--pm-dark); border: 1px solid var(--pm-mid); }
-  .status-soon   { background: var(--amber-light); color: var(--amber); border: 1px solid #e8c97a; }
-
-  /* ── Diagram cards ── */
-  .diagram-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 44px; }
-  .diagram-card {
-    background: var(--bg2); border: 1.5px solid var(--border); border-radius: var(--radius);
-    padding: 20px 22px; text-decoration: none; color: var(--text);
-    transition: border-color .15s, box-shadow .15s; display: block;
-  }
-  .diagram-card:hover { border-color: var(--pm-mid); box-shadow: 0 4px 16px rgba(11,110,79,.08); }
-  .diagram-tag {
-    font-size: 10px; font-family: 'Source Code Pro', monospace;
-    color: var(--pm); letter-spacing: .1em; text-transform: uppercase;
-    margin-bottom: 8px; display: block;
-  }
-  .diagram-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-  .diagram-desc { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
-  .diagram-arrow { font-size: 18px; color: var(--pm); margin-top: 12px; display: block; }
-
-  /* ── Example grid ── */
-  .example-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 44px; }
-  .example-card {
-    background: var(--bg2); border: 1.5px solid var(--border); border-radius: var(--radius);
-    padding: 18px 20px; text-decoration: none; color: var(--text);
-    transition: border-color .15s, box-shadow .15s; display: block;
-  }
-  .example-card:hover { border-color: var(--pm-mid); box-shadow: 0 4px 16px rgba(11,110,79,.08); }
-  .example-card.locked { opacity: .55; cursor: not-allowed; }
-  .example-num { font-size: 10px; font-family: 'Source Code Pro', monospace; color: var(--text-dimmer); margin-bottom: 6px; }
-  .example-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; line-height: 1.35; }
-  .example-desc { font-size: 12px; color: var(--text-dim); line-height: 1.6; margin-bottom: 12px; }
-  .example-card-footer { display: flex; align-items: center; justify-content: space-between; }
-  .example-tag {
-    font-size: 10px; font-family: 'Source Code Pro', monospace;
-    padding: 3px 8px; border-radius: 10px; font-weight: 600;
-  }
-  .tag-tier1  { background: var(--pm-light);   color: var(--pm-dark);  border: 1px solid var(--pm-mid); }
-  .tag-tier2  { background: var(--blue-light);  color: #0f4a7a;         border: 1px solid #b8d0ed; }
-  .tag-tier3  { background: var(--amber-light); color: var(--amber);    border: 1px solid #e8c97a; }
-  .tag-locked { background: var(--bg3);         color: var(--text-dimmer); border: 1px solid var(--border); }
-  .card-arrow  { font-size: 16px; color: var(--pm); }
-  .lock-icon   { font-size: 14px; }
-
-  /* ── Section divider ── */
-  .section-divider { height: 1px; background: var(--border); margin: 40px 0; }
-
-  /* ── Footer ── */
-  footer {
-    text-align: center; padding: 32px 40px;
-    font-size: 11px; font-family: 'Source Code Pro', monospace;
-    color: var(--text-dimmer); border-top: 1px solid var(--border);
+  .output-label {
+    font-size:10px; font-family:'Source Code Pro',monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--green);
+    margin-bottom:10px; font-weight:600;
   }
 
-  @media(max-width:640px) {
-    .topnav, .hero, .main { padding-left: 20px; padding-right: 20px; }
-    .hero { padding-top: 28px; }
-    .diagram-grid, .example-grid { grid-template-columns: 1fr; }
+  /* Tags row */
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag {
+    font-size:11px; font-family:'Source Code Pro',monospace;
+    padding:4px 10px; border-radius:20px; border:1px solid var(--border);
+    color:var(--text-dimmer); background:var(--bg3);
   }
+  .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:#0f4a7a; }
+
+  /* Section divider */
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+
+  /* Reviewer bar */
+  .reviewer-bar {
+    display:flex; align-items:center; gap:10px;
+    padding:12px 16px; border-radius:8px; margin:24px 0;
+    background:var(--amber-light); border:1.5px solid #e8c97a;
+    border-left:3px solid var(--amber);
+    font-size:13px; font-family:'Source Code Pro',monospace; font-weight:600;
+    color:var(--amber); transition:all .2s;
+  }
+  .reviewer-bar.checked { background:var(--green-light); border-color:var(--green-mid); border-left-color:var(--green); color:var(--green); }
+  .reviewer-bar input[type="checkbox"] { width:16px; height:16px; accent-color:var(--green); }
+
+  /* Bottom nav */
+  .bottom-nav { display:flex; justify-content:flex-end; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
+  .nav-btn {
+    padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600;
+    cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif;
+    transition:background .15s;
+  }
+  .nav-btn { background:var(--pm); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--pm-dark); }
+
+  /* Footer */
+  footer { text-align:center; padding:32px 48px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+
+  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .tabs-wrap { padding-left:20px; } }
 </style>
 </head>
 <body>
 
 <nav class="topnav">
-  <a href="#">SourceFuse L&D</a>
+  <a href="course-map.html">Course map</a>
   <span class="sep">/</span>
-  <a href="#">AI-Augmented PM Learning Path</a>
+  <span>Tier 1 examples</span>
   <span class="sep">/</span>
-  <span>Claude for PM</span>
+  <span>Example 1 — Scope document</span>
 </nav>
 
-<div class="hero-wrap">
-  <div class="hero">
-    <div class="hero-eyebrow">Course Map · AI-Augmented PM Learning Path</div>
-    <h1>Claude for <span>Project Managers</span></h1>
-    <p class="hero-sub">
-      Twelve practical examples showing how senior PMs managing cloud, web, and AI projects
-      at SourceFuse can use Claude to move faster, communicate more clearly, and make better
-      decisions — without replacing the judgment that makes a great PM irreplaceable.
-    </p>
-    <div class="progress-row">
-      <span class="progress-label">Progress</span>
-      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-      <span class="progress-count" id="progressCount">0 of 12 complete</span>
-    </div>
-    <div class="meta-row">
-      <span class="meta-pill pm">All tiers active · Module 1 complete</span>
-      <span class="meta-pill">12 examples · 2 diagrams</span>
-      <span class="meta-pill">Intermediate → Advanced</span>
-      <span class="meta-pill">SF Certified AI-Augmented Project Manager</span>
-    </div>
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+    <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+    <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+    <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+    <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
   </div>
 </div>
 
 <div class="main">
 
-  <!-- ── Diagrams ── -->
-  <div class="section-eyebrow">Course foundations — interactive diagrams</div>
-  <p class="section-desc">
-    Before the examples, these two diagrams establish the mental model: where Claude fits in the PM workflow,
-    and what the AI-augmented PM operating model looks like across a full project lifecycle.
-    Click any node inside each diagram for depth.
-  </p>
-  <div class="diagram-grid">
-    <a class="diagram-card" href="diagram-1.html">
-      <span class="diagram-tag">Diagram 1 · Foundation</span>
-      <div class="diagram-title">Claude in the PM workflow</div>
-      <div class="diagram-desc">Where Claude accelerates — and where human judgment remains irreplaceable. A map of the PM decision landscape.</div>
-      <span class="diagram-arrow">→</span>
-    </a>
-    <a class="diagram-card" href="diagram-2.html">
-      <span class="diagram-tag">Diagram 2 · Foundation</span>
-      <div class="diagram-title">The AI-augmented PM operating model</div>
-      <div class="diagram-desc">From brief to delivery — how an AI-augmented PM integrates Claude across scoping, planning, execution, and reporting.</div>
-      <span class="diagram-arrow">→</span>
-    </a>
-  </div>
-
-  <div class="section-divider"></div>
-
-  <!-- ── Tier 1 ── -->
-  <div class="tier-header">
-    <div class="tier-icon">◎</div>
-    <div class="tier-info">
-      <div class="tier-name">Tier 1 — Single-context tasks</div>
-      <div class="tier-sub">One document · One output · One feedback loop</div>
+  <!-- STEP 1 -->
+  <section class="step-section active" id="step-1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-meta">
+        <div class="step-label">Step 1 of 5</div>
+        <div class="step-title">The problem</div>
+      </div>
     </div>
-    <span class="tier-status status-active">Active</span>
-  </div>
-  <p class="section-desc" style="margin-bottom:16px;">
-    Each Tier 1 example gives Claude a single input — a brief, a metric dump, a backlog — and asks for one
-    clear deliverable. The interaction runs 2–4 turns. These establish the prompting habits and output standards
-    that make Tier 2 and Tier 3 work.
-  </p>
-  <div class="example-grid">
 
-    <a class="example-card" href="example-1-scope.html">
-      <div class="example-num">Example 1 · Tier 1 · Project scoping</div>
-      <div class="example-title">Turning a vague brief into a structured scope document</div>
-      <div class="example-desc">The Meridian Portal brief arrives as two paragraphs of stakeholder notes. Claude helps Sarah turn it into a structured scope document with objectives, exclusions, and open questions.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier1">Project scoping</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-2-status.html">
-      <div class="example-num">Example 2 · Tier 1 · Stakeholder communication</div>
-      <div class="example-title">Drafting a status update for C-suite vs engineering</div>
-      <div class="example-desc">Same project data, two completely different audiences. Claude helps Sarah adapt tone, depth, and framing — so Mark Donovan (CTO) and Arjun's dev team each get what they need.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier1">Communication</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-3-risk.html">
-      <div class="example-num">Example 3 · Tier 1 · Risk identification</div>
-      <div class="example-title">Generating and scoring a risk register from a project brief</div>
-      <div class="example-desc">Sarah pastes the Meridian Cloud Migration brief and asks Claude to surface risks, score them on likelihood and impact, and suggest mitigations. The naive approach produces a generic list.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier1">Risk management</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-4-sprint.html">
-      <div class="example-num">Example 4 · Tier 1 · Sprint planning</div>
-      <div class="example-title">Decomposing an epic into a sprint-ready backlog</div>
-      <div class="example-desc">The Meridian AI Assistant epic needs to be broken into stories for Sprint 3. Claude helps Sarah decompose it into sized, acceptance-criteria-ready stories aligned to team capacity.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier1">Sprint planning</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-  </div>
-
-  <div class="section-divider"></div>
-
-  <!-- ── Tier 2 ── -->
-  <div class="tier-header">
-    <div class="tier-icon">⊕</div>
-    <div class="tier-info">
-      <div class="tier-name">Tier 2 — Multi-context tasks</div>
-      <div class="tier-sub">Multiple inputs · Cross-document reasoning · 5–8 turn interactions</div>
+    <div class="tags-row">
+      <span class="tag pm">Example 1 · Tier 1</span>
+      <span class="tag">Project scoping</span>
+      <span class="tag">Single-context</span>
+      <span class="tag">2–3 turn interaction</span>
     </div>
-    <span class="tier-status status-active">Active</span>
-  </div>
-  <p class="section-desc" style="margin-bottom:16px;">
-    Tier 2 examples bring multiple inputs simultaneously — stakeholder notes, metrics, logs, RFP responses.
-    The naive approach produces a surface-level synthesis; the Claude Code interaction runs 5–8 turns and
-    produces something genuinely useful under real project pressure.
-  </p>
-  <div class="example-grid">
 
-    <a class="example-card" href="example-5-requirements.html">
-      <div class="example-num">Example 5 · Tier 2 · Requirements gathering</div>
-      <div class="example-title">Reconciling conflicting stakeholder requirements into an MRD</div>
-      <div class="example-desc">Mark Donovan wants real-time dashboards. Lisa Park wants cost controls. Arjun flags technical feasibility issues. Claude helps Sarah surface the conflicts and write an MRD that reflects reality.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier2">Requirements</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
+    <p class="prose">
+      Sarah Chen is the SF Senior PM on the Meridian Financial Group account. Three workstreams are running concurrently — Cloud Migration, Meridian Portal, and the Meridian AI Assistant. It's Week 1 of the Portal engagement.
+    </p>
 
-    <a class="example-card" href="example-6-escalation.html">
-      <div class="example-num">Example 6 · Tier 2 · Escalation drafting</div>
-      <div class="example-title">Crafting an escalation memo from incident logs and timeline</div>
-      <div class="example-desc">A production incident on the Meridian Portal has been running for 6 hours. Sarah needs to brief Raj Patel and the client. Claude helps turn raw incident logs into a structured escalation memo.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier2">Escalation</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
+    <p class="prose">
+      Mark Donovan, Meridian's CTO, has sent over the project brief. It's two paragraphs of executive notes typed directly into an email. No structured requirements. No exclusions. No success criteria.
+    </p>
 
-    <a class="example-card" href="example-7-vendor.html">
-      <div class="example-num">Example 7 · Tier 2 · Vendor evaluation</div>
-      <div class="example-title">Scoring a vendor shortlist from RFP responses</div>
-      <div class="example-desc">Three vendors have responded to the Meridian AI Assistant RFP. Sarah has a scoring rubric and 60 pages of responses. Claude helps structure the evaluation and surface the real differentiators.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier2">Vendor evaluation</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-8-reporting.html">
-      <div class="example-num">Example 8 · Tier 2 · Stakeholder reporting</div>
-      <div class="example-title">Building a project health dashboard narrative from raw metrics</div>
-      <div class="example-desc">Sprint velocity is down. Scope creep is up. Two workstreams are amber. Claude helps Sarah write the monthly health narrative that explains what's happening and what she's doing about it.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier2">Reporting</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-9-model.html">
-      <div class="example-num">Example 9 · Tier 2 · AI project specifics</div>
-      <div class="example-title">Evaluating model selection trade-offs for a client AI project</div>
-      <div class="example-desc">Meridian wants to know why SF recommended Claude over GPT-4 for their AI Assistant. Sarah uses Claude to build a structured trade-off analysis she can defend in the client review.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier2">AI project management</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-  </div>
-
-  <div class="section-divider"></div>
-
-  <!-- ── Tier 3 ── -->
-  <div class="tier-header">
-    <div class="tier-icon">⊗</div>
-    <div class="tier-info">
-      <div class="tier-name">Tier 3 — Complex, cross-layer tasks</div>
-      <div class="tier-sub">Ambiguous inputs · Competing priorities · Judgment-heavy outputs</div>
+    <div class="doc-block">
+      <div class="doc-label">Source document — Mark Donovan's brief (verbatim email)</div>
+      <p>Hi Sarah — as discussed, we want to rebuild the client portal. The current one is embarrassing. Clients should be able to see their account, run reports, upload documents, and ideally get some AI help with their queries. We want it to feel modern. Mobile too. The team needs to be able to manage users from their end. Timeline is aggressive — Mark wants it done by Q3. Budget TBD but let's not go crazy. Lisa will be your day-to-day. Let me know what you need from us.</p>
+      <br>
+      <p>One more thing — compliance is important for us (we're a financial services firm) and whatever we build needs to integrate with our existing Salesforce setup. Don't break anything.</p>
     </div>
-    <span class="tier-status status-active">Active</span>
-  </div>
-  <p class="section-desc" style="margin-bottom:16px;">
-    Tier 3 examples are the hardest and most realistic. Multiple workstreams, ambiguous inputs, and outputs
-    that require genuine PM judgment to validate. Claude's value is in structuring the complexity — the PM's
-    value is in knowing what to do with it.
-  </p>
-  <div class="example-grid">
 
-    <a class="example-card" href="example-10-rca.html">
-      <div class="example-num">Example 10 · Tier 3 · Risk + escalation</div>
-      <div class="example-title">P1 incident RCA draft and board-level communication in one session</div>
-      <div class="example-desc">A Meridian Cloud Migration outage has caused client data unavailability. Sarah needs an RCA for the engineering team and a board-level summary for Mark Donovan — in the next two hours.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier3">Risk · Escalation</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
+    <p class="prose">
+      Sarah has a kickoff call with Lisa Park (Meridian PMO Lead) in 48 hours. She needs a structured scope document to walk through — one that captures what's in, what's out, what's ambiguous, and what she needs answers on before the team can begin.
+    </p>
 
-    <a class="example-card" href="example-11-contract.html">
-      <div class="example-num">Example 11 · Tier 3 · Contract evaluation</div>
-      <div class="example-title">Identifying red flags in a cloud vendor contract</div>
-      <div class="example-desc">The winning vendor from Example 7 has sent a 40-page MSA. Legal is backed up. Sarah uses Claude to surface the clauses that need immediate attention before the signing deadline.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier3">Vendor · Contract</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-12-cost.html">
-      <div class="example-num">Example 12 · Tier 3 · AI project specifics</div>
-      <div class="example-title">Advising a client on cloud cost estimates for an AI workload</div>
-      <div class="example-desc">Meridian's CFO has asked why the AI Assistant infrastructure costs 3x the original estimate. Sarah uses Claude to build a clear cost model narrative that explains the drivers and options.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier3">AI · Cloud costs</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-  </div>
-
-  <div class="section-divider"></div>
-
-  <!-- ── Certification ── -->
-  <div class="section-eyebrow">Certification</div>
-  <div class="section-title">SF Certified AI-Augmented Project Manager</div>
-  <p class="section-desc">
-    Complete all 12 examples and both diagrams, then take the certification exam.
-    36 scenario-based questions · 75% pass mark · 45 minutes · 3 attempts.
-  </p>
-  <a class="example-card" href="certification-test.html" style="max-width:420px; display:block;">
-    <div class="example-num">Certification Exam</div>
-    <div class="example-title">SF Certified AI-Augmented Project Manager</div>
-    <div class="example-desc">36 questions across all 12 examples. Scenario-based MCQ and True/False.</div>
-    <div class="example-card-footer">
-      <span class="example-tag tag-tier1">75% pass · 45 min · 3 attempts</span>
-      <span class="card-arrow">→</span>
+    <div class="callout">
+      <strong>Why this is harder than it looks:</strong> A vague brief isn't just incomplete — it's a risk surface. "Don't break anything" could mean anything. "Q3" is six months away or four depending on what month it is. "Ideally get some AI help" could be a chatbot or a full RAG pipeline. The scope document Sarah produces will become the basis for the SOW, the sprint plan, and every future scope-creep conversation.
     </div>
-  </a>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-1">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-1" data-step="1">
+      <label for="rev-cb-1">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step-section" id="step-2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-meta">
+        <div class="step-label">Step 2 of 5</div>
+        <div class="step-title">The naive approach</div>
+      </div>
+    </div>
+
+    <p class="prose">
+      Under time pressure, most PMs reach for a scope document template — or ask Claude with a single generic prompt.
+    </p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah (naive prompt)</div>
+      Here's a project brief from my client. Can you turn it into a scope document?
+
+      [pastes email]
+    </div>
+
+    <p class="prose">What Claude produces from this prompt is technically a scope document. It has the right headings. But it has a critical flaw:</p>
+
+    <div class="callout callout-bad">
+      <strong>What goes wrong:</strong> Claude fills in the gaps with plausible-sounding assumptions. "Mobile too" becomes "fully responsive PWA with offline support." "AI help with queries" becomes "integrated AI chatbot using OpenAI." "Don't break anything" disappears entirely. The document looks complete — but it contains commitments Sarah never made and omits risks she should have flagged.
+    </div>
+
+    <p class="prose">
+      The naive output is dangerous precisely because it looks professional. Lisa Park will read it and assume it reflects an informed assessment. When the AI chatbot scope gets challenged in Week 6, Sarah will have no documented basis for the assumption.
+    </p>
+
+    <div class="callout callout-warn">
+      <strong>The pattern to recognise:</strong> When Claude is given an ambiguous input with no structure, it defaults to making the output look complete by filling gaps with reasonable assumptions. For scoping work, this is the opposite of what a PM needs. You need the gaps surfaced, not hidden.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-2">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-2" data-step="2">
+      <label for="rev-cb-2">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-section" id="step-3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-meta">
+        <div class="step-label">Step 3 of 5</div>
+        <div class="step-title">The Claude interaction</div>
+      </div>
+    </div>
+
+    <p class="prose">
+      Sarah approaches this differently. Instead of asking Claude to write the scope document, she asks it to help her <strong>analyse the brief first</strong>, then structure the output with explicit handling of ambiguity.
+    </p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 1</div>
+      I'm a senior PM at a cloud consultancy. I've received a project brief from a client (financial services sector) for a portal rebuild. Before we write anything, I need you to read this brief and tell me:
+
+      1. What is explicitly stated as in scope
+      2. What is implied but not confirmed
+      3. What is missing that I need to clarify before the kickoff call
+      4. Any red flags or risks in the brief itself
+
+      Do not make assumptions. Flag everything uncertain as uncertain.
+
+      [pastes email]
+      <hr class="prompt-sep">
+      <div class="speaker claude">Claude — Turn 1</div>
+      Here's my analysis of the brief:
+
+      <strong>Explicitly stated (in scope):</strong>
+      — Account visibility for clients
+      — Report running capability
+      — Document upload
+      — User management for internal team
+      — Mobile support
+      — Salesforce integration
+      — Compliance requirement (unspecified standard)
+
+      <strong>Implied but unconfirmed:</strong>
+      — "AI help with queries" — could be keyword search, a chatbot, or a RAG-based assistant. These have very different build costs and timelines.
+      — "Modern feel" — UX/design scope is entirely undefined
+      — "Q3 deadline" — Q3 of which year? Which month is the hard deadline?
+      — "Budget TBD" — no budget ceiling means no basis for trade-off decisions
+
+      <strong>Missing — needs clarification before kickoff:</strong>
+      — Which compliance framework? (SOC 2, PCI DSS, FINRA?)
+      — Salesforce integration depth? (read-only sync, bi-directional, real-time?)
+      — What does "don't break anything" protect specifically?
+      — Who are the end users? Clients only, or also internal staff?
+      — What is the current portal built on and what is being replaced vs. extended?
+      — Is there an existing design system or brand guide?
+
+      <strong>Red flags:</strong>
+      — "Timeline is aggressive" with "budget TBD" is a constraint conflict. Budget needs to be established before timeline can be confirmed.
+      — "Ideally get some AI help" signals an aspirational feature that hasn't been scoped. This will become scope creep if not explicitly defined or excluded now.
+      — Compliance is mentioned as important but with no specification — this is a delivery risk.
+    </div>
+
+    <p class="prose" style="margin-top:20px;">Sarah reviews Claude's analysis — it's close, but she wants to add one more constraint she knows from her discovery call: the portal must not store PII on SF infrastructure. She refines:</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 2</div>
+      Good. One thing to add to red flags: the client mentioned verbally that PII cannot be stored on third-party infrastructure — this needs to be in the scope document as a constraint.
+
+      Now write the scope document. Use these sections:
+      — Project overview (2–3 sentences)
+      — In scope (bullet list, confirmed items only)
+      — Out of scope (explicit exclusions)
+      — Assumptions (things we're proceeding with pending confirmation)
+      — Open questions (must be resolved at kickoff)
+      — Constraints
+      — Success criteria (draft — to be confirmed with client)
+
+      Do not fill in anything that isn't in the brief or my additions. Mark anything uncertain with [TO CONFIRM].
+      <hr class="prompt-sep">
+      <div class="speaker claude">Claude — Turn 2</div>
+      <strong>Meridian Portal — Scope Document v0.1 (Pre-kickoff draft)</strong>
+      <em>Prepared by: Sarah Chen, SF Senior PM | Status: Draft — for kickoff review</em>
+
+      <strong>Project overview</strong>
+      SF has been engaged to rebuild the Meridian Financial Group client portal. The new portal will enable clients to access their accounts, run reports, upload documents, and interact with internal teams. This document defines the agreed scope basis for kickoff discussion and is subject to revision following the kickoff call.
+
+      <strong>In scope</strong>
+      — Client-facing account dashboard (view account information)
+      — Report generation and download capability
+      — Document upload (client-initiated)
+      — Internal user management interface
+      — Mobile-responsive frontend
+      — Salesforce integration [scope of integration: TO CONFIRM]
+      — Financial services compliance [framework: TO CONFIRM]
+
+      <strong>Out of scope</strong>
+      — AI-assisted query feature (flagged as aspirational — not confirmed for this phase)
+      — Migration of historical data from existing portal [TO CONFIRM]
+      — Modifications to Salesforce configuration
+      — Third-party PII storage on SF infrastructure
+
+      <strong>Assumptions</strong>
+      — Client will provide access to existing portal documentation and Salesforce sandbox
+      — Design direction to be established during discovery sprint
+      — "Q3" refers to Q3 2026 [TO CONFIRM: hard deadline month]
+
+      <strong>Open questions (for kickoff)</strong>
+      1. Which compliance framework applies? (SOC 2, PCI DSS, FINRA, other?)
+      2. Salesforce integration: read-only sync, bi-directional, or real-time?
+      3. What does "don't break anything" protect specifically?
+      4. Who are the end users of the portal beyond direct clients?
+      5. What is the current portal's technology stack?
+      6. Is there an existing design system or brand guide?
+      7. Hard deadline for Q3 — is this a go-live date or a delivery date?
+      8. Budget ceiling: when can this be confirmed?
+
+      <strong>Constraints</strong>
+      — PII must not be stored on SF or third-party infrastructure
+      — Timeline: Q3 2026 [hard deadline month: TO CONFIRM]
+      — Budget: TBD — no commitments can be made until this is established
+
+      <strong>Success criteria (draft)</strong>
+      — Clients can log in, view accounts, run reports, and upload documents
+      — Internal team can manage user access without engineering support
+      — Portal passes compliance review [framework: TO CONFIRM]
+      — Salesforce data reflects portal activity [integration scope: TO CONFIRM]
+    </div>
+
+    <div class="callout callout-good" style="margin-top:20px;">
+      <strong>What changed:</strong> The document is honest. Every gap is visible. Sarah can walk into the kickoff call and work through the open questions with Lisa Park — rather than discovering in Week 6 that the AI chatbot scope was never confirmed.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-3">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-3" data-step="3">
+      <label for="rev-cb-3">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step-section" id="step-4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-meta">
+        <div class="step-label">Step 4 of 5</div>
+        <div class="step-title">The refined output</div>
+      </div>
+    </div>
+
+    <p class="prose">
+      After the kickoff call, Sarah has answers to most of the open questions. She returns to Claude with the confirmed information and asks for a v1.0 scope document — the one that will become the basis for the SOW.
+    </p>
+
+    <div class="callout">
+      <strong>What the kickoff confirmed:</strong> Compliance framework is SOC 2 Type II. Salesforce integration is bi-directional sync (not real-time). Q3 hard deadline is September 30, 2026. Budget ceiling is $380K. AI query feature is explicitly deferred to Phase 2. PII constraint confirmed. Current portal is a legacy Rails app — replacement, not extension.
+    </div>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 3</div>
+      Here are the answers from the kickoff call:
+      — Compliance: SOC 2 Type II
+      — Salesforce: bi-directional sync, not real-time
+      — Hard deadline: September 30, 2026
+      — Budget ceiling: $380K
+      — AI query feature: deferred to Phase 2 (explicitly out of scope for this phase)
+      — PII constraint: confirmed
+      — Current portal: legacy Rails app, full replacement not extension
+      — Design: client has a brand guide, will share next week
+      — End users: external clients only (internal staff use Salesforce directly)
+
+      Update the scope document to v1.0. Remove all [TO CONFIRM] markers. Move confirmed items. Keep the open questions section only for genuinely unresolved items.
+    </div>
+
+    <div class="output-block">
+      <div class="output-label">✓ Refined output — Scope Document v1.0</div>
+      <strong>Meridian Portal — Scope Document v1.0</strong><br>
+      <em>Prepared by: Sarah Chen, SF Senior PM | Confirmed: post-kickoff | Status: Baseline</em><br><br>
+
+      <strong>In scope</strong><br>
+      — Client-facing account dashboard<br>
+      — Report generation and download<br>
+      — Document upload (client-initiated)<br>
+      — Internal user management interface<br>
+      — Mobile-responsive frontend<br>
+      — Salesforce bi-directional sync (non-real-time)<br>
+      — SOC 2 Type II compliance<br>
+      — Full replacement of legacy Rails portal<br><br>
+
+      <strong>Out of scope</strong><br>
+      — AI-assisted query feature (Phase 2)<br>
+      — Real-time Salesforce sync<br>
+      — Salesforce configuration changes<br>
+      — Internal staff portal access (use Salesforce directly)<br>
+      — PII storage on SF or third-party infrastructure<br><br>
+
+      <strong>Constraints</strong><br>
+      — PII must not be stored on SF infrastructure<br>
+      — Hard go-live: September 30, 2026<br>
+      — Budget ceiling: $380,000<br>
+      — SOC 2 Type II compliance required at launch<br><br>
+
+      <strong>Open items</strong><br>
+      — Brand guide (client to share w/c April 14)<br>
+      — Salesforce sandbox access (IT to provision by April 21)<br><br>
+
+      <strong>Success criteria</strong><br>
+      — External clients can log in, view accounts, run reports, upload documents<br>
+      — Internal team manages user access without engineering support<br>
+      — Portal passes SOC 2 Type II audit<br>
+      — Salesforce bi-directional sync operational at launch<br>
+      — Go-live by September 30, 2026 within $380K budget
+    </div>
+
+    <p class="prose">
+      The v1.0 document is clean, confirmed, and defensible. Every line traces to either the original brief or a kickoff decision. The AI feature exclusion is explicit — which means when Mark Donovan asks about it in Month 3, Sarah has a signed document to point to.
+    </p>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-4">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-4" data-step="4">
+      <label for="rev-cb-4">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step-section" id="step-5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-meta">
+        <div class="step-label">Step 5 of 5</div>
+        <div class="step-title">Watch out</div>
+      </div>
+    </div>
+
+    <p class="prose">Three failure modes to watch for when using Claude for scoping work:</p>
+
+    <div class="callout callout-bad">
+      <strong>1. Assumption laundering</strong><br>
+      Claude's default behaviour with vague input is to produce plausible-looking output by filling gaps silently. Always explicitly instruct Claude to flag uncertainty rather than resolve it. The phrase "do not make assumptions — mark everything uncertain as uncertain" should be in every scoping prompt.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>2. The complete-looking document trap</strong><br>
+      A Claude-generated scope document will almost always look well-structured and professional. This is dangerous — it creates false confidence. Always review the output asking: "Where has Claude resolved something I haven't actually confirmed?" If you can't answer that, you haven't reviewed it carefully enough.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>3. Verbal-only context</strong><br>
+      Information from verbal conversations (like Sarah's PII constraint) does not exist for Claude unless you tell it. Before any scoping session, gather your notes and add them explicitly. Claude has no memory of your discovery calls.
+    </div>
+
+    <div class="callout callout-good">
+      <strong>The prompting discipline that makes this work:</strong><br>
+      Analyse before writing. Ask Claude to surface gaps and flag ambiguity before it generates any output. Then provide confirmed context. Then generate. This two-phase approach produces a fundamentally better document than asking for the output directly.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-5">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-5" data-step="5">
+      <label for="rev-cb-5">Mark step as reviewed</label>
+    </div>
+
+    <!-- Bottom nav -->
+    <div class="bottom-nav">
+      <a class="nav-btn" href="example-2-status.html">Example 2 — Status update →</a>
+    </div>
+  </section>
 
 </div>
 
-<footer>
-  AIOps &amp; DevOps Learning Path · SourceFuse L&amp;D · AI-Augmented PM
-</footer>
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
 
 <script>
 const CACHE_VERSION = '2026-04-05-v1';
+const REV_KEY = 'pm_example-1-scope';
+
 (function() {
   function addVersion(url) {
     if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
@@ -439,23 +556,34 @@ const CACHE_VERSION = '2026-04-05-v1';
   document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
 })();
 
-// Progress tracking
-const EXAMPLES = [
-  'example-1-scope','example-2-status','example-3-risk','example-4-sprint',
-  'example-5-requirements','example-6-escalation','example-7-vendor',
-  'example-8-reporting','example-9-model','example-10-rca',
-  'example-11-contract','example-12-cost'
-];
-let done = 0;
-EXAMPLES.forEach(id => {
-  try {
-    const s = JSON.parse(localStorage.getItem('pm_' + id) || '{}');
-    if (s.reviewComplete) done++;
-  } catch(e) {}
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+
+function revLoad() { try { return JSON.parse(localStorage.getItem(REV_KEY)) || {}; } catch(e) { return {}; } }
+function revSave(s) { localStorage.setItem(REV_KEY, JSON.stringify(s)); }
+
+document.querySelectorAll('.rev-checkbox').forEach(cb => {
+  const s = revLoad();
+  if (s['cb_' + cb.dataset.step]) {
+    cb.checked = true;
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) { bar.classList.add('checked'); bar.querySelector('label').textContent = '✓ Step reviewed'; }
+  }
+  cb.addEventListener('change', () => {
+    const s = revLoad();
+    s['cb_' + cb.dataset.step] = cb.checked;
+    revSave(s);
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) {
+      bar.classList.toggle('checked', cb.checked);
+      bar.querySelector('label').textContent = cb.checked ? '✓ Step reviewed' : 'Mark step as reviewed';
+    }
+  });
 });
-const pct = Math.round((done / EXAMPLES.length) * 100);
-document.getElementById('progressFill').style.width = pct + '%';
-document.getElementById('progressCount').textContent = done + ' of ' + EXAMPLES.length + ' complete';
 </script>
 </body>
 </html>
