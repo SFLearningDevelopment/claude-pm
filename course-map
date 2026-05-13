@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Map — Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #eef2f7;
+    --bg2:          #ffffff;
+    --bg3:          #f0f4f9;
+    --border:       #d0dae8;
+    --text:         #1a2332;
+    --text-dim:     #4a5568;
+    --text-dimmer:  #8fa3bc;
+    --pm:           #0b6e4f;
+    --pm-light:     #e6f4ef;
+    --pm-mid:       #a8d5c2;
+    --pm-dark:      #074d37;
+    --blue:         #1a6eb5;
+    --blue-light:   #e8f1fb;
+    --coral:        #c0392b;
+    --green:        #1a6b3a;
+    --green-light:  #e8f5ed;
+    --amber:        #92600a;
+    --amber-light:  #fdf3e3;
+    --radius:       12px;
+    --code-bg:      #1e2433;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Merriweather Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* ── Topnav ── */
+  .topnav {
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 0 40px; height: 52px; display: flex; align-items: center;
+    gap: 8px; font-size: 12px; color: var(--text-dimmer);
+    font-family: 'Source Code Pro', monospace;
+  }
+  .topnav a { color: var(--pm); text-decoration: none; }
+  .topnav a:hover { text-decoration: underline; }
+  .sep { opacity: .4; }
+
+  /* ── Hero ── */
+  .hero-wrap { background: var(--bg2); border-bottom: 2px solid var(--border); }
+  .hero { max-width: 900px; margin: 0 auto; padding: 48px 40px 40px; }
+  .hero-eyebrow {
+    font-size: 11px; font-family: 'Source Code Pro', monospace;
+    color: var(--pm); letter-spacing: .12em; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .hero h1 { font-size: 30px; font-weight: 700; line-height: 1.25; margin-bottom: 16px; }
+  .hero h1 span { color: var(--pm); }
+  .hero-sub { font-size: 15px; color: var(--text-dim); max-width: 620px; line-height: 1.7; margin-bottom: 24px; }
+
+  /* ── Progress bar ── */
+  .progress-row { display: flex; align-items: center; gap: 12px; }
+  .progress-label { font-size: 11px; font-family: 'Source Code Pro', monospace; color: var(--text-dimmer); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+  .progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: var(--pm); border-radius: 3px; transition: width 0.6s ease; }
+  .progress-count { font-size: 11px; font-family: 'Source Code Pro', monospace; color: var(--text-dimmer); white-space: nowrap; }
+
+  /* ── Meta pills ── */
+  .meta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+  .meta-pill {
+    font-size: 11px; font-family: 'Source Code Pro', monospace;
+    padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border);
+    color: var(--text-dimmer); background: var(--bg3);
+  }
+  .meta-pill.pm { background: var(--pm-light); border-color: var(--pm-mid); color: var(--pm-dark); }
+
+  /* ── Main layout ── */
+  .main { max-width: 900px; margin: 0 auto; padding: 40px; }
+
+  /* ── Section headings ── */
+  .section-eyebrow {
+    font-size: 10px; font-family: 'Source Code Pro', monospace;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: var(--text-dimmer); margin-bottom: 6px;
+  }
+  .section-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .section-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; font-weight: 300; max-width: 680px; line-height: 1.7; }
+
+  /* ── Tier badge ── */
+  .tier-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .tier-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--pm-light); border: 1.5px solid var(--pm-mid);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .tier-info { flex: 1; }
+  .tier-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .tier-sub { font-size: 12px; color: var(--text-dimmer); font-family: 'Source Code Pro', monospace; }
+  .tier-status {
+    font-size: 10px; font-family: 'Source Code Pro', monospace;
+    padding: 3px 8px; border-radius: 10px; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase;
+  }
+  .status-active { background: var(--pm-light); color: var(--pm-dark); border: 1px solid var(--pm-mid); }
+  .status-soon   { background: var(--amber-light); color: var(--amber); border: 1px solid #e8c97a; }
+
+  /* ── Diagram cards ── */
+  .diagram-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 44px; }
+  .diagram-card {
+    background: var(--bg2); border: 1.5px solid var(--border); border-radius: var(--radius);
+    padding: 20px 22px; text-decoration: none; color: var(--text);
+    transition: border-color .15s, box-shadow .15s; display: block;
+  }
+  .diagram-card:hover { border-color: var(--pm-mid); box-shadow: 0 4px 16px rgba(11,110,79,.08); }
+  .diagram-tag {
+    font-size: 10px; font-family: 'Source Code Pro', monospace;
+    color: var(--pm); letter-spacing: .1em; text-transform: uppercase;
+    margin-bottom: 8px; display: block;
+  }
+  .diagram-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .diagram-desc { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .diagram-arrow { font-size: 18px; color: var(--pm); margin-top: 12px; display: block; }
+
+  /* ── Example grid ── */
+  .example-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 44px; }
+  .example-card {
+    background: var(--bg2); border: 1.5px solid var(--border); border-radius: var(--radius);
+    padding: 18px 20px; text-decoration: none; color: var(--text);
+    transition: border-color .15s, box-shadow .15s; display: block;
+  }
+  .example-card:hover { border-color: var(--pm-mid); box-shadow: 0 4px 16px rgba(11,110,79,.08); }
+  .example-card.locked { opacity: .55; cursor: not-allowed; }
+  .example-num { font-size: 10px; font-family: 'Source Code Pro', monospace; color: var(--text-dimmer); margin-bottom: 6px; }
+  .example-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; line-height: 1.35; }
+  .example-desc { font-size: 12px; color: var(--text-dim); line-height: 1.6; margin-bottom: 12px; }
+  .example-card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .example-tag {
+    font-size: 10px; font-family: 'Source Code Pro', monospace;
+    padding: 3px 8px; border-radius: 10px; font-weight: 600;
+  }
+  .tag-tier1  { background: var(--pm-light);   color: var(--pm-dark);  border: 1px solid var(--pm-mid); }
+  .tag-tier2  { background: var(--blue-light);  color: #0f4a7a;         border: 1px solid #b8d0ed; }
+  .tag-tier3  { background: var(--amber-light); color: var(--amber);    border: 1px solid #e8c97a; }
+  .tag-locked { background: var(--bg3);         color: var(--text-dimmer); border: 1px solid var(--border); }
+  .card-arrow  { font-size: 16px; color: var(--pm); }
+  .lock-icon   { font-size: 14px; }
+
+  /* ── Section divider ── */
+  .section-divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center; padding: 32px 40px;
+    font-size: 11px; font-family: 'Source Code Pro', monospace;
+    color: var(--text-dimmer); border-top: 1px solid var(--border);
+  }
+
+  @media(max-width:640px) {
+    .topnav, .hero, .main { padding-left: 20px; padding-right: 20px; }
+    .hero { padding-top: 28px; }
+    .diagram-grid, .example-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="#">SourceFuse L&D</a>
+  <span class="sep">/</span>
+  <a href="#">AI-Augmented PM Learning Path</a>
+  <span class="sep">/</span>
+  <span>Claude for PM</span>
+</nav>
+
+<div class="hero-wrap">
+  <div class="hero">
+    <div class="hero-eyebrow">Course Map · AI-Augmented PM Learning Path</div>
+    <h1>Claude for <span>Project Managers</span></h1>
+    <p class="hero-sub">
+      Twelve practical examples showing how senior PMs managing cloud, web, and AI projects
+      at SourceFuse can use Claude to move faster, communicate more clearly, and make better
+      decisions — without replacing the judgment that makes a great PM irreplaceable.
+    </p>
+    <div class="progress-row">
+      <span class="progress-label">Progress</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="progress-count" id="progressCount">0 of 12 complete</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-pill pm">All tiers active · Module 1 complete</span>
+      <span class="meta-pill">12 examples · 2 diagrams</span>
+      <span class="meta-pill">Intermediate → Advanced</span>
+      <span class="meta-pill">SF Certified AI-Augmented Project Manager</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ── Diagrams ── -->
+  <div class="section-eyebrow">Course foundations — interactive diagrams</div>
+  <p class="section-desc">
+    Before the examples, these two diagrams establish the mental model: where Claude fits in the PM workflow,
+    and what the AI-augmented PM operating model looks like across a full project lifecycle.
+    Click any node inside each diagram for depth.
+  </p>
+  <div class="diagram-grid">
+    <a class="diagram-card" href="diagram-1.html">
+      <span class="diagram-tag">Diagram 1 · Foundation</span>
+      <div class="diagram-title">Claude in the PM workflow</div>
+      <div class="diagram-desc">Where Claude accelerates — and where human judgment remains irreplaceable. A map of the PM decision landscape.</div>
+      <span class="diagram-arrow">→</span>
+    </a>
+    <a class="diagram-card" href="diagram-2.html">
+      <span class="diagram-tag">Diagram 2 · Foundation</span>
+      <div class="diagram-title">The AI-augmented PM operating model</div>
+      <div class="diagram-desc">From brief to delivery — how an AI-augmented PM integrates Claude across scoping, planning, execution, and reporting.</div>
+      <span class="diagram-arrow">→</span>
+    </a>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ── Tier 1 ── -->
+  <div class="tier-header">
+    <div class="tier-icon">◎</div>
+    <div class="tier-info">
+      <div class="tier-name">Tier 1 — Single-context tasks</div>
+      <div class="tier-sub">One document · One output · One feedback loop</div>
+    </div>
+    <span class="tier-status status-active">Active</span>
+  </div>
+  <p class="section-desc" style="margin-bottom:16px;">
+    Each Tier 1 example gives Claude a single input — a brief, a metric dump, a backlog — and asks for one
+    clear deliverable. The interaction runs 2–4 turns. These establish the prompting habits and output standards
+    that make Tier 2 and Tier 3 work.
+  </p>
+  <div class="example-grid">
+
+    <a class="example-card" href="example-1-scope.html">
+      <div class="example-num">Example 1 · Tier 1 · Project scoping</div>
+      <div class="example-title">Turning a vague brief into a structured scope document</div>
+      <div class="example-desc">The Meridian Portal brief arrives as two paragraphs of stakeholder notes. Claude helps Sarah turn it into a structured scope document with objectives, exclusions, and open questions.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier1">Project scoping</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="example-card" href="example-2-status.html">
+      <div class="example-num">Example 2 · Tier 1 · Stakeholder communication</div>
+      <div class="example-title">Drafting a status update for C-suite vs engineering</div>
+      <div class="example-desc">Same project data, two completely different audiences. Claude helps Sarah adapt tone, depth, and framing — so Mark Donovan (CTO) and Arjun's dev team each get what they need.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier1">Communication</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="example-card" href="example-3-risk.html">
+      <div class="example-num">Example 3 · Tier 1 · Risk identification</div>
+      <div class="example-title">Generating and scoring a risk register from a project brief</div>
+      <div class="example-desc">Sarah pastes the Meridian Cloud Migration brief and asks Claude to surface risks, score them on likelihood and impact, and suggest mitigations. The naive approach produces a generic list.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier1">Risk management</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="example-card" href="example-4-sprint.html">
+      <div class="example-num">Example 4 · Tier 1 · Sprint planning</div>
+      <div class="example-title">Decomposing an epic into a sprint-ready backlog</div>
+      <div class="example-desc">The Meridian AI Assistant epic needs to be broken into stories for Sprint 3. Claude helps Sarah decompose it into sized, acceptance-criteria-ready stories aligned to team capacity.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier1">Sprint planning</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ── Tier 2 ── -->
+  <div class="tier-header">
+    <div class="tier-icon">⊕</div>
+    <div class="tier-info">
+      <div class="tier-name">Tier 2 — Multi-context tasks</div>
+      <div class="tier-sub">Multiple inputs · Cross-document reasoning · 5–8 turn interactions</div>
+    </div>
+    <span class="tier-status status-active">Active</span>
+  </div>
+  <p class="section-desc" style="margin-bottom:16px;">
+    Tier 2 examples bring multiple inputs simultaneously — stakeholder notes, metrics, logs, RFP responses.
+    The naive approach produces a surface-level synthesis; the Claude Code interaction runs 5–8 turns and
+    produces something genuinely useful under real project pressure.
+  </p>
+  <div class="example-grid">
+
+    <a class="example-card" href="example-5-requirements.html">
+      <div class="example-num">Example 5 · Tier 2 · Requirements gathering</div>
+      <div class="example-title">Reconciling conflicting stakeholder requirements into an MRD</div>
+      <div class="example-desc">Mark Donovan wants real-time dashboards. Lisa Park wants cost controls. Arjun flags technical feasibility issues. Claude helps Sarah surface the conflicts and write an MRD that reflects reality.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier2">Requirements</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="example-card" href="example-6-escalation.html">
+      <div class="example-num">Example 6 · Tier 2 · Escalation drafting</div>
+      <div class="example-title">Crafting an escalation memo from incident logs and timeline</div>
+      <div class="example-desc">A production incident on the Meridian Portal has been running for 6 hours. Sarah needs to brief Raj Patel and the client. Claude helps turn raw incident logs into a structured escalation memo.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier2">Escalation</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="example-card" href="example-7-vendor.html">
+      <div class="example-num">Example 7 · Tier 2 · Vendor evaluation</div>
+      <div class="example-title">Scoring a vendor shortlist from RFP responses</div>
+      <div class="example-desc">Three vendors have responded to the Meridian AI Assistant RFP. Sarah has a scoring rubric and 60 pages of responses. Claude helps structure the evaluation and surface the real differentiators.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier2">Vendor evaluation</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="example-card" href="example-8-reporting.html">
+      <div class="example-num">Example 8 · Tier 2 · Stakeholder reporting</div>
+      <div class="example-title">Building a project health dashboard narrative from raw metrics</div>
+      <div class="example-desc">Sprint velocity is down. Scope creep is up. Two workstreams are amber. Claude helps Sarah write the monthly health narrative that explains what's happening and what she's doing about it.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier2">Reporting</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="example-card" href="example-9-model.html">
+      <div class="example-num">Example 9 · Tier 2 · AI project specifics</div>
+      <div class="example-title">Evaluating model selection trade-offs for a client AI project</div>
+      <div class="example-desc">Meridian wants to know why SF recommended Claude over GPT-4 for their AI Assistant. Sarah uses Claude to build a structured trade-off analysis she can defend in the client review.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier2">AI project management</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ── Tier 3 ── -->
+  <div class="tier-header">
+    <div class="tier-icon">⊗</div>
+    <div class="tier-info">
+      <div class="tier-name">Tier 3 — Complex, cross-layer tasks</div>
+      <div class="tier-sub">Ambiguous inputs · Competing priorities · Judgment-heavy outputs</div>
+    </div>
+    <span class="tier-status status-active">Active</span>
+  </div>
+  <p class="section-desc" style="margin-bottom:16px;">
+    Tier 3 examples are the hardest and most realistic. Multiple workstreams, ambiguous inputs, and outputs
+    that require genuine PM judgment to validate. Claude's value is in structuring the complexity — the PM's
+    value is in knowing what to do with it.
+  </p>
+  <div class="example-grid">
+
+    <a class="example-card" href="example-10-rca.html">
+      <div class="example-num">Example 10 · Tier 3 · Risk + escalation</div>
+      <div class="example-title">P1 incident RCA draft and board-level communication in one session</div>
+      <div class="example-desc">A Meridian Cloud Migration outage has caused client data unavailability. Sarah needs an RCA for the engineering team and a board-level summary for Mark Donovan — in the next two hours.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier3">Risk · Escalation</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="example-card" href="example-11-contract.html">
+      <div class="example-num">Example 11 · Tier 3 · Contract evaluation</div>
+      <div class="example-title">Identifying red flags in a cloud vendor contract</div>
+      <div class="example-desc">The winning vendor from Example 7 has sent a 40-page MSA. Legal is backed up. Sarah uses Claude to surface the clauses that need immediate attention before the signing deadline.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier3">Vendor · Contract</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="example-card" href="example-12-cost.html">
+      <div class="example-num">Example 12 · Tier 3 · AI project specifics</div>
+      <div class="example-title">Advising a client on cloud cost estimates for an AI workload</div>
+      <div class="example-desc">Meridian's CFO has asked why the AI Assistant infrastructure costs 3x the original estimate. Sarah uses Claude to build a clear cost model narrative that explains the drivers and options.</div>
+      <div class="example-card-footer">
+        <span class="example-tag tag-tier3">AI · Cloud costs</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ── Certification ── -->
+  <div class="section-eyebrow">Certification</div>
+  <div class="section-title">SF Certified AI-Augmented Project Manager</div>
+  <p class="section-desc">
+    Complete all 12 examples and both diagrams, then take the certification exam.
+    36 scenario-based questions · 75% pass mark · 45 minutes · 3 attempts.
+  </p>
+  <a class="example-card" href="certification-test.html" style="max-width:420px; display:block;">
+    <div class="example-num">Certification Exam</div>
+    <div class="example-title">SF Certified AI-Augmented Project Manager</div>
+    <div class="example-desc">36 questions across all 12 examples. Scenario-based MCQ and True/False.</div>
+    <div class="example-card-footer">
+      <span class="example-tag tag-tier1">75% pass · 45 min · 3 attempts</span>
+      <span class="card-arrow">→</span>
+    </div>
+  </a>
+
+</div>
+
+<footer>
+  AIOps &amp; DevOps Learning Path · SourceFuse L&amp;D · AI-Augmented PM
+</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+
+// Progress tracking
+const EXAMPLES = [
+  'example-1-scope','example-2-status','example-3-risk','example-4-sprint',
+  'example-5-requirements','example-6-escalation','example-7-vendor',
+  'example-8-reporting','example-9-model','example-10-rca',
+  'example-11-contract','example-12-cost'
+];
+let done = 0;
+EXAMPLES.forEach(id => {
+  try {
+    const s = JSON.parse(localStorage.getItem('pm_' + id) || '{}');
+    if (s.reviewComplete) done++;
+  } catch(e) {}
+});
+const pct = Math.round((done / EXAMPLES.length) * 100);
+document.getElementById('progressFill').style.width = pct + '%';
+document.getElementById('progressCount').textContent = done + ' of ' + EXAMPLES.length + ' complete';
+</script>
+</body>
+</html>
