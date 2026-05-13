@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example 4 — Sprint Planning · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --pm:#0b6e4f; --pm-light:#e6f4ef; --pm-mid:#a8d5c2; --pm-dark:#074d37;
+    --blue:#1a6eb5; --blue-light:#e8f1fb;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--pm); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; overflow-x:auto; }
+  .tabs { display:flex; }
+  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:13px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; font-family:'Merriweather Sans',sans-serif; }
+  .tab-btn .num { width:22px; height:22px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .tab-btn.active { color:var(--pm); border-bottom-color:var(--pm); }
+  .tab-btn.active .num { background:var(--pm); border-color:var(--pm); color:#fff; }
+  .main { max-width:860px; margin:0 auto; padding:40px; }
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num { width:48px; height:48px; border-radius:50%; background:var(--pm); color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:22px; font-weight:700; }
+  .prose { font-size:15px; color:var(--text-dim); line-height:1.8; margin-bottom:20px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .callout { border-left:3px solid var(--pm); background:var(--pm-light); padding:14px 18px; border-radius:0 8px 8px 0; margin:20px 0; font-size:14px; line-height:1.7; color:var(--text-dim); }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
+  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.7; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
+  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
+  .prompt-block .speaker.user { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
+  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:3px solid var(--green); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-size:13.5px; line-height:1.8; color:var(--text-dim); }
+  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:10px; font-weight:600; }
+
+  /* Story cards */
+  .story-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0; }
+  .story-card { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
+  .story-card.carried { border-top:3px solid var(--amber); }
+  .story-card.new { border-top:3px solid var(--pm); }
+  .story-id { font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-bottom:4px; }
+  .story-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .story-desc { font-size:12px; color:var(--text-dim); margin-bottom:10px; line-height:1.5; }
+  .story-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .story-pts { font-size:11px; font-family:'Source Code Pro',monospace; background:var(--bg3); border:1px solid var(--border); padding:2px 8px; border-radius:10px; color:var(--text-dimmer); }
+  .story-tag { font-size:10px; font-family:'Source Code Pro',monospace; padding:2px 8px; border-radius:10px; }
+  .story-tag.fe  { background:var(--blue-light);  color:#0f4a7a;       border:1px solid #b8d0ed; }
+  .story-tag.be  { background:var(--pm-light);    color:var(--pm-dark); border:1px solid var(--pm-mid); }
+  .story-tag.qa  { background:var(--amber-light); color:var(--amber);   border:1px solid #e8c97a; }
+  .story-tag.dep { background:var(--coral-light); color:var(--coral);   border:1px solid var(--coral-mid); }
+
+  .sprint-summary { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:16px 20px; margin:20px 0; display:flex; gap:24px; flex-wrap:wrap; }
+  .sprint-stat { text-align:center; }
+  .sprint-stat .val { font-size:24px; font-weight:700; color:var(--pm); font-family:'Source Code Pro',monospace; }
+  .sprint-stat .lbl { font-size:11px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag { font-size:11px; font-family:'Source Code Pro',monospace; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:var(--pm-dark); }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  .reviewer-bar { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:8px; margin:24px 0; background:var(--amber-light); border:1.5px solid #e8c97a; border-left:3px solid var(--amber); font-size:13px; font-family:'Source Code Pro',monospace; font-weight:600; color:var(--amber); }
+  .reviewer-bar.checked { background:var(--green-light); border-color:var(--green-mid); border-left-color:var(--green); color:var(--green); }
+  .reviewer-bar input[type="checkbox"] { width:16px; height:16px; accent-color:var(--green); }
+  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
+  .nav-btn { padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
+  .nav-btn { background:var(--pm); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--pm-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:32px 40px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .story-grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a>
+  <span class="sep">/</span>
+  <span>Tier 1 examples</span>
+  <span class="sep">/</span>
+  <span>Example 4 — Sprint planning</span>
+</nav>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+    <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+    <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+    <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+    <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <section class="step-section active" id="step-1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-meta">
+        <div class="step-label">Step 1 of 5</div>
+        <div class="step-title">The problem</div>
+      </div>
+    </div>
+
+    <div class="tags-row">
+      <span class="tag pm">Example 4 · Tier 1</span>
+      <span class="tag">Sprint planning</span>
+      <span class="tag">Single-context</span>
+      <span class="tag">2–3 turn interaction</span>
+    </div>
+
+    <p class="prose">
+      Sprint 3 planning for the Meridian AI Assistant is in two hours. Sarah has a high-level epic — "AI Query Assistant MVP" — that needs to be broken into properly sized, acceptance-criteria-ready user stories before the team can commit.
+    </p>
+
+    <div class="doc-block">
+      <div class="doc-label">Epic — Meridian AI Assistant: AI Query Assistant MVP</div>
+      Build an AI-powered query assistant for the Meridian client portal. Clients should be able to ask natural language questions about their accounts and get accurate, cited responses. The assistant must not answer questions outside the scope of Meridian's data. It should feel conversational but professional. Must work on mobile. Response time target: under 3 seconds. Integration with the existing portal authentication (already built in Sprint 2).
+    </div>
+
+    <div class="doc-block">
+      <div class="doc-label">Team capacity — Sprint 3 (2 weeks)</div>
+      Carlos (AI/ML lead): 10 days available<br>
+      Priya (frontend lead): 8 days available (one FE engineer still at 80%)<br>
+      Backend engineer (Rohan): 10 days available<br>
+      QA (shared): 4 days available<br>
+      Total capacity: ~32 story points (using 1pt ≈ 1 day, with 20% buffer for BAU)
+    </div>
+
+    <p class="prose">
+      The AI Assistant epic is deliberately vague at this stage — "feel conversational but professional" is not a testable acceptance criterion. Before the sprint planning session, Sarah needs stories with clear acceptance criteria, estimated sizes, and dependency flags so the team can have an informed commitment conversation.
+    </p>
+
+    <div class="callout">
+      <strong>Why this is PM work, not just developer work:</strong> Developers can decompose technically. PMs decompose for deliverability — which means understanding what can be demo'd to the client at the end of the sprint, what has external dependencies, and what needs to be excluded from Sprint 3 to avoid scope creep. Claude can help structure this thinking before the room fills up.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-1">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-1" data-step="1">
+      <label for="rev-cb-1">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step-section" id="step-2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-meta">
+        <div class="step-label">Step 2 of 5</div>
+        <div class="step-title">The naive approach</div>
+      </div>
+    </div>
+
+    <p class="prose">The naive prompt produces stories without acceptance criteria, without sizing guidance, and without flagging what's actually achievable in a 2-week sprint:</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah (naive prompt)</div>Break this AI assistant epic into user stories.
+
+[pastes epic]</div>
+
+    <div class="doc-block">
+      <div class="doc-label">Naive output — unsized stories without acceptance criteria</div>
+      1. As a client, I want to ask natural language questions about my account<br>
+      2. As a client, I want to receive accurate responses to my questions<br>
+      3. As a client, I want the assistant to cite its sources<br>
+      4. As a client, I want the assistant to work on mobile<br>
+      5. As a client, I want responses within 3 seconds<br>
+      6. As a client, I want the assistant to stay within Meridian's data scope<br>
+      7. As a client, I want a conversational experience
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>What's wrong:</strong> These are feature descriptions masquerading as user stories. None have acceptance criteria — how do you test "accurate responses"? How do you test "conversational experience"? There are no size estimates, no dependency flags, and no indication that stories 1, 2, 5, and 6 together represent significantly more than 32 story points of work for Sprint 3. The team would arrive at planning and spend 40 minutes discovering this.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-2">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-2" data-step="2">
+      <label for="rev-cb-2">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-section" id="step-3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-meta">
+        <div class="step-label">Step 3 of 5</div>
+        <div class="step-title">The Claude interaction</div>
+      </div>
+    </div>
+
+    <p class="prose">Sarah provides capacity context, a sizing convention, and asks Claude to flag what fits in the sprint and what should be deferred — with acceptance criteria for each story.</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 1</div>I'm a senior PM at a cloud consultancy. I need to decompose this AI assistant epic into sprint-ready user stories for a 2-week sprint. Here are my constraints:
+
+Team capacity: ~32 story points total (1 point ≈ 1 day of work)
+Team: AI/ML engineer (10 days), frontend engineer (8 days), backend engineer (10 days), QA shared (4 days)
+Sprint goal: A demo-able AI query MVP that a client can actually use to ask account questions
+
+For each story, provide:
+— User story (As a... I want... So that...)
+— Acceptance criteria (3–5 testable conditions using Given/When/Then format)
+— Story point estimate
+— Which team member(s) own it
+— Any dependencies on other stories or external systems
+
+Also tell me:
+— What fits in Sprint 3 given the capacity
+— What should be deferred to Sprint 4 and why
+
+Epic:
+[pastes epic]
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 1</div><strong>Sprint 3 Stories — Meridian AI Query Assistant MVP</strong>
+
+<strong>Story AI-01: RAG pipeline foundation</strong>
+As a system, the AI assistant must retrieve relevant account data from Meridian's data store to answer client queries accurately.
+Acceptance criteria:
+— Given a client query, the RAG pipeline retrieves the top 3 relevant document chunks from Meridian's indexed account data
+— Given a query outside Meridian's data scope, the pipeline returns no results and triggers the out-of-scope response
+— Given indexed data, retrieval completes in under 1 second (to support the 3s total response time)
+— Given a new document is added to the index, it is available for retrieval within 5 minutes
+Estimate: 8 points | Owner: Carlos (AI/ML) | Dependencies: Meridian data access + indexing pipeline (external dependency — confirm with Meridian IT)
+
+<strong>Story AI-02: Query interface — portal integration</strong>
+As a client, I want to type a natural language question in the portal so that I can get an answer without navigating menus.
+Acceptance criteria:
+— Given I am authenticated, a query input field is visible on the portal dashboard
+— Given I type a query and submit, a loading state is shown within 200ms
+— Given a response is returned, it is displayed with the source citation visible
+— Given I am on mobile, the query interface is fully functional at 375px viewport width
+— Given the session expires, I am prompted to re-authenticate before my query is submitted
+Estimate: 5 points | Owner: Priya (frontend) | Dependencies: AI-01 (API endpoint), portal auth (Sprint 2 — complete)
+
+<strong>Story AI-03: Out-of-scope guardrail</strong>
+As a client, when I ask a question outside Meridian's account data, I receive a clear and professional response explaining what the assistant can help with.
+Acceptance criteria:
+— Given a query that matches no Meridian data, the assistant responds with a predefined message explaining its scope
+— Given the out-of-scope response, it suggests 2–3 topics the assistant can help with
+— Given any query, the assistant never fabricates information (verified by QA test set of 20 adversarial queries)
+Estimate: 3 points | Owner: Carlos (AI/ML) | Dependencies: AI-01
+
+<strong>Story AI-04: Response latency validation</strong>
+As a client, I want responses within 3 seconds so that the assistant feels responsive and usable.
+Acceptance criteria:
+— Given a standard query, end-to-end response time (query submission to response displayed) is under 3 seconds for 95th percentile
+— Given a complex query requiring multiple retrieval chunks, response time does not exceed 5 seconds
+— Given a response time exceeds 3 seconds, a "still working" indicator is shown after 2 seconds
+Estimate: 3 points | Owner: Carlos (AI/ML) + Rohan (backend) | Dependencies: AI-01, AI-02
+
+<strong>Story AI-05: QA test suite — MVP</strong>
+As a QA engineer, I want a test suite for the AI assistant so that we can validate accuracy and guardrail behaviour before demo.
+Acceptance criteria:
+— 30-question test set covering: in-scope queries (15), out-of-scope queries (10), adversarial queries (5)
+— All in-scope queries return a response with a valid citation
+— All out-of-scope queries return the guardrail message
+— All adversarial queries return either the guardrail message or a correct in-scope response
+Estimate: 4 points | Owner: QA | Dependencies: AI-01, AI-02, AI-03
+
+<strong>Total Sprint 3: 23 points — within 32pt capacity ✓</strong>
+Remaining capacity (9 points): buffer for integration issues and carried items from Sprint 2
+
+<strong>Deferred to Sprint 4:</strong>
+— Conversation history / multi-turn queries (requires session state management — 6pts)
+— Admin monitoring dashboard for query logs (8pts)
+— Fine-tuning on Meridian-specific terminology (requires training data collection first — 10pts)
+These are deferred because they are not required for a client-demo-able MVP and would consume the sprint buffer needed for integration risk.</div>
+
+    <div class="callout callout-good" style="margin-top:20px;">
+      <strong>What changed:</strong> Every story has testable acceptance criteria. The sprint total is calculated against capacity. External dependencies are flagged. The deferred items have reasons — not just "left for later." Sarah arrives at planning with a proposal, not a question.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-3">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-3" data-step="3">
+      <label for="rev-cb-3">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step-section" id="step-4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-meta">
+        <div class="step-label">Step 4 of 5</div>
+        <div class="step-title">The refined output</div>
+      </div>
+    </div>
+
+    <p class="prose">After the sprint planning session, the team adjusts two estimates (AI-01 goes from 8 to 10 points after Carlos flags the indexing pipeline complexity) and adds a dependency confirmation requirement. The final sprint board looks like this:</p>
+
+    <div class="sprint-summary">
+      <div class="sprint-stat"><div class="val">23</div><div class="lbl">Committed pts</div></div>
+      <div class="sprint-stat"><div class="val">32</div><div class="lbl">Capacity pts</div></div>
+      <div class="sprint-stat"><div class="val">5</div><div class="lbl">Stories</div></div>
+      <div class="sprint-stat"><div class="val">9</div><div class="lbl">Buffer pts</div></div>
+      <div class="sprint-stat"><div class="val">1</div><div class="lbl">Ext. dependency</div></div>
+    </div>
+
+    <div class="story-grid">
+      <div class="story-card new">
+        <div class="story-id">AI-01 · 10pts · Carlos</div>
+        <div class="story-title">RAG pipeline foundation</div>
+        <div class="story-desc">Core retrieval pipeline with Meridian data indexing. Revised to 10pts after indexing complexity confirmed.</div>
+        <div class="story-meta">
+          <span class="story-pts">10 pts</span>
+          <span class="story-tag be">Backend/ML</span>
+          <span class="story-tag dep">Ext. dependency</span>
+        </div>
+      </div>
+      <div class="story-card new">
+        <div class="story-id">AI-02 · 5pts · Priya</div>
+        <div class="story-title">Query interface — portal integration</div>
+        <div class="story-desc">Frontend query input, loading state, response display with citations. Mobile responsive.</div>
+        <div class="story-meta">
+          <span class="story-pts">5 pts</span>
+          <span class="story-tag fe">Frontend</span>
+        </div>
+      </div>
+      <div class="story-card new">
+        <div class="story-id">AI-03 · 3pts · Carlos</div>
+        <div class="story-title">Out-of-scope guardrail</div>
+        <div class="story-desc">Predefined response for out-of-scope queries. Verified with 20 adversarial test cases.</div>
+        <div class="story-meta">
+          <span class="story-pts">3 pts</span>
+          <span class="story-tag be">Backend/ML</span>
+        </div>
+      </div>
+      <div class="story-card new">
+        <div class="story-id">AI-04 · 3pts · Carlos + Rohan</div>
+        <div class="story-title">Response latency validation</div>
+        <div class="story-desc">End-to-end latency under 3s at p95. Loading indicator at 2s threshold.</div>
+        <div class="story-meta">
+          <span class="story-pts">3 pts</span>
+          <span class="story-tag be">Backend/ML</span>
+        </div>
+      </div>
+      <div class="story-card new">
+        <div class="story-id">AI-05 · 4pts · QA</div>
+        <div class="story-title">QA test suite — MVP</div>
+        <div class="story-desc">30-question test set: in-scope, out-of-scope, adversarial. All results validated.</div>
+        <div class="story-meta">
+          <span class="story-pts">4 pts</span>
+          <span class="story-tag qa">QA</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>The PM's closure:</strong> Sarah notes the external dependency (Meridian IT data access for AI-01) and raises it with Lisa Park before the sprint starts. If this dependency isn't resolved by Day 3, AI-01 is blocked — and with it, the entire sprint. Getting ahead of this is exactly the kind of PM judgment that Claude's output makes visible.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-4">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-4" data-step="4">
+      <label for="rev-cb-4">Mark step as reviewed</label>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step-section" id="step-5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-meta">
+        <div class="step-label">Step 5 of 5</div>
+        <div class="step-title">Watch out</div>
+      </div>
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>1. Claude will underestimate AI/ML work</strong><br>
+      AI-01's initial estimate of 8 points was optimistic — Carlos caught this in planning because he knew the indexing pipeline complexity. Claude doesn't know your team's velocity on AI work specifically. Always validate AI/ML story estimates with the technical lead before committing.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>2. Acceptance criteria for AI quality are hard to make testable</strong><br>
+      "Accurate responses" and "conversational tone" are not testable. Claude will attempt to operationalise these — but you need to validate whether the test cases it proposes actually measure what the client cares about. A 30-question test set is a starting point, not a guarantee of production quality.
+    </div>
+
+    <div class="callout callout-bad">
+      <strong>3. Claude cannot see your team's existing sprint board</strong><br>
+      If there are carried stories, existing technical debt items, or team commitments Claude doesn't know about, the capacity calculation will be wrong. Always provide the full capacity picture — not just the headline number.
+    </div>
+
+    <div class="callout callout-good">
+      <strong>The prompting discipline that makes this work:</strong><br>
+      (1) Provide team capacity by person — not just total points. (2) State the sprint goal — what needs to be demo-able. (3) Ask explicitly for what should be deferred and why. (4) Ask for dependencies — both internal (story-to-story) and external (client/third-party). (5) Validate with your tech lead before the planning session, not during it.
+    </div>
+
+    <div class="divider"></div>
+    <div class="reviewer-bar" id="rev-bar-5">
+      <input type="checkbox" class="rev-checkbox" id="rev-cb-5" data-step="5">
+      <label for="rev-cb-5">Mark step as reviewed</label>
+    </div>
+
+    <div class="bottom-nav">
+      <a class="nav-btn secondary" href="example-3-risk.html">← Example 3</a>
+      <a class="nav-btn" href="example-5-requirements.html">Example 5 — Requirements →</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+const REV_KEY = 'pm_example-4-sprint';
+
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+
+function revLoad() { try { return JSON.parse(localStorage.getItem(REV_KEY)) || {}; } catch(e) { return {}; } }
+function revSave(s) { localStorage.setItem(REV_KEY, JSON.stringify(s)); }
+
+document.querySelectorAll('.rev-checkbox').forEach(cb => {
+  const s = revLoad();
+  if (s['cb_' + cb.dataset.step]) {
+    cb.checked = true;
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) { bar.classList.add('checked'); bar.querySelector('label').textContent = '✓ Step reviewed'; }
+  }
+  cb.addEventListener('change', () => {
+    const s = revLoad();
+    s['cb_' + cb.dataset.step] = cb.checked;
+    revSave(s);
+    const bar = cb.closest('.reviewer-bar');
+    if (bar) {
+      bar.classList.toggle('checked', cb.checked);
+      bar.querySelector('label').textContent = cb.checked ? '✓ Step reviewed' : 'Mark step as reviewed';
+    }
+  });
+});
+</script>
+</body>
+</html>
