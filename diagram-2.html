@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagram 2 — AI-Augmented PM Operating Model · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --pm:#0b6e4f; --pm-light:#e6f4ef; --pm-mid:#a8d5c2; --pm-dark:#074d37;
+    --blue:#1a6eb5; --blue-light:#e8f1fb;
+    --coral:#c0392b; --coral-light:#fdf0ee;
+    --green:#1a6b3a; --green-light:#e8f5ed;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--pm); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+
+  .hero-wrap { background:var(--bg2); border-bottom:2px solid var(--border); }
+  .hero { max-width:900px; margin:0 auto; padding:32px 40px 28px; }
+  .hero-eyebrow { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--pm); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-size:24px; font-weight:700; margin-bottom:8px; }
+  .hero h1 span { color:var(--pm); }
+  .hero-sub { font-size:14px; color:var(--text-dim); max-width:620px; line-height:1.7; }
+  .hero-hint { font-size:12px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:10px; }
+
+  .main { max-width:900px; margin:0 auto; padding:32px 40px; }
+
+  /* Operating model — horizontal lifecycle */
+  .model-wrap { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:28px; margin-bottom:24px; }
+
+  /* Stage cards — horizontal flow */
+  .stages { display:flex; gap:0; align-items:stretch; position:relative; margin-bottom:24px; }
+  .stage-arrow { display:flex; align-items:center; color:var(--pm-mid); font-size:20px; padding:0 4px; flex-shrink:0; }
+
+  .stage {
+    flex:1; border-radius:10px; padding:16px 14px; cursor:pointer;
+    transition:transform .15s, box-shadow .15s;
+    border:2px solid transparent; position:relative;
+    min-width:0;
+  }
+  .stage:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.1); }
+  .stage.active { box-shadow:0 0 0 3px var(--pm), 0 6px 20px rgba(11,110,79,.2); }
+
+  .stage-1 { background:var(--pm-light); border-color:var(--pm-mid); }
+  .stage-2 { background:#e8f1fb; border-color:#b8d0ed; }
+  .stage-3 { background:#fff8e6; border-color:#e8c97a; }
+  .stage-4 { background:var(--green-light); border-color:var(--green-mid); }
+  .stage-5 { background:var(--coral-light); border-color:#f0b8b2; }
+
+  .stage-num { font-size:10px; font-family:'Source Code Pro',monospace; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+  .stage-1 .stage-num { color:var(--pm-dark); }
+  .stage-2 .stage-num { color:#0f4a7a; }
+  .stage-3 .stage-num { color:var(--amber); }
+  .stage-4 .stage-num { color:var(--green); }
+  .stage-5 .stage-num { color:var(--coral); }
+
+  .stage-title { font-size:12px; font-weight:700; color:var(--text); margin-bottom:6px; line-height:1.3; }
+  .stage-items { list-style:none; }
+  .stage-items li { font-size:10px; color:var(--text-dim); font-family:'Source Code Pro',monospace; padding:2px 0; border-bottom:1px solid rgba(0,0,0,.06); }
+  .stage-items li:last-child { border:none; }
+  .stage-items li::before { content:'· '; color:var(--text-dimmer); }
+
+  /* Claude layer below stages */
+  .claude-layer { margin-top:16px; padding:14px 16px; background:var(--code-bg); border-radius:8px; }
+  .cl-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.1em; text-transform:uppercase; color:#a6e3a1; margin-bottom:10px; }
+  .cl-grid { display:flex; gap:8px; flex-wrap:wrap; }
+  .cl-chip {
+    font-size:11px; font-family:'Source Code Pro',monospace;
+    padding:4px 10px; border-radius:16px; cursor:pointer;
+    border:1px solid rgba(255,255,255,.15); color:#cdd6f4;
+    transition:background .15s;
+  }
+  .cl-chip:hover { background:rgba(255,255,255,.1); }
+  .cl-chip.active { background:var(--pm); border-color:var(--pm); color:#fff; }
+
+  /* Detail panel */
+  .detail-panel {
+    background:var(--bg2); border:1.5px solid var(--border);
+    border-radius:var(--radius); padding:24px 28px;
+    margin-bottom:24px; min-height:200px;
+  }
+  .detail-panel.empty { display:flex; align-items:center; justify-content:center; color:var(--text-dimmer); font-size:13px; font-family:'Source Code Pro',monospace; min-height:120px; }
+  .detail-eyebrow { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--pm); margin-bottom:6px; }
+  .detail-title { font-size:18px; font-weight:700; margin-bottom:12px; }
+  .detail-body { font-size:14px; color:var(--text-dim); line-height:1.7; margin-bottom:14px; }
+
+  /* Before/after comparison */
+  .ba-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+  .ba-card { border-radius:8px; padding:14px 16px; font-size:12px; line-height:1.6; }
+  .ba-before { background:var(--coral-light); border-left:3px solid var(--coral); }
+  .ba-after  { background:var(--green-light);  border-left:3px solid var(--green); }
+  .ba-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.08em; text-transform:uppercase; font-weight:700; margin-bottom:8px; }
+  .ba-before .ba-label { color:var(--coral); }
+  .ba-after  .ba-label { color:var(--green); }
+  .ba-time { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:8px; }
+
+  .nav-row { display:flex; justify-content:space-between; padding-top:16px; border-top:1px solid var(--border); }
+  .nav-btn { padding:10px 18px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
+  .nav-btn { background:var(--pm); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--pm-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+
+  footer { text-align:center; padding:28px 40px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); margin-top:16px; }
+
+  @media(max-width:700px) {
+    .topnav,.main,.hero { padding-left:20px; padding-right:20px; }
+    .stages { flex-direction:column; }
+    .stage-arrow { display:none; }
+    .ba-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a>
+  <span class="sep">/</span>
+  <span>Diagram 2 — AI-augmented PM operating model</span>
+</nav>
+
+<div class="hero-wrap">
+  <div class="hero">
+    <div class="hero-eyebrow">Foundation · Diagram 2 of 2</div>
+    <h1>The AI-Augmented PM <span>Operating Model</span></h1>
+    <p class="hero-sub">From brief to delivery — how a senior PM integrates Claude across the full project lifecycle. Click any stage to see the before/after comparison and the key Claude touchpoints.</p>
+    <p class="hero-hint">↓ Click any stage or Claude touchpoint to explore</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="model-wrap">
+
+    <div class="stages">
+
+      <div class="stage stage-1" onclick="showStage('initiation')" id="stage-initiation">
+        <div class="stage-num">Stage 1</div>
+        <div class="stage-title">Initiation</div>
+        <ul class="stage-items">
+          <li>Brief analysis</li>
+          <li>Scope document</li>
+          <li>Risk register</li>
+          <li>Kickoff prep</li>
+        </ul>
+      </div>
+
+      <div class="stage-arrow">→</div>
+
+      <div class="stage stage-2" onclick="showStage('planning')" id="stage-planning">
+        <div class="stage-num">Stage 2</div>
+        <div class="stage-title">Planning</div>
+        <ul class="stage-items">
+          <li>Milestone plan</li>
+          <li>Backlog decomp</li>
+          <li>Sprint planning</li>
+          <li>Budget baseline</li>
+        </ul>
+      </div>
+
+      <div class="stage-arrow">→</div>
+
+      <div class="stage stage-3" onclick="showStage('execution')" id="stage-execution">
+        <div class="stage-num">Stage 3</div>
+        <div class="stage-title">Execution</div>
+        <ul class="stage-items">
+          <li>Sprint tracking</li>
+          <li>Velocity analysis</li>
+          <li>Blocker mgmt</li>
+          <li>Status updates</li>
+        </ul>
+      </div>
+
+      <div class="stage-arrow">→</div>
+
+      <div class="stage stage-4" onclick="showStage('reporting')" id="stage-reporting">
+        <div class="stage-num">Stage 4</div>
+        <div class="stage-title">Reporting</div>
+        <ul class="stage-items">
+          <li>Health reports</li>
+          <li>Exec narrative</li>
+          <li>Change requests</li>
+          <li>Forecast updates</li>
+        </ul>
+      </div>
+
+      <div class="stage-arrow">→</div>
+
+      <div class="stage stage-5" onclick="showStage('closeout')" id="stage-closeout">
+        <div class="stage-num">Stage 5</div>
+        <div class="stage-title">Close-out</div>
+        <ul class="stage-items">
+          <li>Lessons learned</li>
+          <li>Handover docs</li>
+          <li>Retrospective</li>
+          <li>Case study</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="claude-layer">
+      <div class="cl-label">Claude touchpoints — click to explore</div>
+      <div class="cl-grid">
+        <div class="cl-chip" onclick="showTouchpoint('analyse')">Analyse before writing</div>
+        <div class="cl-chip" onclick="showTouchpoint('backwards')">Backwards scheduling</div>
+        <div class="cl-chip" onclick="showTouchpoint('audience')">Audience-specific comms</div>
+        <div class="cl-chip" onclick="showTouchpoint('scenarios')">Scenario modelling</div>
+        <div class="cl-chip" onclick="showTouchpoint('crosscutting')">Cross-cutting synthesis</div>
+        <div class="cl-chip" onclick="showTouchpoint('cr')">CR impact analysis</div>
+        <div class="cl-chip" onclick="showTouchpoint('translate')">Technical translation</div>
+        <div class="cl-chip" onclick="showTouchpoint('retro')">Retrospective facilitation</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Detail panel -->
+  <div class="detail-panel empty" id="detailPanel">
+    ← Click any stage or touchpoint above to explore
+  </div>
+
+  <div class="nav-row">
+    <a class="nav-btn secondary" href="diagram-1.html">← Diagram 1</a>
+    <a class="nav-btn" href="example-1-scope.html">Start with Example 1 →</a>
+  </div>
+
+</div>
+
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+
+const stages = {
+  initiation: {
+    label: 'Stage 1 — Initiation',
+    title: 'From vague brief to structured start',
+    body: 'Initiation is where AI-augmented PMs gain the most time. A brief that would take 2–3 hours to structure manually takes 20–30 minutes with Claude. The key discipline: analyse before writing. Claude surfaces gaps and ambiguity that would otherwise surface in Week 6 as scope creep.',
+    before: { label: 'Without Claude', items: ['2–3 hrs to structure scope from brief', 'Generic risk register from template', 'Gaps discovered at kickoff or later', 'Open questions buried in email threads'], time: '~4 hours' },
+    after:  { label: 'With Claude', items: ['Scope doc with [TO CONFIRM] markers in 30 min', 'Context-specific risk register with client actions', 'Gaps surfaced before kickoff call', 'Open questions structured and prioritised'], time: '~45 minutes' }
+  },
+  planning: {
+    label: 'Stage 2 — Planning',
+    title: 'Constraint-aware plans, not aspirational timelines',
+    body: 'Planning is where naive plans fail — they schedule forward from Day 1 and discover constraint conflicts in Month 3. Claude can reason backwards from a fixed deadline, surface the critical path, and flag where parallel phases are possible. But the PM must add operational buffer and validate with tech leads.',
+    before: { label: 'Without Claude', items: ['Generic phase plan: Discovery → Build → Test → Launch', 'Constraints discovered mid-project', 'Backlog decomposition in sprint planning (under pressure)', 'SOC 2 / compliance as an afterthought'], time: '~1 day' },
+    after:  { label: 'With Claude', items: ['Backwards-scheduled constraint-aware milestone plan', 'SOC 2 clock, UAT window, dependencies all visible upfront', 'Backlog ready before sprint planning meeting', 'Critical path explicitly identified'], time: '~2 hours' }
+  },
+  execution: {
+    label: 'Stage 3 — Execution',
+    title: 'Tracking that surfaces risk before it becomes a crisis',
+    body: 'In execution, Claude\'s value is in interpretation — turning velocity numbers into delivery risk scenarios, identifying the right corrective actions, and preparing the conversation with stakeholders before the crisis hits. The PM who surfaces a delivery risk in Week 8 has options; the one who surfaces it in Week 20 does not.',
+    before: { label: 'Without Claude', items: ['Velocity tracked in spreadsheet, interpreted manually', 'Status updates written fresh each sprint', 'Delivery risk surfaced when it\'s too late to act', 'Blockers communicated reactively'], time: '~3 hrs/sprint' },
+    after:  { label: 'With Claude', items: ['Scenario model (declining/stable/recovery) in 15 min', 'Status updates from raw data in 2 turns', 'Delivery risk surfaced with options prepared', 'Blocker communications drafted and reviewed'], time: '~45 min/sprint' }
+  },
+  reporting: {
+    label: 'Stage 4 — Reporting & Change Management',
+    title: 'One programme view, not three workstream summaries',
+    body: 'Reporting is where PMs on multi-workstream programmes spend disproportionate time. Claude can synthesise three workstream dumps into a single programme narrative — but only with explicit synthesis instructions. The consolidated client action section is the highest-value output: it makes the PM\'s accountability expectations visible in every report.',
+    before: { label: 'Without Claude', items: ['3 separate workstream summaries stapled together', 'Client actions buried in individual sections', 'Change requests handled reactively, often verbally', 'No formal impact analysis before responding'], time: '~3–4 hrs/month' },
+    after:  { label: 'With Claude', items: ['Single programme narrative with cross-cutting themes', 'Consolidated client action section with named owners', 'CR impact analysis before any response', 'Formal CR record for every scope change request'], time: '~45 min/month' }
+  },
+  closeout: {
+    label: 'Stage 5 — Close-out',
+    title: 'Capture what was learned before it walks out the door',
+    body: 'Close-out is consistently under-invested — teams are already moving to the next project. Claude can accelerate the lessons-learned process by synthesising retrospective notes into themes, drafting the handover documentation from raw notes, and producing a client-ready case study from the project history. The PM\'s role is to ensure the learning is honest, not sanitised.',
+    before: { label: 'Without Claude', items: ['Retrospective notes never synthesised into themes', 'Handover documentation produced under time pressure', 'Lessons learned lost when PM moves to next project', 'Case study never written'], time: 'Often skipped' },
+    after:  { label: 'With Claude', items: ['Retrospective themes synthesised from notes in 20 min', 'Handover doc drafted from raw notes + scope doc', 'Lessons structured and stored for future reference', 'Client case study drafted for SF marketing use'], time: '~2 hours' }
+  }
+};
+
+const touchpoints = {
+  analyse: {
+    label: 'Touchpoint — Analyse before writing',
+    title: 'The discipline that changes everything',
+    body: 'The single most impactful habit for an AI-augmented PM: always ask Claude to analyse and surface gaps before generating any document. This applies to scope documents, risk registers, status updates, and health reports. A two-phase approach (analyse → generate) consistently outperforms a one-phase approach (generate).',
+    before: { label: 'One-phase (naive)', items: ['"Write a scope document from this brief"', 'Claude fills gaps with plausible assumptions', 'Document looks complete but contains hidden commitments', 'Gaps surface in Week 6 as scope creep'], time: 'Risk: high' },
+    after:  { label: 'Two-phase (correct)', items: ['"Analyse this brief — surface gaps, flag uncertainty"', '"Now write the scope doc with [TO CONFIRM] markers"', 'Gaps are visible before kickoff', 'Open questions become the kickoff agenda'], time: 'Risk: low' }
+  },
+  backwards: {
+    label: 'Touchpoint — Backwards scheduling',
+    title: 'Plan from the deadline, not from Day 1',
+    body: 'For fixed-deadline projects, always ask Claude to reason backwards from the deadline before producing a forward-scheduled plan. This surfaces constraint conflicts (like the SOC 2 30-day clock) that forward scheduling hides until they become crises.',
+    before: { label: 'Forward scheduling (naive)', items: ['Phase 1: Discovery (4 weeks)', 'Phase 2: Build (18 weeks)', 'Phase 3: Testing (3 weeks)', 'Constraints discovered mid-project'], time: 'Plan looks complete, hides risks' },
+    after:  { label: 'Backwards scheduling (correct)', items: ['Go-live: Sep 30', 'SOC 2 clock starts Sep 1 (30-day rule)', 'Build must complete Aug 29 — not Sep 30', 'Effective build window: 18.5 weeks, not 23'], time: 'Real constraint visible from Day 1' }
+  },
+  audience: {
+    label: 'Touchpoint — Audience-specific communication',
+    title: 'Same data, different documents',
+    body: 'The same raw sprint data needs to become two completely different documents: a 130-word executive brief for the CTO and a structured operational update for the delivery team. Claude handles this transformation — but only if given detailed audience context. Describe who they are, what they care about, what they don\'t need, and what action you need from them.',
+    before: { label: 'Generic update (naive)', items: ['One status update sent to all audiences', 'Story points and technical detail in CTO update', 'Budget narrative in team update', 'No explicit call to action for either audience'], time: 'Neither audience gets what they need' },
+    after:  { label: 'Audience-specific (correct)', items: ['CTO: 130 words, RAG status, one explicit action required', 'Team: bullet points, named owners, hard dates', 'No technical jargon in CTO update', 'No budget narrative in team update'], time: '2 turns, 2 audiences served' }
+  },
+  scenarios: {
+    label: 'Touchpoint — Scenario modelling',
+    title: 'Three futures, one conversation',
+    body: 'When delivery risk is emerging, scenario modelling gives you the evidence base for the stakeholder conversation. Always model three: declining trend, stable, and recovery. The three-scenario model prevents the conversation from becoming a debate about whether there\'s a problem — it moves directly to which option to take.',
+    before: { label: 'Without scenarios', items: ['"I\'m concerned about the velocity trend"', 'Stakeholder asks: how bad is it?', 'PM cannot quantify the risk', 'Conversation becomes subjective'], time: 'Risk: conversation goes nowhere' },
+    after:  { label: 'With scenario model', items: ['Scenario 1 (declining): 22pts gap, Red risk', 'Scenario 2 (stable): manageable with monitoring', 'Scenario 3 (recovery): requires specific intervention', 'Conversation starts at options, not diagnosis'], time: 'Risk: actionable in one meeting' }
+  },
+  crosscutting: {
+    label: 'Touchpoint — Cross-cutting synthesis',
+    title: 'Programme view, not workstream summaries',
+    body: 'On multi-workstream programmes, the most important insights are the ones that appear across workstreams — two client-side blockers, a shared dependency, a common velocity pattern. Claude will produce N summaries unless explicitly instructed to find cross-cutting themes. This instruction is not optional.',
+    before: { label: 'Three summaries (naive)', items: ['Cloud Migration: on track', 'Portal: brand guide late, velocity declining', 'AI Assistant: build blocked', 'Client sees three separate issues'], time: 'Buried: two client-side blockers' },
+    after:  { label: 'Programme synthesis (correct)', items: ['2 of 3 workstreams blocked by client actions', 'Overall programme: Amber', 'Consolidated client action section', 'Client sees one programme, one ask'], time: 'Visible: client accountability' }
+  },
+  cr: {
+    label: 'Touchpoint — Change request analysis',
+    title: 'Analyse before you respond',
+    body: 'The most common PM mistake with scope change requests is responding before analysing. "Happy to explore this" is not an answer — it is the beginning of scope creep. Always run a CR impact analysis across schedule, budget, and risk before responding. Claude often surfaces creative options (like a demo environment) that the PM hasn\'t considered under pressure.',
+    before: { label: 'Reactive response (naive)', items: ['"Happy to explore this"', '"We\'ll need to assess the impact"', '"Could probably do a basic version"', 'No formal record. Expectation set.'], time: 'Scope creep begins here' },
+    after:  { label: 'Structured response (correct)', items: ['CR-001 raised before responding', 'Schedule, budget, risk impact analysed', 'Three options presented with recommendation', 'Decision required from client by [date]'], time: 'PM is in control of the conversation' }
+  },
+  translate: {
+    label: 'Touchpoint — Technical translation',
+    title: 'Vocabulary change, not fact change',
+    body: 'On AI projects, the PM bridges the technical team and non-technical stakeholders. Claude can translate "3% hallucination rate" into "in 3 out of 100 cases, the assistant flags its response as uncertain rather than guessing" — but only if given explicit translation instructions. The PM\'s job is to validate that the translation is still accurate.',
+    before: { label: 'Technical output (direct)', items: ['"84% retrieval accuracy on test set"', '"3% hallucination rate — being addressed"', '"RAG pipeline operational"', 'Board reads: AI is unreliable'], time: 'Risk: board alarm' },
+    after:  { label: 'Translated output (correct)', items: ['"84 of 100 questions answered correctly in testing"', '"3 in 100 flagged as uncertain — correct behaviour"', '"AI assistant is built and being tested"', 'Board reads: progress, responsible development'], time: 'Risk: informed, not alarmed' }
+  },
+  retro: {
+    label: 'Touchpoint — Retrospective facilitation',
+    title: 'Capture learning before it walks out the door',
+    body: 'Project retrospectives produce notes that rarely become organisational learning. Claude can synthesise retrospective notes into themes, convert themes into structured lessons, and draft a client-ready case study from the project history. The PM\'s role is to ensure honesty — Claude will soften uncomfortable lessons unless explicitly told not to.',
+    before: { label: 'Without Claude', items: ['Sticky notes from retro session', 'Action items assigned but not followed up', 'Lessons learned document never written', 'Next project repeats same mistakes'], time: 'ROI: near zero' },
+    after:  { label: 'With Claude', items: ['Retro notes → 5 themed lessons in 20 min', 'Each lesson: what happened, why, what to do differently', 'SF knowledge base entry created', 'Case study drafted for marketing use'], time: 'ROI: compound across projects' }
+  }
+};
+
+function clearActive() {
+  document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.cl-chip').forEach(c => c.classList.remove('active'));
+}
+
+function renderDetail(data) {
+  document.getElementById('detailPanel').classList.remove('empty');
+  document.getElementById('detailPanel').innerHTML = `
+    <div class="detail-eyebrow">${data.label}</div>
+    <div class="detail-title">${data.title}</div>
+    <div class="detail-body">${data.body}</div>
+    <div class="ba-grid">
+      <div class="ba-card ba-before">
+        <div class="ba-label">✗ ${data.before.label}</div>
+        ${data.before.items.map(i => `<div style="padding:2px 0; font-size:12px; color:var(--text-dim)">· ${i}</div>`).join('')}
+        <div class="ba-time">${data.before.time}</div>
+      </div>
+      <div class="ba-card ba-after">
+        <div class="ba-label">✓ ${data.after.label}</div>
+        ${data.after.items.map(i => `<div style="padding:2px 0; font-size:12px; color:var(--text-dim)">· ${i}</div>`).join('')}
+        <div class="ba-time">${data.after.time}</div>
+      </div>
+    </div>
+  `;
+}
+
+function showStage(key) {
+  clearActive();
+  document.getElementById('stage-' + key)?.classList.add('active');
+  if (stages[key]) renderDetail(stages[key]);
+}
+
+function showTouchpoint(key) {
+  clearActive();
+  // Find and activate the chip
+  document.querySelectorAll('.cl-chip').forEach(c => {
+    if (c.getAttribute('onclick') === `showTouchpoint('${key}')`) c.classList.add('active');
+  });
+  if (touchpoints[key]) renderDetail(touchpoints[key]);
+}
+</script>
+</body>
+</html>
