@@ -159,22 +159,6 @@
   .assessment-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:8px; }
   .assessment-sub { font-size:15px; color:var(--text-dim); line-height:1.7; margin-bottom:24px; }
 
-  /* Email prompt */
-  .email-input {
-    display:block; width:100%; max-width:400px;
-    padding:10px 14px; border:1.5px solid var(--border); border-radius:8px;
-    font-size:15px; font-family:'Merriweather Sans',sans-serif;
-    color:var(--text); margin-bottom:12px; outline:none;
-  }
-  .email-input:focus { border-color:var(--blue); }
-  .email-submit-btn {
-    padding:10px 22px; background:var(--blue); color:#fff;
-    border:none; border-radius:8px; font-size:14px; font-weight:600;
-    cursor:pointer; font-family:'Merriweather Sans',sans-serif;
-  }
-  .email-submit-btn:hover { background:var(--blue-dark); }
-  .email-error { font-size:13px; color:var(--coral); margin-top:8px; font-family:'Source Code Pro',monospace; }
-
   /* Questions */
   .question-block { margin-bottom:28px; padding-bottom:24px; border-bottom:1px solid var(--border); }
   .question-block:last-of-type { border-bottom:none; }
@@ -197,7 +181,7 @@
     cursor:pointer; font-family:'Merriweather Sans',sans-serif;
   }
   .submit-btn:disabled { background:var(--border); color:var(--text-dimmer); cursor:not-allowed; }
-  .submit-btn:not(:disabled):hover { background:var(--blue-dark); }
+  .submit-btn:not(:disabled):hover { background:var(--blue-dark); color:#fff; }
   .submit-note { font-size:13px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:8px; }
 
   /* Submitted state */
@@ -578,18 +562,6 @@
 
     <!-- ── Learner assessment ──────────────────────────────────────────────── -->
     <div class="assessment-wrap" id="assessmentWrap">
-
-      <!-- Email capture (one-time) -->
-      <div class="email-prompt" id="emailPrompt">
-        <div class="assessment-title">Before you answer</div>
-        <p class="assessment-sub">Enter your SF email so your answers can be saved and retrieved later.</p>
-        <input type="text" id="learnerEmail" class="email-input"
-          placeholder="your.name@sourcefuse.com"
-          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-        <button class="email-submit-btn" id="emailSubmitBtn">Continue to questions</button>
-        <div class="email-error" id="emailError"></div>
-      </div>
-
       <!-- Questions (shown after email confirmed) -->
       <div class="questions-wrap hidden" id="questionsWrap">
         <div class="assessment-title">Check your understanding</div>
@@ -699,11 +671,9 @@ function saveState(s) {
 }
 
 // ── Email capture ──────────────────────────────────────────────────────────
-const learnerEmailKey = 'pm_learner_email';
 
-function getLearnerEmail() {
-  return localStorage.getItem(learnerEmailKey) || '';
-}
+
+
 
 document.addEventListener('DOMContentLoaded', function() {
   const state = loadState();
@@ -715,28 +685,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
-  // If email already stored — skip email prompt
-  if (getLearnerEmail()) {
-    showQuestions();
-  }
 
-  // Email submit
-  const emailBtn = document.getElementById('emailSubmitBtn');
-  if (emailBtn) {
-    emailBtn.addEventListener('click', function() {
-      const val = document.getElementById('learnerEmail').value.trim();
-      if (!val || !val.includes('@')) {
-        document.getElementById('emailError').textContent = 'Please enter a valid email address.';
-        return;
-      }
-      if (!val.endsWith('@sourcefuse.com')) {
-        document.getElementById('emailError').textContent = 'Please use your @sourcefuse.com email address.';
-        return;
-      }
-      localStorage.setItem(learnerEmailKey, val);
-      showQuestions();
-    });
-  }
 
   // Track answer selections — enable submit when all answered
   document.querySelectorAll('.options input[type="radio"]').forEach(function(radio) {
@@ -763,7 +712,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function showQuestions() {
-  document.getElementById('emailPrompt').classList.add('hidden');
   document.getElementById('questionsWrap').classList.remove('hidden');
 }
 
@@ -784,7 +732,6 @@ function submitAnswers() {
   const q3 = document.querySelector('input[name="q3"]:checked')?.value;
 
   const s = loadState();
-  s.email       = getLearnerEmail();
   s.exampleId   = EXAMPLE_ID;
   s.answers     = { q1, q2, q3 };
   s.correct     = CORRECT;
@@ -798,7 +745,6 @@ function submitAnswers() {
 
 function showSubmittedState() {
   document.getElementById('questionsWrap')?.classList.add('hidden');
-  document.getElementById('emailPrompt')?.classList.add('hidden');
   document.getElementById('submittedWrap')?.classList.remove('hidden');
 }
 
