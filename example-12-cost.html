@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Example 12 — Cloud Cost Narrative · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --blue:#1a6eb5; --blue-light:#e8f1fb; --blue-mid:#b8d0ed; --blue-dark:#0f4a7a;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3;
+    --code-bg:#1e2433; --code-text:#cdd6f4; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--blue); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; overflow-x:auto; }
+  .tabs { display:flex; }
+  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:14px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; font-family:'Merriweather Sans',sans-serif; }
+  .tab-btn .num { width:24px; height:24px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .tab-btn.active { color:var(--blue); border-bottom-color:var(--blue); }
+  .tab-btn.active .num { background:var(--blue); border-color:var(--blue); color:#fff; }
+  .main { max-width:1400px; margin:0 auto; padding:36px 32px; }
+  .step-section { display:none; }
+  .step-section.active { display:block; }
+  .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .step-num { width:52px; height:52px; border-radius:50%; background:var(--blue); color:#fff; font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-meta { flex:1; }
+  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+  .step-title { font-size:24px; font-weight:700; }
+  .prose { font-size:17px; color:var(--text-dim); line-height:1.9; margin-bottom:24px; }
+  .prose strong { color:var(--text); font-weight:600; }
+  .callout { border-left:3px solid var(--blue); background:var(--blue-light); padding:18px 22px; border-radius:0 8px 8px 0; margin:20px 0; font-size:16px; line-height:1.8; color:var(--text-dim); }
+  .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
+  .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
+  .callout-good { border-left-color:var(--green); background:var(--green-light); }
+  .callout strong { color:var(--text); }
+  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-left:4px solid var(--blue); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-size:16px; line-height:1.85; color:var(--text-dim); }
+  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
+  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:14.5px; line-height:1.8; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
+  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
+  .prompt-block .speaker.user { color:#89b4fa; }
+  .prompt-block .speaker.claude { color:#a6e3a1; }
+  .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
+  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:4px solid var(--green); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-size:16px; line-height:1.85; color:var(--text-dim); }
+  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:12px; font-weight:600; }
+  .cost-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin:20px 0; }
+  .cost-card { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
+  .cost-card-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+  .cost-card-val { font-size:26px; font-weight:700; color:var(--blue); font-family:'Source Code Pro',monospace; margin-bottom:4px; }
+  .cost-card-desc { font-size:13px; color:var(--text-dim); line-height:1.5; }
+  .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
+  .tag { font-size:12px; font-family:'Source Code Pro',monospace; padding:4px 12px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag.tier3 { background:var(--amber-light); border-color:#e8c97a; color:var(--amber); }
+  .divider { height:1px; background:var(--border); margin:32px 0; }
+  .assessment-wrap { background:var(--bg2); border:1.5px solid var(--border); border-left:4px solid var(--blue); border-radius:var(--radius); padding:28px 32px; margin:32px 0; }
+  .assessment-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .assessment-sub { font-size:15px; color:var(--text-dim); line-height:1.7; margin-bottom:24px; }
+  .question-block { margin-bottom:28px; padding-bottom:24px; border-bottom:1px solid var(--border); }
+  .question-block:last-of-type { border-bottom:none; }
+  .q-num { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--blue); letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; font-weight:600; }
+  .q-text { font-size:16px; font-weight:600; color:var(--text); line-height:1.5; margin-bottom:16px; }
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .option { display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:8px; border:1.5px solid var(--border); cursor:pointer; font-size:15px; color:var(--text-dim); line-height:1.5; transition:border-color .15s, background .15s; }
+  .option:hover { border-color:var(--blue-mid); background:var(--blue-light); }
+  .option input[type="radio"] { margin-top:3px; flex-shrink:0; accent-color:var(--blue); }
+  .submit-btn { margin-top:20px; padding:12px 28px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Merriweather Sans',sans-serif; }
+  .submit-btn:disabled { background:var(--border); color:var(--text-dimmer); cursor:not-allowed; }
+  .submit-btn:not(:disabled):hover { background:var(--blue-dark); color:#fff; }
+  .submit-note { font-size:13px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:8px; }
+  .submitted-wrap { text-align:center; padding:16px 0; }
+  .submitted-icon { font-size:36px; color:var(--green); margin-bottom:8px; }
+  .submitted-title { font-size:18px; font-weight:700; color:var(--green); margin-bottom:8px; }
+  .submitted-body { font-size:15px; color:var(--text-dim); line-height:1.7; }
+  .results-link { color:var(--blue); font-weight:600; }
+  .complete-bar { display:flex; align-items:center; gap:12px; padding:14px 20px; border-radius:8px; margin:16px 0 32px; font-size:14px; font-family:'Source Code Pro',monospace; font-weight:600; border:1.5px solid var(--border); background:var(--bg3); color:var(--text-dimmer); transition:all .2s; }
+  .complete-bar.disabled { opacity:.6; cursor:not-allowed; }
+  .complete-bar.ready { background:var(--blue-light); border-color:var(--blue-mid); border-left:3px solid var(--blue); color:var(--blue-dark); }
+  .complete-bar.done { background:var(--green-light); border-color:var(--green-mid); border-left:3px solid var(--green); color:var(--green); }
+  .complete-bar input[type="checkbox"] { width:18px; height:18px; accent-color:var(--green); }
+  .complete-bar.disabled input { cursor:not-allowed; }
+  .hidden { display:none !important; }
+  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:8px; }
+  .nav-btn { padding:12px 22px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; transition:background .15s; background:var(--blue); color:#fff; border:none; }
+  .nav-btn:hover { background:var(--blue-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:32px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
+  @media(max-width:700px) { .cost-grid { grid-template-columns:1fr 1fr; } }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a href="course-map.html">Course map</a><span class="sep">/</span>
+  <span>Tier 3 examples</span><span class="sep">/</span>
+  <span>Example 12 — Cloud cost narrative</span>
+</nav>
+<div class="tabs-wrap"><div class="tabs">
+  <button class="tab-btn active" onclick="showTab(1)"><span class="num">1</span> Problem</button>
+  <button class="tab-btn" onclick="showTab(2)"><span class="num">2</span> Naive approach</button>
+  <button class="tab-btn" onclick="showTab(3)"><span class="num">3</span> Claude interaction</button>
+  <button class="tab-btn" onclick="showTab(4)"><span class="num">4</span> Refined output</button>
+  <button class="tab-btn" onclick="showTab(5)"><span class="num">5</span> Watch out</button>
+</div></div>
+<div class="main">
+
+<!-- STEP 1 -->
+<section class="step-section active" id="step-1">
+  <div class="step-header"><div class="step-num">1</div><div class="step-meta"><div class="step-label">Step 1 of 5</div><div class="step-title">The problem</div></div></div>
+  <div class="tags-row"><span class="tag tier3">Example 12 · Tier 3</span><span class="tag">Cloud costs</span><span class="tag">AI workloads</span><span class="tag">Executive communication</span></div>
+  <p class="prose">Month 4 of the Meridian engagement. The Meridian AI Assistant has been running in a staging environment for three weeks. Carlos has sent Sarah the AWS cost report. The numbers are higher than the original estimate — and the reasons are technical.</p>
+  <p class="prose">Mark Donovan has asked for a cost update before the next board meeting. He approved a $120K budget for the AI Assistant workstream. The current AWS spend trajectory is projecting $180K over the build period — $60K over budget. He needs to understand why, whether it is controllable, and what options exist.</p>
+  <div class="doc-block">
+    <div class="doc-label">Carlos's AWS cost data (raw)</div>
+    Compute: EC2 p3.2xlarge instances for embedding generation — $4,200/month. Originally estimated on t3.large ($340/month) — underestimated GPU requirement for production-scale embedding workload. Storage: Pinecone vector store — $1,100/month (estimated $200/month — vector dimensions and index size 4× original estimate due to longer document chunks). API costs: OpenAI ada-002 embedding calls — $890/month at current indexing rate. Data transfer: $340/month (cross-AZ). Total current monthly burn: $6,530. Original monthly estimate: $2,400. Variance: +$4,130/month (+172%). Projected 18-month total at current rate: $117,540 compute + overhead = ~$180K. Optimisation options: (1) Switch to Graviton3-based instances for inference (saves ~35% on compute), (2) reduce embedding re-indexing frequency from daily to weekly (saves ~$400/month on API costs), (3) use AWS Bedrock Titan embeddings instead of OpenAI ada-002 (saves ~$600/month, quality TBC). Estimated savings if all three: ~$2,100/month — brings projection to ~$142K.
+  </div>
+  <div class="callout callout-warn"><strong>Why this is Tier 3:</strong> The PM must take Carlos's technical cost breakdown — which contains GPU instance types, vector store pricing, embedding API economics, and optimisation options — and turn it into a board-ready narrative that explains a $60K budget overrun without alarming the client, while being technically accurate and presenting concrete options. Translating cost overruns is harder than translating progress updates — the client is being asked to accept additional spend.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 2 -->
+<section class="step-section" id="step-2">
+  <div class="step-header"><div class="step-num">2</div><div class="step-meta"><div class="step-label">Step 2 of 5</div><div class="step-title">The naive approach</div></div></div>
+  <p class="prose">The naive approach presents the raw numbers with a technical explanation — accurate but useless for a non-technical executive:</p>
+  <div class="prompt-block"><div class="speaker user">Sarah (naive — cost update to Mark)</div>Hi Mark — wanted to flag a budget update on the AI Assistant workstream. Current AWS spend is running at $6,530/month vs our estimate of $2,400/month. The main drivers are the GPU compute requirements for embedding generation (we needed p3.2xlarge instead of t3.large), the Pinecone vector store running larger than expected, and OpenAI API costs. We're looking at optimisations including switching to Graviton3 instances and Bedrock Titan embeddings. Projected total is now ~$180K vs the $120K approved budget. Happy to discuss.</div>
+  <div class="callout callout-bad"><strong>What's wrong:</strong> Every sentence contains jargon Mark cannot decode. "p3.2xlarge," "Pinecone vector store," "Graviton3," "Bedrock Titan embeddings" — none of these mean anything to a financial services CTO without an AI background. The $60K overrun is presented as a number without context — is this normal for AI projects? Was the estimate naive from the start? What is Mark being asked to decide? "Happy to discuss" again defers the decision to a call that should not need to happen if the communication is done correctly.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 3 -->
+<section class="step-section" id="step-3">
+  <div class="step-header"><div class="step-num">3</div><div class="step-meta"><div class="step-label">Step 3 of 5</div><div class="step-title">The Claude interaction</div></div></div>
+  <p class="prose">Sarah asks Claude to translate the cost data into a board-ready narrative with three components: why the overrun happened, whether it is reasonable, and what the options are — all without technical jargon.</p>
+  <div class="prompt-block"><div class="speaker user">Sarah — Turn 1</div>I'm a senior PM on an AI project for a financial services client. I need to explain a cloud cost overrun to a non-technical CTO (financial services background). The overrun is $60K over an approved $120K budget.
+
+Requirements:
+— No technical jargon (no GPU, EC2, Pinecone, Graviton, embeddings API — translate everything)
+— Explain why the estimate was wrong — honestly, not defensively
+— Explain whether this level of overrun is typical for AI projects at this stage
+— Present three options with cost implications
+— Tone: confident and direct, not apologetic. The overrun is real but manageable.
+— Format: short narrative + options table, max 250 words
+
+Raw cost data from my engineering lead:
+[pastes Carlos's data]
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 1</div><strong>AI Assistant — Cloud Cost Update</strong>
+
+The AI Assistant's cloud infrastructure costs are running above the original estimate. Current monthly spend is $6,500 against an estimate of $2,400 — a variance of 170%. Over the 18-month build period, this projects to approximately $180K against the approved $120K.
+
+<strong>Why the estimate was higher than expected</strong>
+The original estimate was based on standard web application infrastructure costs. Once development began, it became clear that the AI Assistant requires specialised processing power to analyse and index Meridian's account documents at the speed needed for real-time client queries. This type of AI workload typically costs 3–5× more to run than a standard web application — a pattern seen consistently across the industry. The original estimate did not account for this, which is a scoping gap we should have caught earlier.
+
+<strong>Three options</strong>
+
+| Option | What changes | Projected total | Decision needed |
+|---|---|---|---|
+| A — Status quo | Nothing | ~$180K | Accept $60K additional |
+| B — Partial optimisation | Switch 2 of 3 cost drivers to lower-cost alternatives | ~$155K | Accept $35K additional |
+| C — Full optimisation | All three cost drivers optimised (some quality testing required) | ~$142K | Accept $22K additional; allow 2-week quality validation |
+
+<strong>Recommendation:</strong> Option B. The optimisations in Option C require quality validation that could delay the October investor day demonstration. Option B reduces the overrun significantly while protecting the delivery timeline.
+<hr class="prompt-sep">
+<div class="speaker user">Sarah — Turn 2</div>Add one sentence at the top that leads with the recommendation — Mark reads the first sentence and decides whether to read on.</div>
+<hr class="prompt-sep">
+<div class="speaker claude">Claude — Turn 2</div>Added opening sentence:
+
+"We recommend approving an additional $35K for the AI Assistant workstream — this resolves the infrastructure cost variance while protecting the October investor day timeline."
+
+[rest of narrative follows]</div>
+  <div class="callout callout-good" style="margin-top:20px;"><strong>What changed:</strong> The $60K overrun is now contextualised as a known pattern in AI projects, not a project management failure. The options are presented with decision language — what Mark needs to approve, not what the engineering team needs to do. The recommendation leads, so Mark knows what he is being asked to decide before he reads the detail. No jargon. No deferral to a call.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 4 -->
+<section class="step-section" id="step-4">
+  <div class="step-header"><div class="step-num">4</div><div class="step-meta"><div class="step-label">Step 4 of 5</div><div class="step-title">The refined output</div></div></div>
+  <p class="prose">Sarah adds two things Claude did not include: a revised budget summary showing the total programme budget impact across all three workstreams, and a note on the quality validation risk in Option C that she had discussed with Carlos.</p>
+  <div class="cost-grid">
+    <div class="cost-card">
+      <div class="cost-card-label">Original AI budget</div>
+      <div class="cost-card-val">$120K</div>
+      <div class="cost-card-desc">Approved at project kickoff</div>
+    </div>
+    <div class="cost-card">
+      <div class="cost-card-label">Recommended (Option B)</div>
+      <div class="cost-card-val">$155K</div>
+      <div class="cost-card-desc">+$35K additional approval required</div>
+    </div>
+    <div class="cost-card">
+      <div class="cost-card-label">Total programme budget</div>
+      <div class="cost-card-val">$680K</div>
+      <div class="cost-card-desc">$695K with Option B — within 2.5% of total</div>
+    </div>
+  </div>
+  <div class="output-block">
+    <div class="output-label">✓ Sarah's addition — programme context</div>
+    To provide full context: the $35K increase on the AI Assistant workstream represents a 2.5% increase on the total Meridian programme budget of $680K across all three workstreams. The Cloud Migration and Portal workstreams are currently tracking within budget. The overall programme financial position remains healthy.
+  </div>
+  <div class="callout"><strong>Why this addition matters:</strong> Mark is the CTO of a financial services firm. He is used to thinking in programme-level numbers. A $35K variance on a $120K AI workstream sounds like a 29% overrun. A $35K variance on a $680K programme sounds like normal project variance. Claude produced the AI workstream narrative — Sarah added the programme context that reframes the number correctly. This is the PM's financial judgment layer.</div>
+  <div class="divider"></div>
+</section>
+
+<!-- STEP 5 -->
+<section class="step-section" id="step-5">
+  <div class="step-header"><div class="step-num">5</div><div class="step-meta"><div class="step-label">Step 5 of 5</div><div class="step-title">Watch out</div></div></div>
+  <div class="callout callout-bad"><strong>1. Never present a cost overrun without a recommendation</strong><br>Presenting options without a recommendation forces the client to make a technical decision they are not equipped to make. Always lead with your recommendation — the client can override it, but they should not have to derive it themselves. Claude will present options neutrally unless asked to recommend. Always ask.</div>
+  <div class="callout callout-bad"><strong>2. Claude will contextualise optimistically</strong><br>Claude stated that 3–5× cost overruns are "seen consistently across the industry" — which is broadly true for AI infrastructure, but Sarah should validate this claim with Carlos before presenting it to the client. If the client's CFO challenges it, Sarah needs a source, not Claude's general knowledge.</div>
+  <div class="callout callout-bad"><strong>3. The options table needs decision language, not technical language</strong><br>Claude's first draft used "switch 2 of 3 cost drivers" — still partially technical. Sarah revised to "what changes / projected total / decision needed" — framing each option as what Mark needs to approve, not what the engineering team needs to do. Always review option descriptions for residual jargon.</div>
+  <div class="callout callout-good"><strong>The discipline that makes this work:</strong><br>Lead with the recommendation, not the problem. Contextualise the number at the right level (programme, not workstream). Translate options into decision language. Validate any industry benchmarks Claude uses before presenting to the client. The PM's financial judgment — knowing that $35K on $680K reads differently than $35K on $120K — cannot be delegated to Claude.</div>
+  <div class="divider"></div>
+
+  <div class="assessment-wrap" id="assessmentWrap">
+    <div class="questions-wrap" id="questionsWrap">
+      <div class="assessment-title">Check your understanding</div>
+      <p class="assessment-sub">Answer all three questions to complete this example. Your answers are saved — results shown on the Results page after completing the course.</p>
+      <div class="question-block">
+        <div class="q-num">Question 1 of 3</div>
+        <div class="q-text">What is the most important structural change Sarah made to Claude's cost narrative before sending it to Mark?</div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q1" value="A"> She removed the options table — it was too complex for a board audience</label>
+          <label class="option"><input type="radio" name="q1" value="B"> She added programme-level budget context — reframing $35K from 29% of the AI budget to 2.5% of the total programme</label>
+          <label class="option"><input type="radio" name="q1" value="C"> She added the raw AWS cost data so Mark could verify the numbers independently</label>
+          <label class="option"><input type="radio" name="q1" value="D"> She replaced the recommendation with a request for Mark to choose an option</label>
+        </div>
+      </div>
+      <div class="question-block">
+        <div class="q-num">Question 2 of 3</div>
+        <div class="q-text">Claude stated that 3–5× AI infrastructure cost overruns are "seen consistently across the industry." What should a PM do before presenting this claim to a client?</div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q2" value="A"> Accept it — Claude's knowledge base is comprehensive and reliable for industry benchmarks</label>
+          <label class="option"><input type="radio" name="q2" value="B"> Remove it — industry benchmarks should never be cited in client communications</label>
+          <label class="option"><input type="radio" name="q2" value="C"> Validate it with the engineering lead so there is a defensible source if the client's CFO challenges it</label>
+          <label class="option"><input type="radio" name="q2" value="D"> Replace it with a lower estimate to manage client expectations conservatively</label>
+        </div>
+      </div>
+      <div class="question-block">
+        <div class="q-num">Question 3 of 3</div>
+        <div class="q-text">Why should a PM always include a recommendation when presenting cost options to a client executive?</div>
+        <div class="options">
+          <label class="option"><input type="radio" name="q3" value="A"> Executives prefer to make decisions quickly and will choose the cheapest option without guidance</label>
+          <label class="option"><input type="radio" name="q3" value="B"> Presenting options without a recommendation forces the client to make a technical decision they are not equipped to make</label>
+          <label class="option"><input type="radio" name="q3" value="C"> A recommendation demonstrates that the PM has read the contract SLA requirements</label>
+          <label class="option"><input type="radio" name="q3" value="D"> Without a recommendation the client will always request more options before deciding</label>
+        </div>
+      </div>
+      <button class="submit-btn" id="submitAnswersBtn" disabled>Submit answers</button>
+      <div class="submit-note" id="submitNote">Select an answer for each question to submit.</div>
+    </div>
+    <div class="submitted-wrap hidden" id="submittedWrap">
+      <div class="submitted-icon">✓</div>
+      <div class="submitted-title">Answers saved</div>
+      <div class="submitted-body">Your answers have been recorded. View them on the <a href="results.html" class="results-link">Results page</a> after completing the course.</div>
+    </div>
+  </div>
+  <div class="complete-bar disabled" id="completeBar">
+    <input type="checkbox" id="completeCb" disabled>
+    <label for="completeCb" id="completeLabel">Answer all questions to unlock</label>
+  </div>
+
+  <div class="bottom-nav">
+    <a class="nav-btn secondary" href="example-11-contract.html">← Example 11</a>
+    <a class="nav-btn" href="results.html">View my results →</a>
+  </div>
+</section>
+
+</div>
+<footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+<script>
+const CACHE_VERSION = '2026-04-05-v1';
+const EXAMPLE_ID    = 'example-12-cost';
+const CORRECT       = { q1: 'B', q2: 'C', q3: 'B' };
+(function() {
+  function addVersion(url) {
+    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
+    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    if (url.includes('v=' + CACHE_VERSION)) return url;
+    return url + sep + 'v=' + CACHE_VERSION;
+  }
+  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
+})();
+function showTab(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+}
+const STORAGE_KEY = 'pm_learner_' + EXAMPLE_ID;
+function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; } }
+function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+document.addEventListener('DOMContentLoaded', function() {
+  const state = loadState();
+  if (state.submittedAt) { showSubmittedState(); activateCompleteBar(state.complete); return; }
+  document.querySelectorAll('.options input[type="radio"]').forEach(function(r) { r.addEventListener('change', checkAllAnswered); });
+  document.getElementById('submitAnswersBtn').addEventListener('click', submitAnswers);
+  const cb = document.getElementById('completeCb');
+  if (cb) cb.addEventListener('change', function() {
+    if (!cb.checked) return;
+    const s = loadState(); s.complete = true; saveState(s); activateCompleteBar(true);
+  });
+});
+function checkAllAnswered() {
+  const all = ['q1','q2','q3'].every(n => document.querySelector('input[name="'+n+'"]:checked'));
+  document.getElementById('submitAnswersBtn').disabled = !all;
+  document.getElementById('submitNote').textContent = all ? 'Ready to submit.' : 'Select an answer for each question to submit.';
+}
+function submitAnswers() {
+  const answers = {};
+  ['q1','q2','q3'].forEach(n => { const v = document.querySelector('input[name="'+n+'"]:checked')?.value; if(v) answers[n]=v; });
+  const s = loadState();
+  s.exampleId = EXAMPLE_ID; s.answers = answers; s.correct = CORRECT; s.submittedAt = new Date().toISOString();
+  saveState(s); showSubmittedState(); activateCompleteBar(false);
+}
+function showSubmittedState() {
+  document.getElementById('questionsWrap')?.classList.add('hidden');
+  document.getElementById('submittedWrap')?.classList.remove('hidden');
+}
+function activateCompleteBar(isDone) {
+  const bar = document.getElementById('completeBar');
+  const cb  = document.getElementById('completeCb');
+  const lbl = document.getElementById('completeLabel');
+  if (!bar) return;
+  if (isDone) { bar.className='complete-bar done'; cb.disabled=false; cb.checked=true; lbl.textContent='✓ Example complete'; }
+  else { bar.className='complete-bar ready'; cb.disabled=false; lbl.textContent='Mark example as complete'; }
+}
+</script>
+</body>
+</html>
