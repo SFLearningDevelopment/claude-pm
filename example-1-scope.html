@@ -34,16 +34,16 @@
   .tabs { display:flex; gap:0; }
   .tab-btn {
     display:flex; align-items:center; gap:8px; padding:14px 18px;
-    font-size:13px; font-weight:600; color:var(--text-dimmer);
+    font-size:16px; font-weight:700; color:var(--text-dimmer);
     border-bottom:2px solid transparent; cursor:pointer;
     background:none; border-top:none; border-left:none; border-right:none;
     white-space:nowrap; transition:color .15s;
     font-family:'Merriweather Sans',sans-serif;
   }
   .tab-btn .num {
-    width:22px; height:22px; border-radius:50%; background:var(--bg3);
+    width:28px; height:28px; border-radius:50%; background:var(--bg3);
     border:1.5px solid var(--border); display:flex; align-items:center;
-    justify-content:center; font-size:11px; font-weight:700;
+    justify-content:center; font-size:14px; font-weight:700;
     font-family:'Source Code Pro',monospace; flex-shrink:0; transition:all .15s;
   }
   .tab-btn.active { color:var(--pm); border-bottom-color:var(--pm); }
@@ -65,7 +65,7 @@
     font-family:'Source Code Pro',monospace;
   }
   .step-meta { flex:1; }
-  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--blue); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
   .step-title { font-size:28px; font-weight:700; }
 
   /* Content blocks */
@@ -124,9 +124,9 @@
   /* Tags row */
   .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
   .tag {
-    font-size:11px; font-family:'Source Code Pro',monospace;
-    padding:4px 10px; border-radius:20px; border:1px solid var(--border);
-    color:var(--text-dimmer); background:var(--bg3);
+    font-size:14px; font-family:'Source Code Pro',monospace; font-weight:600;
+    padding:6px 14px; border-radius:20px; border:1px solid var(--border);
+    color:var(--text-dim); background:var(--bg3);
   }
   .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:#0f4a7a; }
 
@@ -211,6 +211,10 @@
   .complete-bar input[type="checkbox"] { width:18px; height:18px; accent-color:var(--green); }
   .complete-bar.disabled input { cursor:not-allowed; }
   .hidden { display:none !important; }
+  .step-nav-row { display:flex; justify-content:flex-end; margin-top:24px; }
+  .continue-btn { padding:12px 24px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Merriweather Sans',sans-serif; transition:background .15s; }
+  .continue-btn:hover { background:var(--blue-dark); }
+  .back-dashboard-btn { padding:12px 22px; background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
 
 
   /* ── Google SSO overlay ─────────────────────────────────────────────────── */
@@ -331,6 +335,7 @@
       <strong>Why this is harder than it looks:</strong> A vague brief isn't just incomplete — it's a risk surface. "Don't break anything" could mean anything. "Q3" is six months away or four depending on what month it is. "Ideally get some AI help" could be a chatbot or a full RAG pipeline. The scope document Sarah produces will become the basis for the SOW, the sprint plan, and every future scope-creep conversation.
     </div>
     <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(2)">Continue →</button></div>
   </section>
 
   <!-- STEP 2 -->
@@ -368,6 +373,7 @@
       <strong>The pattern to recognise:</strong> When Claude is given an ambiguous input with no structure, it defaults to making the output look complete by filling gaps with reasonable assumptions. For scoping work, this is the opposite of what a PM needs. You need the gaps surfaced, not hidden.
     </div>
     <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(3)">Continue →</button></div>
   </section>
 
   <!-- STEP 3 -->
@@ -499,6 +505,7 @@
       <strong>What changed:</strong> The document is honest. Every gap is visible. Sarah can walk into the kickoff call and work through the open questions with Lisa Park — rather than discovering in Week 6 that the AI chatbot scope was never confirmed.
     </div>
     <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(4)">Continue →</button></div>
   </section>
 
   <!-- STEP 4 -->
@@ -579,6 +586,7 @@
       The v1.0 document is clean, confirmed, and defensible. Every line traces to either the original brief or a kickoff decision. The AI feature exclusion is explicit — which means when Mark Donovan asks about it in Month 3, Sarah has a signed document to point to.
     </p>
     <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(5)">Continue →</button></div>
   </section>
 
   <!-- STEP 5 -->
