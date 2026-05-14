@@ -21,7 +21,7 @@
   }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
-  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:15px; font-weight:700; color:var(--text-dim); font-family:'Merriweather Sans',sans-serif; }
   .topnav a { color:var(--blue); text-decoration:none; }
   .topnav a:hover { text-decoration:underline; }
   .sep { opacity:.4; }
@@ -37,8 +37,8 @@
   .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
   .step-num { width:52px; height:52px; border-radius:50%; background:var(--blue); color:#fff; font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
   .step-meta { flex:1; }
-  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
-  .step-title { font-size:24px; font-weight:700; }
+  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+  .step-title { font-size:28px; font-weight:700; }
   .prose { font-size:17px; color:var(--text-dim); line-height:1.9; margin-bottom:24px; }
   .prose strong { color:var(--text); font-weight:600; }
   .callout { border-left:3px solid var(--blue); background:var(--blue-light); padding:18px 22px; border-radius:0 8px 8px 0; margin:20px 0; font-size:16px; line-height:1.8; color:var(--text-dim); }
@@ -156,7 +156,7 @@
 </div>
 
 <nav class="topnav">
-  <a href="course-map.html">Course map</a><span class="sep">/</span>
+  <a href="course-map.html">Back to course dashboard</a><span class="sep">/</span>
   <span>Tier 3 examples</span><span class="sep">/</span>
   <span>Example 12 — Cloud cost narrative</span>
 </nav>
@@ -427,7 +427,7 @@ function showUserBar(email) {
   const bar = document.getElementById('authUserBar');
   const em  = document.getElementById('authUserEmail');
   if (bar) bar.classList.remove('hidden');
-  if (em)  em.textContent = email;
+  if (em)  em.textContent = 'Welcome, ' + email;
 }
 
 _auth.onAuthStateChanged(function(user) {
