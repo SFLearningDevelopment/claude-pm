@@ -3,198 +3,128 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Course Map — Claude for PM</title>
+<title>Exam Results · Claude for PM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:           #eef2f7;
-    --bg2:          #ffffff;
-    --bg3:          #f0f4f9;
-    --border:       #d0dae8;
-    --text:         #1a2332;
-    --text-dim:     #4a5568;
-    --text-dimmer:  #8fa3bc;
-    --pm:           #1a6eb5;
-    --pm-light:     #e8f1fb;
-    --pm-mid:       #b8d0ed;
-    --pm-dark:      #0f4a7a;
-    --blue:         #1a6eb5;
-    --blue-light:   #e8f1fb;
-    --coral:        #c0392b;
-    --green:        #1a6b3a;
-    --green-light:  #e8f5ed;
-    --amber:        #92600a;
-    --amber-light:  #fdf3e3;
-    --radius:       12px;
-    --code-bg:      #1e2433;
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --blue:#1a6eb5; --blue-light:#e8f1fb; --blue-mid:#b8d0ed; --blue-dark:#0f4a7a;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3; --radius:12px;
   }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--blue); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .hero { background:var(--bg2); border-bottom:2px solid var(--border); padding:32px; }
+  .hero-inner { max-width:1400px; margin:0 auto; }
+  .hero-eyebrow { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--blue); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-size:30px; font-weight:700; margin-bottom:8px; }
+  .hero-sub { font-size:16px; color:var(--text-dim); line-height:1.7; }
+  .main { max-width:1400px; margin:0 auto; padding:32px; }
+  .score-banner { border-radius:var(--radius); padding:32px 36px; margin-bottom:28px; display:flex; align-items:center; gap:32px; }
+  .score-banner.pass { background:var(--green-light); border:2px solid var(--green-mid); border-left:6px solid var(--green); }
+  .score-banner.fail { background:var(--coral-light); border:2px solid var(--coral-mid); border-left:6px solid var(--coral); }
+  .score-big { font-size:56px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .score-banner.pass .score-big { color:var(--green); }
+  .score-banner.fail .score-big { color:var(--coral); }
+  .score-meta { flex:1; }
+  .score-result { font-size:22px; font-weight:700; margin-bottom:6px; }
+  .score-banner.pass .score-result { color:var(--green); }
+  .score-banner.fail .score-result { color:var(--coral); }
+  .score-detail { font-size:15px; color:var(--text-dim); line-height:1.7; }
+  .score-badge { display:inline-block; margin-top:10px; padding:6px 16px; border-radius:20px; font-size:13px; font-weight:700; font-family:'Source Code Pro',monospace; }
+  .score-banner.pass .score-badge { background:var(--green); color:#fff; }
+  .score-banner.fail .score-badge { background:var(--coral); color:#fff; }
+  .summary-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+  .sum-card { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px 24px; text-align:center; }
+  .sum-card .val { font-size:28px; font-weight:700; font-family:'Source Code Pro',monospace; margin-bottom:4px; }
+  .sum-card .lbl { font-size:12px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); text-transform:uppercase; letter-spacing:.08em; }
+  .sum-card.c .val { color:var(--green); }
+  .sum-card.w .val { color:var(--coral); }
+  .sum-card.t .val { color:var(--blue); }
+  .sum-card.a .val { color:var(--amber); }
+  .section-title { font-size:18px; font-weight:700; margin-bottom:16px; padding-bottom:8px; border-bottom:2px solid var(--border); }
+  .q-table { width:100%; border-collapse:collapse; margin-bottom:32px; }
+  .q-table th { background:var(--bg3); border:1px solid var(--border); padding:10px 14px; text-align:left; font-size:11px; font-family:'Source Code Pro',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dimmer); }
+  .q-table td { border:1px solid var(--border); padding:12px 14px; font-size:15px; color:var(--text-dim); vertical-align:top; line-height:1.5; }
+  .q-table tr:nth-child(even) td { background:var(--bg3); }
+  .pill { display:inline-block; padding:3px 12px; border-radius:20px; font-size:13px; font-family:'Source Code Pro',monospace; font-weight:700; }
+  .pill-correct { background:var(--green-light); color:var(--green); border:1px solid var(--green-mid); }
+  .pill-wrong   { background:var(--coral-light); color:var(--coral); border:1px solid var(--coral-mid); }
+  .pill-ans     { background:var(--blue-light); color:var(--blue-dark); border:1px solid var(--blue-mid); }
+  .empty-state { text-align:center; padding:60px 32px; background:var(--bg2); border-radius:var(--radius); border:1.5px solid var(--border); }
+  .empty-icon { font-size:48px; margin-bottom:16px; }
+  .empty-title { font-size:22px; font-weight:700; margin-bottom:8px; }
+  .empty-sub { font-size:16px; color:var(--text-dim); margin-bottom:24px; }
+  .empty-btn { display:inline-block; padding:12px 24px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-weight:600; font-size:15px; }
+  .empty-btn:hover { background:var(--blue-dark); }
+  .nav-row { display:flex; gap:16px; margin-top:32px; padding-top:24px; border-top:1px solid var(--border); flex-wrap:wrap; }
+  .nav-btn { padding:12px 22px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
+  .nav-btn.primary { background:var(--blue); color:#fff; }
+  .nav-btn.primary:hover { background:var(--blue-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:32px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); margin-top:16px; }
+  @media(max-width:700px) { .summary-grid { grid-template-columns:1fr 1fr; } .score-banner { flex-direction:column; gap:16px; } }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Merriweather Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-
-  /* ── Topnav ── */
-  .topnav {
-    background: var(--bg2); border-bottom: 1px solid var(--border);
-    padding: 0 32px; height: 52px; display: flex; align-items: center;
-    gap: 8px; font-size: 12px; color: var(--text-dimmer);
-    font-family: 'Source Code Pro', monospace;
+  /* ── Google SSO overlay ─────────────────────────────────────────────────── */
+  .auth-overlay {
+    position:fixed; inset:0; background:rgba(15,30,60,.7);
+    display:flex; align-items:center; justify-content:center;
+    z-index:9999; backdrop-filter:blur(4px);
   }
-  .topnav a { color: var(--pm); text-decoration: none; }
-  .topnav a:hover { text-decoration: underline; }
-  .sep { opacity: .4; }
-
-  /* ── Hero ── */
-  .hero-wrap { background: var(--bg2); border-bottom: 2px solid var(--border); }
-  .hero { max-width: 1400px; margin: 0 auto; padding: 40px 32px 36px; }
-  .hero-eyebrow {
-    font-size: 11px; font-family: 'Source Code Pro', monospace;
-    color: var(--pm); letter-spacing: .12em; text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-  .hero h1 { font-size: 36px; font-weight: 700; line-height: 1.25; margin-bottom: 16px; }
-  .hero h1 span { color: var(--pm); }
-  .hero-sub { font-size: 17px; color: var(--text-dim); max-width: 620px; line-height: 1.7; margin-bottom: 24px; }
-
-  /* ── Progress bar ── */
-  .progress-row { display: flex; align-items: center; gap: 12px; }
-  .progress-label { font-size: 11px; font-family: 'Source Code Pro', monospace; color: var(--text-dimmer); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
-  .progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; width: 0%; background: var(--pm); border-radius: 3px; transition: width 0.6s ease; }
-  .progress-count { font-size: 11px; font-family: 'Source Code Pro', monospace; color: var(--text-dimmer); white-space: nowrap; }
-
-  /* ── Meta pills ── */
-  .meta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
-  .meta-pill {
-    font-size: 11px; font-family: 'Source Code Pro', monospace;
-    padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border);
-    color: var(--text-dimmer); background: var(--bg3);
-  }
-  .meta-pill.pm { background: var(--pm-light); border-color: var(--pm-mid); color: var(--pm-dark); }
-
-  /* ── Main layout ── */
-  .main { max-width: 1400px; margin: 0 auto; padding: 32px; }
-
-  /* ── Section headings ── */
-  .section-eyebrow {
-    font-size: 10px; font-family: 'Source Code Pro', monospace;
-    letter-spacing: .15em; text-transform: uppercase;
-    color: var(--text-dimmer); margin-bottom: 6px;
-  }
-  .section-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-  .section-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; font-weight: 300; max-width: 680px; line-height: 1.7; }
-
-  /* ── Tier badge ── */
-  .tier-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-  .tier-icon {
-    width: 36px; height: 36px; border-radius: 8px;
-    background: var(--pm-light); border: 1.5px solid var(--pm-mid);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; flex-shrink: 0;
-  }
-  .tier-info { flex: 1; }
-  .tier-name { font-size: 14px; font-weight: 700; color: var(--text); }
-  .tier-sub { font-size: 12px; color: var(--text-dimmer); font-family: 'Source Code Pro', monospace; }
-  .tier-status {
-    font-size: 10px; font-family: 'Source Code Pro', monospace;
-    padding: 3px 8px; border-radius: 10px; font-weight: 600;
-    letter-spacing: .06em; text-transform: uppercase;
-  }
-  .status-active { background: var(--pm-light); color: var(--pm-dark); border: 1px solid var(--pm-mid); }
-  .status-soon   { background: var(--amber-light); color: var(--amber); border: 1px solid #e8c97a; }
-
-  /* ── Diagram cards ── */
-  .diagram-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 44px; }
-  .diagram-card {
-    background: var(--bg2); border: 1.5px solid var(--border); border-radius: var(--radius);
-    padding: 20px 22px; text-decoration: none; color: var(--text);
-    transition: border-color .15s, box-shadow .15s; display: block;
-  }
-  .diagram-card:hover { border-color: var(--pm-mid); box-shadow: 0 4px 16px rgba(11,110,79,.08); }
-  .diagram-tag {
-    font-size: 10px; font-family: 'Source Code Pro', monospace;
-    color: var(--pm); letter-spacing: .1em; text-transform: uppercase;
-    margin-bottom: 8px; display: block;
-  }
-  .diagram-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-  .diagram-desc { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
-  .diagram-arrow { font-size: 18px; color: var(--pm); margin-top: 12px; display: block; }
-
-  /* ── Example grid ── */
-  .example-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 44px; }
-  .example-card {
-    background: var(--bg2); border: 1.5px solid var(--border); border-radius: var(--radius);
-    padding: 18px 20px; text-decoration: none; color: var(--text);
-    transition: border-color .15s, box-shadow .15s; display: block;
-  }
-  .example-card:hover { border-color: var(--pm-mid); box-shadow: 0 4px 16px rgba(11,110,79,.08); }
-  .example-card.locked { opacity: .55; cursor: not-allowed; }
-  .example-num { font-size: 10px; font-family: 'Source Code Pro', monospace; color: var(--text-dimmer); margin-bottom: 6px; }
-  .example-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; line-height: 1.35; }
-  .example-desc { font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 12px; }
-  .example-card-footer { display: flex; align-items: center; justify-content: space-between; }
-  .example-tag {
-    font-size: 10px; font-family: 'Source Code Pro', monospace;
-    padding: 3px 8px; border-radius: 10px; font-weight: 600;
-  }
-  .tag-tier1  { background: var(--pm-light);   color: var(--pm-dark);  border: 1px solid var(--pm-mid); }
-  .tag-tier2  { background: var(--blue-light);  color: #0f4a7a;         border: 1px solid #b8d0ed; }
-  .tag-tier3  { background: var(--amber-light); color: var(--amber);    border: 1px solid #e8c97a; }
-  .tag-locked { background: var(--bg3);         color: var(--text-dimmer); border: 1px solid var(--border); }
-  .card-arrow  { font-size: 16px; color: var(--pm); }
-  .lock-icon   { font-size: 14px; }
-
-  /* ── Section divider ── */
-  .section-divider { height: 1px; background: var(--border); margin: 40px 0; }
-
-  /* ── Footer ── */
-  footer {
-    text-align: center; padding: 32px 40px;
-    font-size: 11px; font-family: 'Source Code Pro', monospace;
-    color: var(--text-dimmer); border-top: 1px solid var(--border);
-  }
-
-  @media(max-width:640px) {
-    .topnav, .hero, .main { padding-left: 20px; padding-right: 20px; }
-    .hero { padding-top: 28px; }
-    .diagram-grid, .example-grid { grid-template-columns: 1fr; }
-  }
-  .cert-card.locked { pointer-events:none; }
-  .cert-card.unlocked { cursor:pointer !important; opacity:1 !important; pointer-events:auto; }
-  .cert-card.unlocked:hover { border-color:var(--blue); box-shadow:0 4px 16px rgba(26,110,181,.15); }
-
-  .auth-overlay { position:fixed; inset:0; background:rgba(15,30,60,.7); display:flex; align-items:center; justify-content:center; z-index:9999; backdrop-filter:blur(4px); }
   .auth-overlay.hidden { display:none; }
-  .auth-box { background:#fff; border-radius:16px; padding:48px 40px; max-width:420px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+  .auth-box {
+    background:#fff; border-radius:16px; padding:48px 40px;
+    max-width:420px; width:90%; text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.2);
+  }
   .auth-logo { font-size:32px; margin-bottom:16px; }
-  .auth-title { font-size:22px; font-weight:700; color:#1a2332; margin-bottom:8px; }
-  .auth-sub { font-size:15px; color:#4a5568; line-height:1.6; margin-bottom:28px; }
-  .auth-google-btn { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:14px 20px; border-radius:8px; background:#1a6eb5; color:#fff; border:none; font-size:16px; font-weight:600; cursor:pointer; font-family:'Merriweather Sans',sans-serif; }
-  .auth-google-btn:hover { background:#0f4a7a; }
-  .auth-error { font-size:13px; color:#c0392b; margin-top:12px; font-family:'Source Code Pro',monospace; }
-  .auth-user-bar { background:#e8f1fb; border-bottom:1px solid #b8d0ed; padding:8px 32px; font-size:13px; font-family:'Source Code Pro',monospace; color:#0f4a7a; display:flex; align-items:center; justify-content:space-between; }
+  .auth-title { font-size:22px; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .auth-sub { font-size:15px; color:var(--text-dim); line-height:1.6; margin-bottom:28px; }
+  .auth-google-btn {
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    width:100%; padding:14px 20px; border-radius:8px;
+    background:var(--blue); color:#fff; border:none;
+    font-size:16px; font-weight:600; cursor:pointer;
+    font-family:'Merriweather Sans',sans-serif; transition:background .15s;
+  }
+  .auth-google-btn:hover { background:var(--blue-dark); }
+  .auth-google-btn svg { width:20px; height:20px; flex-shrink:0; }
+  .auth-error { font-size:13px; color:var(--coral); margin-top:12px; font-family:'Source Code Pro',monospace; }
+  .auth-user-bar {
+    background:var(--blue-light); border-bottom:1px solid var(--blue-mid);
+    padding:8px 32px; font-size:13px; font-family:'Source Code Pro',monospace;
+    color:var(--blue-dark); display:flex; align-items:center; justify-content:space-between;
+  }
   .auth-user-bar.hidden { display:none; }
-  .auth-signout { background:none; border:none; color:#1a6eb5; cursor:pointer; font-size:12px; font-family:'Source Code Pro',monospace; text-decoration:underline; }
+  .auth-signout { background:none; border:none; color:var(--blue); cursor:pointer; font-size:12px; font-family:'Source Code Pro',monospace; text-decoration:underline; }
 
 </style>
 </head>
 <body>
 
+<!-- Auth overlay -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-box">
     <div class="auth-logo">🎓</div>
     <div class="auth-title">Claude for PM</div>
     <div class="auth-sub">Sign in with your SourceFuse Google account to access the course and save your progress.</div>
     <button class="auth-google-btn" id="googleSignInBtn">
-      <svg viewBox="0 0 48 48" width="20" height="20"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
+      <svg viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
       Sign in with Google
     </button>
     <div class="auth-error hidden" id="authError"></div>
   </div>
 </div>
+
+<!-- Signed-in user bar -->
 <div class="auth-user-bar hidden" id="authUserBar">
   <span id="authUserEmail"></span>
   <button class="auth-signout" id="authSignOutBtn">Sign out</button>
@@ -202,372 +132,249 @@
 
 
 <nav class="topnav">
-  <a href="#">SourceFuse L&D</a>
-  <span class="sep">/</span>
-  <a href="#">AI-Augmented PM Learning Path</a>
-  <span class="sep">/</span>
-  <span>Claude for PM</span>
+  <a href="course-map.html">Course map</a><span class="sep">/</span>
+  <span>Exam results</span>
 </nav>
 
-<div class="hero-wrap">
-  <div class="hero">
-    <div class="hero-eyebrow">Course Map · AI-Augmented PM Learning Path</div>
-    <h1>Claude for <span>Project Managers</span></h1>
-    <p class="hero-sub">
-      Twelve practical examples showing how senior PMs managing cloud, web, and AI projects
-      at SourceFuse can use Claude to move faster, communicate more clearly, and make better
-      decisions — without replacing the judgment that makes a great PM irreplaceable.
-    </p>
-    <div class="progress-row">
-      <span class="progress-label">Progress</span>
-      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-      <span class="progress-count" id="progressCount">0 of 12 complete</span>
-    </div>
-    <div class="meta-row">
-      <span class="meta-pill pm">All tiers active · Module 1 complete</span>
-      <span class="meta-pill">12 examples · 2 diagrams</span>
-      <span class="meta-pill">Intermediate → Advanced</span>
-      <span class="meta-pill">SF Certified AI-Augmented Project Manager</span>
-    </div>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">SF Certified AI-Augmented Project Manager</div>
+    <h1>Exam Results</h1>
+    <p class="hero-sub" id="heroSub">Loading your results...</p>
   </div>
 </div>
 
-<div class="main">
+<div class="main" id="mainContent"></div>
 
-  <!-- ── Diagrams ── -->
-  <div class="section-eyebrow">Course foundations — interactive diagrams</div>
-  <p class="section-desc">
-    Before the examples, these two diagrams establish the mental model: where Claude fits in the PM workflow,
-    and what the AI-augmented PM operating model looks like across a full project lifecycle.
-    Click any node inside each diagram for depth.
-  </p>
-  <div class="diagram-grid">
-    <a class="diagram-card" href="diagram-1.html">
-      <span class="diagram-tag">Diagram 1 · Foundation</span>
-      <div class="diagram-title">Claude in the PM workflow</div>
-      <div class="diagram-desc">Where Claude accelerates — and where human judgment remains irreplaceable. A map of the PM decision landscape.</div>
-      <span class="diagram-arrow">→</span>
-    </a>
-    <a class="diagram-card" href="diagram-2.html">
-      <span class="diagram-tag">Diagram 2 · Foundation</span>
-      <div class="diagram-title">The AI-augmented PM operating model</div>
-      <div class="diagram-desc">From brief to delivery — how an AI-augmented PM integrates Claude across scoping, planning, execution, and reporting.</div>
-      <span class="diagram-arrow">→</span>
-    </a>
-  </div>
-
-  <div class="section-divider"></div>
-
-  <!-- ── Tier 1 ── -->
-  <div class="tier-header">
-    <div class="tier-icon">◎</div>
-    <div class="tier-info">
-      <div class="tier-name">Tier 1 — Single-context tasks</div>
-      <div class="tier-sub">One document · One output · One feedback loop</div>
-    </div>
-    <span class="tier-status status-active">Active</span>
-  </div>
-  <p class="section-desc" style="margin-bottom:16px;">
-    Each Tier 1 example gives Claude a single input — a brief, a metric dump, a backlog — and asks for one
-    clear deliverable. The interaction runs 2–4 turns. These establish the prompting habits and output standards
-    that make Tier 2 and Tier 3 work.
-  </p>
-  <div class="example-grid">
-
-    <a class="example-card" href="example-1-scope.html">
-      <div class="example-num">Example 1 · Tier 1 · Project scoping</div>
-      <div class="example-title">Turning a vague brief into a structured scope document</div>
-      <div class="example-desc">The Meridian Portal brief arrives as two paragraphs of stakeholder notes. Claude helps Sarah turn it into a structured scope document with objectives, exclusions, and open questions.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier1">Project scoping</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-2-status.html">
-      <div class="example-num">Example 2 · Tier 1 · Stakeholder communication</div>
-      <div class="example-title">Drafting a status update for C-suite vs engineering</div>
-      <div class="example-desc">Same project data, two completely different audiences. Claude helps Sarah adapt tone, depth, and framing — so Mark Donovan (CTO) and Arjun's dev team each get what they need.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier1">Communication</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-3-risk.html">
-      <div class="example-num">Example 3 · Tier 1 · Risk identification</div>
-      <div class="example-title">Generating and scoring a risk register from a project brief</div>
-      <div class="example-desc">Sarah pastes the Meridian Cloud Migration brief and asks Claude to surface risks, score them on likelihood and impact, and suggest mitigations. The naive approach produces a generic list.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier1">Risk management</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-4-sprint.html">
-      <div class="example-num">Example 4 · Tier 1 · Sprint planning</div>
-      <div class="example-title">Decomposing an epic into a sprint-ready backlog</div>
-      <div class="example-desc">The Meridian AI Assistant epic needs to be broken into stories for Sprint 3. Claude helps Sarah decompose it into sized, acceptance-criteria-ready stories aligned to team capacity.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier1">Sprint planning</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-  </div>
-
-  <div class="section-divider"></div>
-
-  <!-- ── Tier 2 ── -->
-  <div class="tier-header">
-    <div class="tier-icon">⊕</div>
-    <div class="tier-info">
-      <div class="tier-name">Tier 2 — Multi-context tasks</div>
-      <div class="tier-sub">Multiple inputs · Cross-document reasoning · 5–8 turn interactions</div>
-    </div>
-    <span class="tier-status status-active">Active</span>
-  </div>
-  <p class="section-desc" style="margin-bottom:16px;">
-    Tier 2 examples bring multiple inputs simultaneously — stakeholder notes, metrics, logs, RFP responses.
-    The naive approach produces a surface-level synthesis; the Claude Code interaction runs 5–8 turns and
-    produces something genuinely useful under real project pressure.
-  </p>
-  <div class="example-grid">
-
-    <a class="example-card" href="example-5-requirements.html">
-      <div class="example-num">Example 5 · Tier 2 · Requirements gathering</div>
-      <div class="example-title">Reconciling conflicting stakeholder requirements into an MRD</div>
-      <div class="example-desc">Mark Donovan wants real-time dashboards. Lisa Park wants cost controls. Arjun flags technical feasibility issues. Claude helps Sarah surface the conflicts and write an MRD that reflects reality.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier2">Requirements</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-6-escalation.html">
-      <div class="example-num">Example 6 · Tier 2 · Escalation drafting</div>
-      <div class="example-title">Crafting an escalation memo from incident logs and timeline</div>
-      <div class="example-desc">A production incident on the Meridian Portal has been running for 6 hours. Sarah needs to brief Raj Patel and the client. Claude helps turn raw incident logs into a structured escalation memo.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier2">Escalation</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-7-vendor.html">
-      <div class="example-num">Example 7 · Tier 2 · Vendor evaluation</div>
-      <div class="example-title">Scoring a vendor shortlist from RFP responses</div>
-      <div class="example-desc">Three vendors have responded to the Meridian AI Assistant RFP. Sarah has a scoring rubric and 60 pages of responses. Claude helps structure the evaluation and surface the real differentiators.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier2">Vendor evaluation</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-8-reporting.html">
-      <div class="example-num">Example 8 · Tier 2 · Stakeholder reporting</div>
-      <div class="example-title">Building a project health dashboard narrative from raw metrics</div>
-      <div class="example-desc">Sprint velocity is down. Scope creep is up. Two workstreams are amber. Claude helps Sarah write the monthly health narrative that explains what's happening and what she's doing about it.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier2">Reporting</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-9-model.html">
-      <div class="example-num">Example 9 · Tier 2 · AI project specifics</div>
-      <div class="example-title">Evaluating model selection trade-offs for a client AI project</div>
-      <div class="example-desc">Meridian wants to know why SF recommended Claude over GPT-4 for their AI Assistant. Sarah uses Claude to build a structured trade-off analysis she can defend in the client review.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier2">AI project management</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-  </div>
-
-  <div class="section-divider"></div>
-
-  <!-- ── Tier 3 ── -->
-  <div class="tier-header">
-    <div class="tier-icon">⊗</div>
-    <div class="tier-info">
-      <div class="tier-name">Tier 3 — Complex, cross-layer tasks</div>
-      <div class="tier-sub">Ambiguous inputs · Competing priorities · Judgment-heavy outputs</div>
-    </div>
-    <span class="tier-status status-active">Active</span>
-  </div>
-  <p class="section-desc" style="margin-bottom:16px;">
-    Tier 3 examples are the hardest and most realistic. Multiple workstreams, ambiguous inputs, and outputs
-    that require genuine PM judgment to validate. Claude's value is in structuring the complexity — the PM's
-    value is in knowing what to do with it.
-  </p>
-  <div class="example-grid">
-
-    <a class="example-card" href="example-10-rca.html">
-      <div class="example-num">Example 10 · Tier 3 · Risk + escalation</div>
-      <div class="example-title">P1 incident RCA draft and board-level communication in one session</div>
-      <div class="example-desc">A Meridian Cloud Migration outage has caused client data unavailability. Sarah needs an RCA for the engineering team and a board-level summary for Mark Donovan — in the next two hours.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier3">Risk · Escalation</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-11-contract.html">
-      <div class="example-num">Example 11 · Tier 3 · Contract evaluation</div>
-      <div class="example-title">Identifying red flags in a cloud vendor contract</div>
-      <div class="example-desc">The winning vendor from Example 7 has sent a 40-page MSA. Legal is backed up. Sarah uses Claude to surface the clauses that need immediate attention before the signing deadline.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier3">Vendor · Contract</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-    <a class="example-card" href="example-12-cost.html">
-      <div class="example-num">Example 12 · Tier 3 · AI project specifics</div>
-      <div class="example-title">Advising a client on cloud cost estimates for an AI workload</div>
-      <div class="example-desc">Meridian's CFO has asked why the AI Assistant infrastructure costs 3x the original estimate. Sarah uses Claude to build a clear cost model narrative that explains the drivers and options.</div>
-      <div class="example-card-footer">
-        <span class="example-tag tag-tier3">AI · Cloud costs</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </a>
-
-  </div>
-
-  <div class="section-divider"></div>
-
-  <!-- ── Certification ── -->
-  <div class="section-eyebrow">Certification</div>
-  <div class="section-title">SF Certified AI-Augmented Project Manager</div>
-  <p class="section-desc">
-    Complete all 12 examples and both diagrams, then take the certification exam.
-    36 scenario-based questions · 75% pass mark · 45 minutes · 3 attempts.
-  </p>
-  <div class="example-card cert-card locked" id="certCard" style="max-width:420px; display:block; cursor:not-allowed; opacity:.55;" title="Complete all 12 examples to unlock">
-    <div class="example-num">Certification Exam</div>
-    <div class="example-title">SF Certified AI-Augmented Project Manager</div>
-    <div class="example-desc">36 questions across all 12 examples. Scenario-based MCQ and True/False.</div>
-    <div class="example-card-footer">
-      <span class="example-tag tag-tier1">75% pass · 45 min · 3 attempts</span>
-      <span class="card-arrow">→</span>
-    </div>
-  </div>
-
-</div>
-
-<footer>
-  AIOps &amp; DevOps Learning Path · SourceFuse L&amp;D · AI-Augmented PM
-</footer>
+<footer>Claude for PM &middot; SourceFuse L&D &middot; SF Certified AI-Augmented Project Manager</footer>
 
 <script>
-const CACHE_VERSION = '2026-04-05-v1';
-(function() {
-  function addVersion(url) {
-    if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
-    if (!url.endsWith('.html') && !url.includes('.html?')) return url;
-    const sep = url.includes('?') ? '&' : '?';
-    if (url.includes('v=' + CACHE_VERSION)) return url;
-    return url + sep + 'v=' + CACHE_VERSION;
-  }
-  document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
-})();
+const PASS_MARK = 75;
+const TOTAL_QS  = 36;
+const STORAGE_KEY = window.pmCertKey ? window.pmCertKey() : 'pm_cert_exam';
 
-// Progress tracking
-const EXAMPLES = [
-  'example-1-scope','example-2-status','example-3-risk','example-4-sprint',
-  'example-5-requirements','example-6-escalation','example-7-vendor',
-  'example-8-reporting','example-9-model','example-10-rca',
-  'example-11-contract','example-12-cost'
+function loadExamState() {
+  const key = window.pmCertKey ? window.pmCertKey() : 'pm_cert_exam';
+  try { return JSON.parse(localStorage.getItem(key)) || null; }
+  catch(e) { return null; }
+}
+
+const EXAM_QUESTIONS = [
+  "When managing scope ambiguity, what is the PM's primary responsibility before asking Claude to generate a document?",
+  "Which prompting approach produces the most reliable scope document from a vague brief?",
+  "What should a scope document always include that a vague brief typically does not?",
+  "What is the most important element of an executive status update that Claude tends to omit by default?",
+  "When writing status updates for two different audiences from the same data, what must the PM specify?",
+  "A declining sprint velocity trend requires what minimum input to Claude for useful risk analysis?",
+  "What makes a risk register genuinely useful versus generic?",
+  "Why must a PM validate Claude's risk scores against their own judgment?",
+  "What type of risk does Claude most commonly miss without explicit prompting?",
+  "What is the key output that separates a Claude-assisted sprint plan from a naive decomposition?",
+  "When should a PM validate story point estimates with the technical lead?",
+  "What is the correct sequence for sprint planning with Claude?",
+  "For fixed-deadline projects, what scheduling technique must always be applied first?",
+  "What hidden constraint did the SOC 2 requirement create in the Meridian Portal plan?",
+  "What operational element did Sarah add to the milestone plan that Claude had not included?",
+  "What two inputs are both required for Claude to produce a useful delivery risk model?",
+  "Three-scenario delivery modelling serves what primary purpose in a stakeholder conversation?",
+  "When root cause analysis identifies contributing factors to velocity decline, what should the PM do before presenting options?",
+  "Without explicit instructions, how does Claude handle a multi-workstream health report request?",
+  "What is the single most important section of a programme health report for client accountability?",
+  "What makes a client-side blocker different from a delivery team blocker in a health report?",
+  "What is the most dangerous PM behaviour when a senior client requests a scope change?",
+  "A formal Change Request record is required for what types of scope change requests?",
+  "What creative option did analysis surface for the Meridian investor day scenario?",
+  "When producing two documents for different audiences from a single incident, what is the correct order?",
+  "Why must an engineering RCA never be shared with the client?",
+  "What information in a P1 board communication can only come from the PM, not from Claude?",
+  "What is the PM's role when using Claude to review a vendor contract?",
+  "Why must engagement context be provided to Claude before contract clauses are pasted?",
+  "What makes the unlimited subcontracting clause a red flag specifically in the Meridian context?",
+  "When translating AI project costs for a board audience, what must always lead the communication?",
+  "What contextual reframe transforms a workstream-level cost overrun into a programme-level one?",
+  "Before presenting Claude's industry benchmark claims to a client, what must a PM always do?",
+  "When should the certification exam card on the course map become active?",
+  "What is the primary purpose of the results page in this course?",
+  "What distinguishes a Tier 3 PM task from a Tier 1 task in this course?"
 ];
-let done = 0;
-EXAMPLES.forEach(id => {
-  try {
-    const s = JSON.parse(localStorage.getItem('pm_' + id) || '{}');
-    if (s.reviewComplete) done++;
-  } catch(e) {}
-});
-const pct = Math.round((done / EXAMPLES.length) * 100);
-document.getElementById('progressFill').style.width = pct + '%';
-document.getElementById('progressCount').textContent = done + ' of ' + EXAMPLES.length + ' complete';
 
-  // ── Certification lock ────────────────────────────────────────────────────
-  const EXAMPLE_IDS = [
-    'example-1-scope','example-2-status','example-3-risk','example-4-sprint',
-    'example-5-requirements','example-6-tracking','example-7-reporting',
-    'example-8-change','example-9-model','example-10-rca',
-    'example-11-contract','example-12-cost'
-  ];
+const CORRECT = {
+  q1:'B',q2:'B',q3:'C',q4:'A',q5:'B',q6:'C',
+  q7:'C',q8:'A',q9:'B',q10:'B',q11:'A',q12:'B',
+  q13:'A',q14:'B',q15:'C',q16:'C',q17:'A',q18:'B',
+  q19:'B',q20:'A',q21:'C',q22:'B',q23:'A',q24:'C',
+  q25:'B',q26:'C',q27:'C',q28:'B',q29:'C',q30:'B',
+  q31:'B',q32:'B',q33:'C',q34:'C',q35:'A',q36:'B'
+};
 
-  function checkCertUnlock() {
-    const allComplete = EXAMPLE_IDS.every(function(id) {
-      try {
-        const uid = window._learnerUid || 'anon';
-        const s = JSON.parse(localStorage.getItem('pm_learner_' + uid + '_' + id));
-        return s && s.complete === true;
-      } catch(e) { return false; }
-    });
-    const card  = document.getElementById('certCard');
-    const arrow = document.getElementById('certArrow');
-    if (!card) return;
-    if (allComplete) {
-      card.className = 'example-card cert-card unlocked';
-      card.style.cssText = 'max-width:420px; display:block;';
-      card.style.cursor = 'pointer';
-      if (arrow) arrow.textContent = '→';
-      card.addEventListener('click', function() {
-        window.location.href = 'certification-test.html';
-      });
+function renderResults() {
+  const main  = document.getElementById('mainContent');
+  const state = loadExamState();
+
+  if (!state || !state.submittedAt) {
+    main.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">&#x1F4DD;</div>
+        <div class="empty-title">No exam results yet</div>
+        <div class="empty-sub">Complete the certification exam to see your results here.</div>
+        <a class="empty-btn" href="certification-test.html">Take the exam &rarr;</a>
+      </div>`;
+    document.getElementById('heroSub').textContent = 'Complete the certification exam to see your results.';
+    return;
+  }
+
+  const answers = state.answers || {};
+  const correct = state.correct || CORRECT;
+  let numCorrect = 0, numWrong = 0;
+  for (let i = 1; i <= TOTAL_QS; i++) {
+    const k = 'q' + i;
+    if (answers[k]) {
+      if (answers[k] === correct[k]) numCorrect++;
+      else numWrong++;
     }
   }
-  checkCertUnlock();
 
+  const pct     = Math.round((numCorrect / TOTAL_QS) * 100);
+  const passed  = pct >= PASS_MARK;
+  const dateStr = new Date(state.submittedAt).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+  const attempt = state.attempt || 1;
+  const remaining = Math.max(0, 3 - attempt);
+
+  document.getElementById('heroSub').textContent =
+    'Submitted ' + dateStr + ' · Attempt ' + attempt + ' of 3 · ' + pct + '% — ' + (passed ? 'PASSED' : 'NOT PASSED');
+
+  const bannerClass = passed ? 'pass' : 'fail';
+  const bannerText  = passed ? '&#x2713; Passed' : '&#x2717; Not passed';
+  const badgeText   = passed ? 'SF Certified AI-Augmented Project Manager' : PASS_MARK + '% required to pass';
+
+  let html = `
+    <div class="score-banner ${bannerClass}">
+      <div class="score-big">${pct}%</div>
+      <div class="score-meta">
+        <div class="score-result">${bannerText}</div>
+        <div class="score-detail">${numCorrect} of ${TOTAL_QS} correct &middot; Attempt ${attempt} of 3 &middot; ${dateStr}</div>
+        <div class="score-badge">${badgeText}</div>
+      </div>
+    </div>
+    <div class="summary-grid">
+      <div class="sum-card c"><div class="val">${numCorrect}</div><div class="lbl">Correct</div></div>
+      <div class="sum-card w"><div class="val">${numWrong}</div><div class="lbl">Incorrect</div></div>
+      <div class="sum-card t"><div class="val">${TOTAL_QS}</div><div class="lbl">Total</div></div>
+      <div class="sum-card a"><div class="val">${remaining}</div><div class="lbl">Attempts left</div></div>
+    </div>
+    <div class="section-title">Question review</div>
+    <table class="q-table">
+      <thead><tr><th>#</th><th>Question</th><th>Your answer</th><th>Correct answer</th><th>Result</th></tr></thead>
+      <tbody>`;
+
+  for (let i = 1; i <= TOTAL_QS; i++) {
+    const k       = 'q' + i;
+    const userAns = answers[k] || '—';
+    const corrAns = correct[k] || '—';
+    const isOk    = userAns === corrAns;
+    const pillU   = isOk ? 'pill-correct' : 'pill-wrong';
+    const result  = isOk
+      ? '<span class="pill pill-correct">&#x2713; Correct</span>'
+      : '<span class="pill pill-wrong">&#x2717; Incorrect</span>';
+    html += `<tr>
+      <td style="font-family:'Source Code Pro',monospace;color:var(--text-dimmer)">${i}</td>
+      <td>${EXAM_QUESTIONS[i-1] || 'Question ' + i}</td>
+      <td><span class="pill ${pillU}">${userAns}</span></td>
+      <td><span class="pill pill-ans">${corrAns}</span></td>
+      <td>${result}</td>
+    </tr>`;
+  }
+
+  html += `</tbody></table><div class="nav-row">`;
+  if (!passed && remaining > 0) {
+    html += `<a class="nav-btn primary" href="certification-test.html">Retake exam (Attempt ${attempt + 1} of 3) &rarr;</a>`;
+  } else if (passed) {
+    html += `<a class="nav-btn primary" href="course-map.html">&larr; Back to course map</a>`;
+  } else {
+    html += `<span class="nav-btn secondary" style="opacity:.5;cursor:not-allowed;">No attempts remaining</span>`;
+  }
+  html += `<a class="nav-btn secondary" href="course-map.html">&larr; Course map</a></div>`;
+
+  main.innerHTML = html;
+}
+
+document.addEventListener('learnerReady', renderResults);
+document.addEventListener('DOMContentLoaded', function() {
+  if (window._learnerUid) renderResults();
+});
 </script>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script>
 const _FB_CONFIG = {
-  apiKey:"AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
-  authDomain:"sfcertification-grafana.firebaseapp.com",
-  projectId:"sfcertification-grafana",
-  storageBucket:"sfcertification-grafana.firebasestorage.app",
-  messagingSenderId:"227322696511",
-  appId:"1:227322696511:web:12e7ced7dd3d45fa06798a"
+  apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain: "sfcertification-grafana.firebaseapp.com",
+  projectId: "sfcertification-grafana",
+  storageBucket: "sfcertification-grafana.firebasestorage.app",
+  messagingSenderId: "227322696511",
+  appId: "1:227322696511:web:12e7ced7dd3d45fa06798a"
 };
-if (!window._fbApp) window._fbApp = firebase.initializeApp(_FB_CONFIG);
+if (!window._fbApp) {
+  window._fbApp = firebase.initializeApp(_FB_CONFIG);
+}
 const _auth = firebase.auth(window._fbApp);
 const _provider = new firebase.auth.GoogleAuthProvider();
-window.pmLearnerKey = function(id) { return 'pm_learner_' + (window._learnerUid||'anon') + '_' + id; };
-window.pmCertKey    = function()   { return 'pm_cert_' + (window._learnerUid||'anon'); };
+
+// Expose uid-aware storage key builder
+window.pmLearnerKey = function(exampleId) {
+  const uid = window._learnerUid || 'anon';
+  return 'pm_learner_' + uid + '_' + exampleId;
+};
+
+window.pmCertKey = function() {
+  const uid = window._learnerUid || 'anon';
+  return 'pm_cert_' + uid;
+};
+
+function showOverlay()   { document.getElementById('authOverlay')?.classList.remove('hidden'); }
+function hideOverlay()   { document.getElementById('authOverlay')?.classList.add('hidden'); }
+function showUserBar(email) {
+  const bar = document.getElementById('authUserBar');
+  const em  = document.getElementById('authUserEmail');
+  if (bar) bar.classList.remove('hidden');
+  if (em)  em.textContent = email;
+}
+
 _auth.onAuthStateChanged(function(user) {
   if (user) {
     const email = user.email || '';
     if (!email.endsWith('@sourcefuse.com')) {
       document.getElementById('authError').textContent = 'Please use your @sourcefuse.com account.';
       document.getElementById('authError').classList.remove('hidden');
-      _auth.signOut(); return;
+      _auth.signOut();
+      showOverlay();
+      return;
     }
-    window._learnerUid = user.uid; window._learnerEmail = email;
-    document.getElementById('authOverlay').classList.add('hidden');
-    document.getElementById('authUserBar').classList.remove('hidden');
-    document.getElementById('authUserEmail').textContent = email;
-    checkCertUnlock();
-    updateProgress();
+    window._learnerUid  = user.uid;
+    window._learnerEmail = email;
+    hideOverlay();
+    showUserBar(email);
+    // Fire page-ready event for page-specific JS
+    document.dispatchEvent(new Event('learnerReady'));
   } else {
-    window._learnerUid = null;
-    document.getElementById('authOverlay').classList.remove('hidden');
-    document.getElementById('authUserBar').classList.add('hidden');
+    window._learnerUid  = null;
+    window._learnerEmail = null;
+    showOverlay();
   }
 });
-document.getElementById('googleSignInBtn').addEventListener('click', function() {
-  _auth.signInWithPopup(_provider).catch(function(e) {
+
+document.getElementById('googleSignInBtn')?.addEventListener('click', function() {
+  _auth.signInWithPopup(_provider).catch(function(err) {
     const el = document.getElementById('authError');
-    if (el) { el.textContent = e.message; el.classList.remove('hidden'); }
+    if (el) { el.textContent = err.message; el.classList.remove('hidden'); }
   });
 });
-document.getElementById('authSignOutBtn').addEventListener('click', function() { _auth.signOut(); });
+
+document.getElementById('authSignOutBtn')?.addEventListener('click', function() {
+  _auth.signOut();
+});
 </script>
 
 </body>
