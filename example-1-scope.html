@@ -181,7 +181,7 @@
     cursor:pointer; font-family:'Merriweather Sans',sans-serif;
   }
   .submit-btn:disabled { background:var(--border); color:var(--text-dimmer); cursor:not-allowed; }
-  .submit-btn:not(:disabled):hover { background:var(--blue-dark); color:#fff; }
+  .submit-btn:not(:disabled):hover { background:var(--blue-dark); color:#000; }
   .submit-note { font-size:13px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:8px; }
 
   /* Submitted state */
@@ -801,10 +801,12 @@ function showTab(n) {
 // ── Storage helpers ──────────────────────────────────────────────────────────
 
 function loadState() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; }
+  const k = window.pmLearnerKey ? window.pmLearnerKey(EXAMPLE_ID) : ('pm_learner_' + EXAMPLE_ID);
+  try { return JSON.parse(localStorage.getItem(k)) || {}; } catch(e) { return {}; }
 }
 function saveState(s) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  const k = window.pmLearnerKey ? window.pmLearnerKey(EXAMPLE_ID) : ('pm_learner_' + EXAMPLE_ID);
+  localStorage.setItem(k, JSON.stringify(s));
 }
 
 // ── Email capture ──────────────────────────────────────────────────────────
@@ -813,8 +815,7 @@ function saveState(s) {
 
 
 document.addEventListener('learnerReady', function() {
-  // Re-key storage with uid
-  const STORAGE_KEY = window.pmLearnerKey(EXAMPLE_ID);
+  // Re-key storage with uid — key is now computed in loadState/saveState
   const state = loadState();
 
   // If already submitted — show submitted state
