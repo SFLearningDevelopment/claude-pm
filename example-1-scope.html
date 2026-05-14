@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Example 2 — Status Update · Claude for PM</title>
+<title>Example 1 — Scope Document · Claude for PM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -22,60 +22,135 @@
   }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+
+  /* Topnav */
   .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
   .topnav a { color:var(--pm); text-decoration:none; }
   .topnav a:hover { text-decoration:underline; }
   .sep { opacity:.4; }
+
+  /* Step tabs */
   .tabs-wrap { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 40px; overflow-x:auto; }
-  .tabs { display:flex; }
-  .tab-btn { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:14px; font-weight:600; color:var(--text-dimmer); border-bottom:2px solid transparent; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; transition:color .15s; font-family:'Merriweather Sans',sans-serif; }
-  .tab-btn .num { width:22px; height:22px; border-radius:50%; background:var(--bg3); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; transition:all .15s; }
+  .tabs { display:flex; gap:0; }
+  .tab-btn {
+    display:flex; align-items:center; gap:8px; padding:14px 18px;
+    font-size:13px; font-weight:600; color:var(--text-dimmer);
+    border-bottom:2px solid transparent; cursor:pointer;
+    background:none; border-top:none; border-left:none; border-right:none;
+    white-space:nowrap; transition:color .15s;
+    font-family:'Merriweather Sans',sans-serif;
+  }
+  .tab-btn .num {
+    width:22px; height:22px; border-radius:50%; background:var(--bg3);
+    border:1.5px solid var(--border); display:flex; align-items:center;
+    justify-content:center; font-size:11px; font-weight:700;
+    font-family:'Source Code Pro',monospace; flex-shrink:0; transition:all .15s;
+  }
   .tab-btn.active { color:var(--pm); border-bottom-color:var(--pm); }
   .tab-btn.active .num { background:var(--pm); border-color:var(--pm); color:#fff; }
+
+  /* Main */
   .main { max-width:1400px; margin:0 auto; padding:36px 32px; }
+
+  /* Step section */
   .step-section { display:none; }
   .step-section.active { display:block; }
+
+  /* Step header */
   .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
-  .step-num { width:48px; height:48px; border-radius:50%; background:var(--pm); color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
+  .step-num {
+    width:48px; height:48px; border-radius:50%; background:var(--pm);
+    color:#fff; font-size:20px; font-weight:700; display:flex;
+    align-items:center; justify-content:center; flex-shrink:0;
+    font-family:'Source Code Pro',monospace;
+  }
   .step-meta { flex:1; }
   .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
   .step-title { font-size:24px; font-weight:700; }
+
+  /* Content blocks */
   .prose { font-size:17px; color:var(--text-dim); line-height:1.9; margin-bottom:24px; }
   .prose strong { color:var(--text); font-weight:600; }
-  .callout { border-left:3px solid var(--pm); background:var(--pm-light); padding:18px 22px; border-radius:0 8px 8px 0; margin:20px 0; font-size:16px; line-height:1.8; color:var(--text-dim); }
+
+  .callout {
+    border-left:3px solid var(--pm); background:var(--pm-light);
+    padding:14px 18px; border-radius:0 8px 8px 0; margin:20px 0;
+    font-size:14px; line-height:1.7; color:var(--text-dim);
+  }
   .callout-warn { border-left-color:var(--amber); background:var(--amber-light); }
   .callout-bad  { border-left-color:var(--coral); background:var(--coral-light); }
   .callout-good { border-left-color:var(--green); background:var(--green-light); }
   .callout strong { color:var(--text); }
-  .doc-block { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-size:16px; line-height:1.85; color:var(--text-dim); }
-  .doc-block .doc-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px; }
-  .prompt-block { background:var(--code-bg); border-radius:var(--radius); padding:20px 24px; margin:20px 0; font-family:'Source Code Pro',monospace; font-size:14.5px; line-height:1.8; color:var(--code-text); overflow-x:auto; white-space:pre-wrap; }
-  .prompt-block .speaker { font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; opacity:.6; }
-  .prompt-block .speaker.user { color:#89b4fa; }
+
+  /* Document block */
+  .doc-block {
+    background:var(--bg3); border:1.5px solid var(--border);
+    border-radius:var(--radius); padding:20px 24px; margin:20px 0;
+    font-size:16px; line-height:1.85; color:var(--text-dim);
+  }
+  .doc-block .doc-label {
+    font-size:10px; font-family:'Source Code Pro',monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer);
+    margin-bottom:10px;
+  }
+
+  /* Code / prompt block */
+  .prompt-block {
+    background:var(--code-bg); border-radius:var(--radius);
+    padding:20px 24px; margin:20px 0; font-family:'Source Code Pro',monospace;
+    font-size:14.5px; line-height:1.8; color:var(--code-text); overflow-x:auto;
+  }
+  .prompt-block .speaker {
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    margin-bottom:8px; opacity:.6;
+  }
+  .prompt-block .speaker.user  { color:#89b4fa; }
   .prompt-block .speaker.claude { color:#a6e3a1; }
   .prompt-sep { border:none; border-top:1px solid rgba(255,255,255,.08); margin:16px 0; }
-  .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:3px solid var(--green); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-size:16px; line-height:1.85; color:var(--text-dim); }
-  .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:10px; font-weight:600; }
-  .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:20px 0; }
-  .compare-card { border-radius:var(--radius); padding:18px 20px; font-size:13px; line-height:1.7; }
-  .compare-bad  { background:var(--coral-light); border:1.5px solid var(--coral-mid); border-top:3px solid var(--coral); }
-  .compare-good { background:var(--green-light); border:1.5px solid var(--green-mid); border-top:3px solid var(--green); }
-  .compare-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.1em; text-transform:uppercase; font-weight:700; margin-bottom:10px; }
-  .compare-bad .compare-label  { color:var(--coral); }
-  .compare-good .compare-label { color:var(--green); }
+
+  /* Output block */
+  .output-block {
+    background:var(--bg2); border:1.5px solid var(--green-mid);
+    border-left:3px solid var(--green);
+    border-radius:var(--radius); padding:20px 24px; margin:20px 0;
+    font-size:16px; line-height:1.85; color:var(--text-dim);
+  }
+  .output-label {
+    font-size:10px; font-family:'Source Code Pro',monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--green);
+    margin-bottom:10px; font-weight:600;
+  }
+
+  /* Tags row */
   .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
-  .tag { font-size:11px; font-family:'Source Code Pro',monospace; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
+  .tag {
+    font-size:11px; font-family:'Source Code Pro',monospace;
+    padding:4px 10px; border-radius:20px; border:1px solid var(--border);
+    color:var(--text-dimmer); background:var(--bg3);
+  }
   .tag.pm { background:var(--pm-light); border-color:var(--pm-mid); color:#0f4a7a; }
+
+  /* Section divider */
   .divider { height:1px; background:var(--border); margin:32px 0; }
-  .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
-  .nav-btn { padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; transition:background .15s; }
+
+
+
+  /* Bottom nav */
+  .bottom-nav { display:flex; justify-content:flex-end; padding:32px 0 0; border-top:1px solid var(--border); margin-top:40px; }
+  .nav-btn {
+    padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600;
+    cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif;
+    transition:background .15s;
+  }
   .nav-btn { background:var(--pm); color:#fff; border:none; }
   .nav-btn:hover { background:var(--pm-dark); }
-  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
-  .nav-btn.secondary:hover { background:var(--bg3); }
+
+  /* Footer */
   footer { text-align:center; padding:28px 32px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
-  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .tabs-wrap { padding-left:20px; } .compare-grid { grid-template-columns:1fr; } }
-/* ── Learner assessment ─────────────────────────────────────────────────── */
+
+  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .tabs-wrap { padding-left:20px; } }
+
+  /* ── Learner assessment ─────────────────────────────────────────────────── */
   .assessment-wrap {
     background:var(--bg2); border:1.5px solid var(--border);
     border-left:4px solid var(--blue); border-radius:var(--radius);
@@ -201,7 +276,7 @@
   <span class="sep">/</span>
   <span>Tier 1 examples</span>
   <span class="sep">/</span>
-  <span>Example 2 — Status update</span>
+  <span>Example 1 — Scope document</span>
 </nav>
 
 <div class="tabs-wrap">
@@ -227,40 +302,34 @@
     </div>
 
     <div class="tags-row">
-      <span class="tag pm">Example 2 · Tier 1</span>
-      <span class="tag">Stakeholder communication</span>
+      <span class="tag pm">Example 1 · Tier 1</span>
+      <span class="tag">Project scoping</span>
       <span class="tag">Single-context</span>
       <span class="tag">2–3 turn interaction</span>
     </div>
 
-    <p class="prose">It is end of Sprint 2 on the Meridian Portal project. Sarah has the raw status data in front of her. The numbers are mixed — some things are on track, some are not.</p>
-
-    <div class="doc-block">
-      <div class="doc-label">Raw sprint data — Sprint 2 wrap</div>
-      Sprint velocity: 34 points delivered vs 42 planned (81%)<br>
-      Stories completed: 11 of 14<br>
-      Carried forward: 3 stories (authentication flow, Salesforce sync handshake, mobile nav)<br>
-      Blockers resolved: 2 (Salesforce sandbox access — 6-day delay; design sign-off on dashboard layout)<br>
-      Active blocker: Brand guide not received from client (due April 14, now April 19 — 5 days late)<br>
-      Budget: $47K spent of $380K total (12.4% of budget, 14.3% of timeline elapsed)<br>
-      Team: Priya flagged capacity issue — one frontend engineer on sick leave, returns Monday<br>
-      Risk: Mobile nav story now at risk of missing Sprint 3 if brand guide not received by April 22<br>
-      Next sprint focus: Authentication, Salesforce sync, document upload module
-    </div>
-
-    <p class="prose">Sarah needs to send two updates within the next two hours:</p>
-
-    <div class="callout">
-      <strong>Update 1 — Mark Donovan (Meridian CTO):</strong> Executive sponsor. Cares about timeline, budget, and whether the project is on track. Does not want technical detail. Will forward this to the Meridian board.
-    </div>
-    <div class="callout" style="margin-top:8px;">
-      <strong>Update 2 — Arjun's dev team (SF Cloud lead) + Priya (SF Web lead):</strong> Execution team. Need to know exactly what's blocked, what's carried forward, and what the plan is for Sprint 3. Want specifics, not narrative.
-    </div>
-
-    <p class="prose" style="margin-top:20px;">
-      The same raw data needs to become two completely different documents. The mistake most PMs make is writing one update and sending it to both audiences — or spending 90 minutes writing two from scratch.
+    <p class="prose">
+      Sarah Chen is the SF Senior PM on the Meridian Financial Group account. Three workstreams are running concurrently — Cloud Migration, Meridian Portal, and the Meridian AI Assistant. It's Week 1 of the Portal engagement.
     </p>
 
+    <p class="prose">
+      Mark Donovan, Meridian's CTO, has sent over the project brief. It's two paragraphs of executive notes typed directly into an email. No structured requirements. No exclusions. No success criteria.
+    </p>
+
+    <div class="doc-block">
+      <div class="doc-label">Source document — Mark Donovan's brief (verbatim email)</div>
+      <p>Hi Sarah — as discussed, we want to rebuild the client portal. The current one is embarrassing. Clients should be able to see their account, run reports, upload documents, and ideally get some AI help with their queries. We want it to feel modern. Mobile too. The team needs to be able to manage users from their end. Timeline is aggressive — Mark wants it done by Q3. Budget TBD but let's not go crazy. Lisa will be your day-to-day. Let me know what you need from us.</p>
+      <br>
+      <p>One more thing — compliance is important for us (we're a financial services firm) and whatever we build needs to integrate with our existing Salesforce setup. Don't break anything.</p>
+    </div>
+
+    <p class="prose">
+      Sarah has a kickoff call with Lisa Park (Meridian PMO Lead) in 48 hours. She needs a structured scope document to walk through — one that captures what's in, what's out, what's ambiguous, and what she needs answers on before the team can begin.
+    </p>
+
+    <div class="callout">
+      <strong>Why this is harder than it looks:</strong> A vague brief isn't just incomplete — it's a risk surface. "Don't break anything" could mean anything. "Q3" is six months away or four depending on what month it is. "Ideally get some AI help" could be a chatbot or a full RAG pipeline. The scope document Sarah produces will become the basis for the SOW, the sprint plan, and every future scope-creep conversation.
+    </div>
     <div class="divider"></div>
   </section>
 
@@ -274,28 +343,30 @@
       </div>
     </div>
 
-    <p class="prose">The naive approach is to ask Claude to "write a status update" without specifying audience, tone, or what to emphasise.</p>
+    <p class="prose">
+      Under time pressure, most PMs reach for a scope document template — or ask Claude with a single generic prompt.
+    </p>
 
     <div class="prompt-block">
-      <div class="speaker user">Sarah (naive prompt)</div>Here's my sprint data. Write a project status update.
+      <div class="speaker user">Sarah (naive prompt)</div>
+      Here's a project brief from my client. Can you turn it into a scope document?
 
-[pastes raw data]</div>
-
-    <p class="prose">Claude produces something like this:</p>
-
-    <div class="doc-block">
-      <div class="doc-label">Naive output — generic status update</div>
-      <strong>Meridian Portal — Sprint 2 Status Update</strong><br><br>
-      Sprint 2 has concluded with 34 story points delivered out of a planned 42, representing 81% velocity. Eleven of fourteen planned stories were completed, with three carried forward to Sprint 3: the authentication flow, Salesforce sync handshake, and mobile navigation.<br><br>
-      Two blockers were resolved during the sprint — Salesforce sandbox access (causing a 6-day delay) and design sign-off on the dashboard layout. An active blocker remains: the brand guide from the client is 5 days overdue, originally due April 14. This puts the mobile navigation story at risk if not received by April 22.<br><br>
-      Budget utilisation stands at $47K of $380K (12.4%). One team member is returning from sick leave on Monday.<br><br>
-      Sprint 3 will focus on authentication, Salesforce sync, and the document upload module.
+      [pastes email]
     </div>
+
+    <p class="prose">What Claude produces from this prompt is technically a scope document. It has the right headings. But it has a critical flaw:</p>
 
     <div class="callout callout-bad">
-      <strong>What's wrong:</strong> This is a technically accurate summary — but it serves neither audience well. Mark Donovan doesn't need to know about story points or the Salesforce sync handshake. Arjun's team doesn't need the budget percentage framed as reassuring. And neither audience gets what they actually need: the CTO needs to know if action is required from him; the dev team needs to know exactly what Sprint 3 looks like.
+      <strong>What goes wrong:</strong> Claude fills in the gaps with plausible-sounding assumptions. "Mobile too" becomes "fully responsive PWA with offline support." "AI help with queries" becomes "integrated AI chatbot using OpenAI." "Don't break anything" disappears entirely. The document looks complete — but it contains commitments Sarah never made and omits risks she should have flagged.
     </div>
 
+    <p class="prose">
+      The naive output is dangerous precisely because it looks professional. Lisa Park will read it and assume it reflects an informed assessment. When the AI chatbot scope gets challenged in Week 6, Sarah will have no documented basis for the assumption.
+    </p>
+
+    <div class="callout callout-warn">
+      <strong>The pattern to recognise:</strong> When Claude is given an ambiguous input with no structure, it defaults to making the output look complete by filling gaps with reasonable assumptions. For scoping work, this is the opposite of what a PM needs. You need the gaps surfaced, not hidden.
+    </div>
     <div class="divider"></div>
   </section>
 
@@ -309,64 +380,124 @@
       </div>
     </div>
 
-    <p class="prose">Sarah gives Claude audience context, tone guidance, and explicit instructions on what each audience needs — and what to exclude.</p>
+    <p class="prose">
+      Sarah approaches this differently. Instead of asking Claude to write the scope document, she asks it to help her <strong>analyse the brief first</strong>, then structure the output with explicit handling of ambiguity.
+    </p>
 
     <div class="prompt-block">
-      <div class="speaker user">Sarah — Turn 1 (CTO update)</div>I'm a senior PM at a cloud consultancy. I need to write two separate status updates from the same sprint data. Let's do the executive one first.
+      <div class="speaker user">Sarah — Turn 1</div>
+      I'm a senior PM at a cloud consultancy. I've received a project brief from a client (financial services sector) for a portal rebuild. Before we write anything, I need you to read this brief and tell me:
 
-Audience: Mark Donovan, CTO of Meridian Financial Group. He is the project sponsor. He will forward this to the board. He cares about: (1) are we on track for the September 30 go-live, (2) is the budget under control, (3) is there anything that requires action from him or his team.
+      1. What is explicitly stated as in scope
+      2. What is implied but not confirmed
+      3. What is missing that I need to clarify before the kickoff call
+      4. Any red flags or risks in the brief itself
 
-Tone: Confident, concise, no jargon, no story points, no technical terminology. Maximum 150 words. Lead with RAG status. If there's a client-side action needed, make it explicit and actionable.
+      Do not make assumptions. Flag everything uncertain as uncertain.
 
-Here is the sprint data:
-[pastes raw data]
-<hr class="prompt-sep">
-<div class="speaker claude">Claude — Turn 1</div><strong>Meridian Portal — Sprint 2 Update</strong>
-<em>Status: AMBER | Week 6 of 26 | Budget on track</em>
+      [pastes email]
+      <hr class="prompt-sep">
+      <div class="speaker claude">Claude — Turn 1</div>
+      Here's my analysis of the brief:
 
-The project is progressing well overall — we are within budget and the core portal features are being built to plan. We delivered the majority of Sprint 2's scope and are on track for the September 30 go-live.
+      <strong>Explicitly stated (in scope):</strong>
+      — Account visibility for clients
+      — Report running capability
+      — Document upload
+      — User management for internal team
+      — Mobile support
+      — Salesforce integration
+      — Compliance requirement (unspecified standard)
 
-One item requires your attention: <strong>the brand guide your team committed to providing by April 14 is now 5 days overdue.</strong> If we do not receive it by April 22, it will delay the mobile experience — a visible feature for your clients. No other blockers are on the SF side.
+      <strong>Implied but unconfirmed:</strong>
+      — "AI help with queries" — could be keyword search, a chatbot, or a RAG-based assistant. These have very different build costs and timelines.
+      — "Modern feel" — UX/design scope is entirely undefined
+      — "Q3 deadline" — Q3 of which year? Which month is the hard deadline?
+      — "Budget TBD" — no budget ceiling means no basis for trade-off decisions
 
-<strong>Action required from Meridian:</strong> Please confirm with your design team that the brand guide will be shared by April 22.
+      <strong>Missing — needs clarification before kickoff:</strong>
+      — Which compliance framework? (SOC 2, PCI DSS, FINRA?)
+      — Salesforce integration depth? (read-only sync, bi-directional, real-time?)
+      — What does "don't break anything" protect specifically?
+      — Who are the end users? Clients only, or also internal staff?
+      — What is the current portal built on and what is being replaced vs. extended?
+      — Is there an existing design system or brand guide?
 
-Next update: end of Sprint 3 (May 3).</div>
-
-    <p class="prose" style="margin-top:20px;">Sarah reviews it — the client-side action is clear, the tone is right, and Mark doesn't need to care about velocity. Now the team update:</p>
-
-    <div class="prompt-block">
-      <div class="speaker user">Sarah — Turn 2 (team update)</div>Good. Now write the team update for Arjun (cloud lead) and Priya (web lead) and their respective dev teams.
-
-Audience: SF delivery team — engineers and tech leads. They want specifics: what's blocked, what carried over and why, what's the plan for Sprint 3, and any capacity issues.
-
-Tone: Direct, no fluff, technical detail is fine. Use bullet points. They don't need the budget or the board context.
-<hr class="prompt-sep">
-<div class="speaker claude">Claude — Turn 2</div><strong>Sprint 2 Wrap + Sprint 3 Plan</strong>
-
-<strong>Sprint 2 — what happened</strong>
-— 34/42 pts delivered (81% velocity)
-— 3 stories carried forward: authentication flow, Salesforce sync handshake, mobile nav
-— Salesforce sandbox delay (6 days) and dashboard design sign-off both resolved
-— Active blocker: brand guide from client — 5 days overdue (was April 14). Hard deadline April 22 or mobile nav slips
-
-<strong>Capacity</strong>
-— Priya: one frontend engineer on sick leave, back Monday. Factor into Sprint 3 planning.
-
-<strong>Sprint 3 focus</strong>
-— Authentication flow (carried)
-— Salesforce sync handshake (carried)
-— Document upload module (new)
-— Mobile nav — contingent on brand guide by April 22
-
-<strong>Actions before Sprint 3 kickoff</strong>
-— Arjun: confirm Salesforce sync handshake dependencies with Meridian IT
-— Priya: replan mobile nav story assuming brand guide arrives April 22 (if late, flag immediately)
-— All: Sprint 3 planning call Wednesday 10am IST</div>
-
-    <div class="callout callout-good" style="margin-top:20px;">
-      <strong>What changed:</strong> Two completely different documents from the same data — each serving its audience precisely. Total time: one focused prompt session, two turns. Mark gets a 130-word executive brief with a clear action. The team gets a structured operational update with named owners and deadlines.
+      <strong>Red flags:</strong>
+      — "Timeline is aggressive" with "budget TBD" is a constraint conflict. Budget needs to be established before timeline can be confirmed.
+      — "Ideally get some AI help" signals an aspirational feature that hasn't been scoped. This will become scope creep if not explicitly defined or excluded now.
+      — Compliance is mentioned as important but with no specification — this is a delivery risk.
     </div>
 
+    <p class="prose" style="margin-top:20px;">Sarah reviews Claude's analysis — it's close, but she wants to add one more constraint she knows from her discovery call: the portal must not store PII on SF infrastructure. She refines:</p>
+
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 2</div>
+      Good. One thing to add to red flags: the client mentioned verbally that PII cannot be stored on third-party infrastructure — this needs to be in the scope document as a constraint.
+
+      Now write the scope document. Use these sections:
+      — Project overview (2–3 sentences)
+      — In scope (bullet list, confirmed items only)
+      — Out of scope (explicit exclusions)
+      — Assumptions (things we're proceeding with pending confirmation)
+      — Open questions (must be resolved at kickoff)
+      — Constraints
+      — Success criteria (draft — to be confirmed with client)
+
+      Do not fill in anything that isn't in the brief or my additions. Mark anything uncertain with [TO CONFIRM].
+      <hr class="prompt-sep">
+      <div class="speaker claude">Claude — Turn 2</div>
+      <strong>Meridian Portal — Scope Document v0.1 (Pre-kickoff draft)</strong>
+      <em>Prepared by: Sarah Chen, SF Senior PM | Status: Draft — for kickoff review</em>
+
+      <strong>Project overview</strong>
+      SF has been engaged to rebuild the Meridian Financial Group client portal. The new portal will enable clients to access their accounts, run reports, upload documents, and interact with internal teams. This document defines the agreed scope basis for kickoff discussion and is subject to revision following the kickoff call.
+
+      <strong>In scope</strong>
+      — Client-facing account dashboard (view account information)
+      — Report generation and download capability
+      — Document upload (client-initiated)
+      — Internal user management interface
+      — Mobile-responsive frontend
+      — Salesforce integration [scope of integration: TO CONFIRM]
+      — Financial services compliance [framework: TO CONFIRM]
+
+      <strong>Out of scope</strong>
+      — AI-assisted query feature (flagged as aspirational — not confirmed for this phase)
+      — Migration of historical data from existing portal [TO CONFIRM]
+      — Modifications to Salesforce configuration
+      — Third-party PII storage on SF infrastructure
+
+      <strong>Assumptions</strong>
+      — Client will provide access to existing portal documentation and Salesforce sandbox
+      — Design direction to be established during discovery sprint
+      — "Q3" refers to Q3 2026 [TO CONFIRM: hard deadline month]
+
+      <strong>Open questions (for kickoff)</strong>
+      1. Which compliance framework applies? (SOC 2, PCI DSS, FINRA, other?)
+      2. Salesforce integration: read-only sync, bi-directional, or real-time?
+      3. What does "don't break anything" protect specifically?
+      4. Who are the end users of the portal beyond direct clients?
+      5. What is the current portal's technology stack?
+      6. Is there an existing design system or brand guide?
+      7. Hard deadline for Q3 — is this a go-live date or a delivery date?
+      8. Budget ceiling: when can this be confirmed?
+
+      <strong>Constraints</strong>
+      — PII must not be stored on SF or third-party infrastructure
+      — Timeline: Q3 2026 [hard deadline month: TO CONFIRM]
+      — Budget: TBD — no commitments can be made until this is established
+
+      <strong>Success criteria (draft)</strong>
+      — Clients can log in, view accounts, run reports, and upload documents
+      — Internal team can manage user access without engineering support
+      — Portal passes compliance review [framework: TO CONFIRM]
+      — Salesforce data reflects portal activity [integration scope: TO CONFIRM]
+    </div>
+
+    <div class="callout callout-good" style="margin-top:20px;">
+      <strong>What changed:</strong> The document is honest. Every gap is visible. Sarah can walk into the kickoff call and work through the open questions with Lisa Park — rather than discovering in Week 6 that the AI chatbot scope was never confirmed.
+    </div>
     <div class="divider"></div>
   </section>
 
@@ -380,39 +511,73 @@ Tone: Direct, no fluff, technical detail is fine. Use bullet points. They don't 
       </div>
     </div>
 
-    <p class="prose">Sarah makes one adjustment to each update before sending. The CTO update needs a subject line formatted for forwarding. The team update needs the Sprint 3 planning call added to the calendar invite text.</p>
-
-    <div class="compare-grid">
-      <div class="compare-card compare-good">
-        <div class="compare-label">✓ CTO update — final</div>
-        <strong>Subject: Meridian Portal — Sprint 2 Update (Action Required)</strong><br><br>
-        Status: <strong>AMBER</strong> | Week 6 of 26 | Budget on track<br><br>
-        The project is progressing well — within budget and on track for September 30. One item requires your attention:<br><br>
-        <strong>The brand guide your team committed to by April 14 is now 5 days overdue.</strong> If not received by April 22, it will delay the mobile experience.<br><br>
-        <strong>Action required:</strong> Please confirm your design team will share the brand guide by April 22.<br><br>
-        Next update: end of Sprint 3 (May 3).
-      </div>
-      <div class="compare-card compare-good">
-        <div class="compare-label">✓ Team update — final</div>
-        <strong>Sprint 2 Wrap / Sprint 3 Plan</strong><br><br>
-        <strong>Carried forward:</strong> Auth flow, SF sync handshake, mobile nav<br>
-        <strong>Blocker:</strong> Brand guide — April 22 hard deadline<br>
-        <strong>Capacity:</strong> Priya -1 FE until Monday<br><br>
-        <strong>Sprint 3 focus:</strong> Auth, SF sync, doc upload, mobile nav (conditional)<br><br>
-        <strong>Actions:</strong><br>
-        — Arjun: SF sync dependencies with Meridian IT<br>
-        — Priya: replan mobile nav, flag if brand guide late<br><br>
-        <strong>Sprint 3 planning: Wed 10am IST</strong><br>
-        Calendar invite to follow.
-      </div>
-    </div>
-
-    <p class="prose">The CTO update has a subject line designed to prompt forwarding and flags the amber status immediately. The team update is condensed to the essentials — named owners, hard dates, one action each.</p>
+    <p class="prose">
+      After the kickoff call, Sarah has answers to most of the open questions. She returns to Claude with the confirmed information and asks for a v1.0 scope document — the one that will become the basis for the SOW.
+    </p>
 
     <div class="callout">
-      <strong>The PM's role in this workflow:</strong> Claude drafts, the PM edits. Sarah's value-add was knowing that Mark forwards these to the board (so the subject line matters), and that the team needs the calendar invite text. Claude can't know those things. The PM always closes the last mile.
+      <strong>What the kickoff confirmed:</strong> Compliance framework is SOC 2 Type II. Salesforce integration is bi-directional sync (not real-time). Q3 hard deadline is September 30, 2026. Budget ceiling is $380K. AI query feature is explicitly deferred to Phase 2. PII constraint confirmed. Current portal is a legacy Rails app — replacement, not extension.
     </div>
 
+    <div class="prompt-block">
+      <div class="speaker user">Sarah — Turn 3</div>
+      Here are the answers from the kickoff call:
+      — Compliance: SOC 2 Type II
+      — Salesforce: bi-directional sync, not real-time
+      — Hard deadline: September 30, 2026
+      — Budget ceiling: $380K
+      — AI query feature: deferred to Phase 2 (explicitly out of scope for this phase)
+      — PII constraint: confirmed
+      — Current portal: legacy Rails app, full replacement not extension
+      — Design: client has a brand guide, will share next week
+      — End users: external clients only (internal staff use Salesforce directly)
+
+      Update the scope document to v1.0. Remove all [TO CONFIRM] markers. Move confirmed items. Keep the open questions section only for genuinely unresolved items.
+    </div>
+
+    <div class="output-block">
+      <div class="output-label">✓ Refined output — Scope Document v1.0</div>
+      <strong>Meridian Portal — Scope Document v1.0</strong><br>
+      <em>Prepared by: Sarah Chen, SF Senior PM | Confirmed: post-kickoff | Status: Baseline</em><br><br>
+
+      <strong>In scope</strong><br>
+      — Client-facing account dashboard<br>
+      — Report generation and download<br>
+      — Document upload (client-initiated)<br>
+      — Internal user management interface<br>
+      — Mobile-responsive frontend<br>
+      — Salesforce bi-directional sync (non-real-time)<br>
+      — SOC 2 Type II compliance<br>
+      — Full replacement of legacy Rails portal<br><br>
+
+      <strong>Out of scope</strong><br>
+      — AI-assisted query feature (Phase 2)<br>
+      — Real-time Salesforce sync<br>
+      — Salesforce configuration changes<br>
+      — Internal staff portal access (use Salesforce directly)<br>
+      — PII storage on SF or third-party infrastructure<br><br>
+
+      <strong>Constraints</strong><br>
+      — PII must not be stored on SF infrastructure<br>
+      — Hard go-live: September 30, 2026<br>
+      — Budget ceiling: $380,000<br>
+      — SOC 2 Type II compliance required at launch<br><br>
+
+      <strong>Open items</strong><br>
+      — Brand guide (client to share w/c April 14)<br>
+      — Salesforce sandbox access (IT to provision by April 21)<br><br>
+
+      <strong>Success criteria</strong><br>
+      — External clients can log in, view accounts, run reports, upload documents<br>
+      — Internal team manages user access without engineering support<br>
+      — Portal passes SOC 2 Type II audit<br>
+      — Salesforce bi-directional sync operational at launch<br>
+      — Go-live by September 30, 2026 within $380K budget
+    </div>
+
+    <p class="prose">
+      The v1.0 document is clean, confirmed, and defensible. Every line traces to either the original brief or a kickoff decision. The AI feature exclusion is explicit — which means when Mark Donovan asks about it in Month 3, Sarah has a signed document to point to.
+    </p>
     <div class="divider"></div>
   </section>
 
@@ -426,35 +591,33 @@ Tone: Direct, no fluff, technical detail is fine. Use bullet points. They don't 
       </div>
     </div>
 
+    <p class="prose">Three failure modes to watch for when using Claude for scoping work:</p>
+
     <div class="callout callout-bad">
-      <strong>1. Claude will soften bad news by default</strong><br>
-      Claude tends toward diplomatic framing. "81% velocity" will be presented as "we delivered most of our sprint scope" unless you explicitly tell it not to soften. If the news is genuinely bad — missed milestone, budget overrun, team conflict — tell Claude: "Do not soften this. The audience needs to understand the severity."
+      <strong>1. Assumption laundering</strong><br>
+      Claude's default behaviour with vague input is to produce plausible-looking output by filling gaps silently. Always explicitly instruct Claude to flag uncertainty rather than resolve it. The phrase "do not make assumptions — mark everything uncertain as uncertain" should be in every scoping prompt.
     </div>
 
     <div class="callout callout-bad">
-      <strong>2. Audience bleed</strong><br>
-      If you write both updates in the same session without resetting context, Claude may carry tone from one into the other. Start each audience update with a fresh context statement: "Now write for a different audience…" and restate the audience profile.
+      <strong>2. The complete-looking document trap</strong><br>
+      A Claude-generated scope document will almost always look well-structured and professional. This is dangerous — it creates false confidence. Always review the output asking: "Where has Claude resolved something I haven't actually confirmed?" If you can't answer that, you haven't reviewed it carefully enough.
     </div>
 
     <div class="callout callout-bad">
-      <strong>3. Missing the ask</strong><br>
-      The most common failure in executive updates is not making the required action explicit. Claude will sometimes bury the action in a paragraph rather than call it out. Always review: "Is the action required from this person crystal clear? Could they read this and think no action is needed?"
+      <strong>3. Verbal-only context</strong><br>
+      Information from verbal conversations (like Sarah's PII constraint) does not exist for Claude unless you tell it. Before any scoping session, gather your notes and add them explicitly. Claude has no memory of your discovery calls.
     </div>
 
     <div class="callout callout-good">
-      <strong>The prompting pattern that works:</strong><br>
-      (1) Paste raw data. (2) Describe the audience in detail — role, what they care about, what they don't, what action you need from them. (3) Set format constraints — word count, tone, structure. (4) Review for softening and missing asks before sending.
+      <strong>The prompting discipline that makes this work:</strong><br>
+      Analyse before writing. Ask Claude to surface gaps and flag ambiguity before it generates any output. Then provide confirmed context. Then generate. This two-phase approach produces a fundamentally better document than asking for the output directly.
     </div>
-
     <div class="divider"></div>
-    <div class="bottom-nav">
-      <a class="nav-btn secondary" href="example-1-scope.html">← Example 1</a>
-      <a class="nav-btn" href="example-3-risk.html">Example 3 — Risk register →</a>
-    </div>
+
+
     <!-- ── Learner assessment ──────────────────────────────────────────────── -->
     <div class="assessment-wrap" id="assessmentWrap">
-
-      <!-- Questions -->
+      <!-- Questions (shown after email confirmed) -->
       <div class="questions-wrap" id="questionsWrap">
         <div class="assessment-title">Check your understanding</div>
         <p class="assessment-sub">Answer all three questions to complete this example. Your answers are saved — results shown at the end of the course.</p>
@@ -462,36 +625,36 @@ Tone: Direct, no fluff, technical detail is fine. Use bullet points. They don't 
         <!-- Q1 -->
         <div class="question-block" id="qblock-1">
           <div class="q-num">Question 1 of 3</div>
-          <div class="q-text">What is the most critical element missing from the naive one-size-fits-all status update?</div>
+          <div class="q-text">When Claude is given a vague brief and asked to "write a scope document," what is its most likely default behaviour?</div>
           <div class="options">
-            <label class="option"><input type="radio" name="q1" value="A"> A RAG status indicator</label>
-            <label class="option"><input type="radio" name="q1" value="B"> A clear action required from the specific audience</label>
-            <label class="option"><input type="radio" name="q1" value="C"> Story point velocity data</label>
-            <label class="option"><input type="radio" name="q1" value="D"> The budget percentage spent</label>
+            <label class="option"><input type="radio" name="q1" value="A"> Ask clarifying questions before writing anything</label>
+            <label class="option"><input type="radio" name="q1" value="B"> Fill in gaps with plausible-sounding assumptions without flagging them</label>
+            <label class="option"><input type="radio" name="q1" value="C"> Refuse to write until all information is confirmed</label>
+            <label class="option"><input type="radio" name="q1" value="D"> Write only what is explicitly stated, leaving the rest blank</label>
           </div>
         </div>
 
         <!-- Q2 -->
         <div class="question-block" id="qblock-2">
           <div class="q-num">Question 2 of 3</div>
-          <div class="q-text">When writing a status update for a C-suite executive, which of these should be excluded?</div>
+          <div class="q-text">In the two-phase prompting approach demonstrated in this example, what is the correct order?</div>
           <div class="options">
-            <label class="option"><input type="radio" name="q2" value="A"> The overall RAG status</label>
-            <label class="option"><input type="radio" name="q2" value="B"> Budget percentage consumed</label>
-            <label class="option"><input type="radio" name="q2" value="C"> Story points and sprint velocity numbers</label>
-            <label class="option"><input type="radio" name="q2" value="D"> The go-live date</label>
+            <label class="option"><input type="radio" name="q2" value="A"> Write the scope document first, then ask Claude to review it for gaps</label>
+            <label class="option"><input type="radio" name="q2" value="B"> Ask Claude to analyse and surface gaps first, then generate the document</label>
+            <label class="option"><input type="radio" name="q2" value="C"> Generate the document and the gap analysis simultaneously in one prompt</label>
+            <label class="option"><input type="radio" name="q2" value="D"> Send the brief to the client for clarification before involving Claude</label>
           </div>
         </div>
 
         <!-- Q3 -->
         <div class="question-block" id="qblock-3">
           <div class="q-num">Question 3 of 3</div>
-          <div class="q-text">Claude tends to soften bad news by default. What should a PM explicitly include in their prompt to prevent this?</div>
+          <div class="q-text">Sarah added the PII constraint to the scope document. Why couldn't Claude have included it without Sarah's input?</div>
           <div class="options">
-            <label class="option"><input type="radio" name="q3" value="A"> An instruction not to soften the news when it is genuinely serious</label>
-            <label class="option"><input type="radio" name="q3" value="B"> A word count limit to keep the update short</label>
-            <label class="option"><input type="radio" name="q3" value="C"> A request to include all technical details</label>
-            <label class="option"><input type="radio" name="q3" value="D"> A list of all sprint stories completed</label>
+            <label class="option"><input type="radio" name="q3" value="A"> Claude is not allowed to handle information about data privacy</label>
+            <label class="option"><input type="radio" name="q3" value="B"> The constraint came from a verbal conversation — Claude has no memory of interactions outside the current session</label>
+            <label class="option"><input type="radio" name="q3" value="C"> Claude would have included it automatically from the brief context</label>
+            <label class="option"><input type="radio" name="q3" value="D"> PII constraints are always out of scope for AI-generated documents</label>
           </div>
         </div>
 
@@ -514,11 +677,16 @@ Tone: Direct, no fluff, technical detail is fine. Use bullet points. They don't 
       <label for="completeCb" id="completeLabel">Answer all questions to unlock</label>
     </div>
 
+    <!-- Bottom nav -->
+    <div class="bottom-nav">
+      <a class="nav-btn" href="example-2-status.html">Example 2 — Status update →</a>
+    </div>
   </section>
 
 </div>
 
 <footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
+
 
 
 <!-- Firebase -->
@@ -598,8 +766,8 @@ document.getElementById('authSignOutBtn')?.addEventListener('click', function() 
 </html>
 <script>
 const CACHE_VERSION = '2026-04-05-v1';
-const EXAMPLE_ID    = 'example-2-status';
-const CORRECT       = { q1: 'B', q2: 'C', q3: 'A' };
+const EXAMPLE_ID    = 'example-1-scope';
+const CORRECT       = { q1: 'B', q2: 'B', q3: 'B' };
 
 // Cache busting
 (function() {
@@ -621,37 +789,44 @@ function showTab(n) {
   document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
 }
 
-// Storage
-function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; } }
-function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+// ── Storage helpers ──────────────────────────────────────────────────────────
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveState(s) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+}
+
+// ── Email capture ──────────────────────────────────────────────────────────
+
+
+
 
 document.addEventListener('learnerReady', function() {
   // Re-key storage with uid
   const STORAGE_KEY = window.pmLearnerKey(EXAMPLE_ID);
   const state = loadState();
 
-  // Already completed
-  if (state.complete) {
+  // If already submitted — show submitted state
+  if (state.submittedAt) {
     showSubmittedState();
-    activateCompleteBar(true);
+    activateCompleteBar(state.complete || false);
     return;
   }
 
-  // Already submitted but not marked complete
-  if (state.submittedAt && !state.complete) {
-    showSubmittedState();
-    activateCompleteBar(false);
-    return;
-  }
 
-  // Track selections
+
+  // Track answer selections — enable submit when all answered
   document.querySelectorAll('.options input[type="radio"]').forEach(function(radio) {
     radio.addEventListener('change', checkAllAnswered);
   });
 
-  // Submit
+  // Submit answers
   const submitBtn = document.getElementById('submitAnswersBtn');
-  if (submitBtn) submitBtn.addEventListener('click', submitAnswers);
+  if (submitBtn) {
+    submitBtn.addEventListener('click', submitAnswers);
+  }
 
   // Complete checkbox
   const completeCb = document.getElementById('completeCb');
@@ -666,25 +841,34 @@ document.addEventListener('learnerReady', function() {
   }
 });
 
+function showQuestions() {
+  document.getElementById('questionsWrap').classList.remove('hidden');
+}
+
 function checkAllAnswered() {
-  const allAnswered = [document.querySelector('input[name="q1"]:checked'), document.querySelector('input[name="q2"]:checked'), document.querySelector('input[name="q3"]:checked')].every(Boolean);
-  const btn  = document.getElementById('submitAnswersBtn');
+  const q1 = document.querySelector('input[name="q1"]:checked');
+  const q2 = document.querySelector('input[name="q2"]:checked');
+  const q3 = document.querySelector('input[name="q3"]:checked');
+  const allAnswered = q1 && q2 && q3;
+  const btn = document.getElementById('submitAnswersBtn');
   const note = document.getElementById('submitNote');
-  if (btn)  btn.disabled = !allAnswered;
+  if (btn) btn.disabled = !allAnswered;
   if (note) note.textContent = allAnswered ? 'Ready to submit.' : 'Select an answer for each question to submit.';
 }
 
 function submitAnswers() {
-  const answers = {};
-    const a1 = document.querySelector('input[name="q1"]:checked')?.value; if (a1) answers['q1'] = a1;
-  const a2 = document.querySelector('input[name="q2"]:checked')?.value; if (a2) answers['q2'] = a2;
-  const a3 = document.querySelector('input[name="q3"]:checked')?.value; if (a3) answers['q3'] = a3;
+  const q1 = document.querySelector('input[name="q1"]:checked')?.value;
+  const q2 = document.querySelector('input[name="q2"]:checked')?.value;
+  const q3 = document.querySelector('input[name="q3"]:checked')?.value;
+
   const s = loadState();
   s.exampleId   = EXAMPLE_ID;
-  s.answers     = answers;
+  s.answers     = { q1, q2, q3 };
   s.correct     = CORRECT;
   s.submittedAt = new Date().toISOString();
+  s.complete    = false; // set when checkbox ticked
   saveState(s);
+
   showSubmittedState();
   activateCompleteBar(false);
 }
@@ -701,7 +885,8 @@ function activateCompleteBar(isDone) {
   if (!bar) return;
   if (isDone) {
     bar.className = 'complete-bar done';
-    cb.disabled   = false; cb.checked = true;
+    cb.disabled   = false;
+    cb.checked    = true;
     label.textContent = '✓ Example complete';
   } else {
     bar.className = 'complete-bar ready';
