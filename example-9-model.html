@@ -38,7 +38,7 @@
   .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
   .step-num { width:48px; height:48px; border-radius:50%; background:var(--pm); color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
   .step-meta { flex:1; }
-  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--blue); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
   .step-title { font-size:28px; font-weight:700; }
   .prose { font-size:17px; color:var(--text-dim); line-height:1.9; margin-bottom:24px; }
   .prose strong { color:var(--text); font-weight:600; }
@@ -135,6 +135,10 @@
   .complete-bar input[type="checkbox"] { width:18px; height:18px; accent-color:var(--green); }
   .complete-bar.disabled input { cursor:not-allowed; }
   .hidden { display:none !important; }
+  .step-nav-row { display:flex; justify-content:flex-end; margin-top:24px; }
+  .continue-btn { padding:12px 24px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Merriweather Sans',sans-serif; transition:background .15s; }
+  .continue-btn:hover { background:var(--blue-dark); }
+  .back-dashboard-btn { padding:12px 22px; background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
 
 
   /* ── Google SSO overlay ─────────────────────────────────────────────────── */
@@ -258,6 +262,7 @@
     </div>
 
     <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(2)">Continue →</button></div>
   </section>
 
   <!-- STEP 2 -->
@@ -287,6 +292,7 @@
     </div>
 
     <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(3)">Continue →</button></div>
   </section>
 
   <!-- STEP 3 -->
@@ -343,6 +349,7 @@ Demo-ready build: targeted in 2 weeks. This will allow Meridian stakeholders to 
     </div>
 
     <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(4)">Continue →</button></div>
   </section>
 
   <!-- STEP 4 -->
@@ -377,6 +384,7 @@ Demo-ready build: targeted in 2 weeks. This will allow Meridian stakeholders to 
     </div>
 
     <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(5)">Continue →</button></div>
   </section>
 
   <!-- STEP 5 -->
