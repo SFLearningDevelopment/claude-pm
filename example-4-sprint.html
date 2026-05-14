@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Example 3 — Risk Register · Claude for PM</title>
+<title>Example 4 — Sprint Planning · Claude for PM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -57,18 +57,26 @@
   .output-block { background:var(--bg2); border:1.5px solid var(--green-mid); border-left:3px solid var(--green); border-radius:var(--radius); padding:22px 26px; margin:20px 0; font-size:16px; line-height:1.85; color:var(--text-dim); }
   .output-label { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:10px; font-weight:600; }
 
-  /* Risk table */
-  .risk-table { width:100%; border-collapse:collapse; margin:20px 0; font-size:13px; }
-  .risk-table th { background:var(--bg3); border:1px solid var(--border); padding:10px 12px; text-align:left; font-size:11px; font-family:'Source Code Pro',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dimmer); font-weight:600; }
-  .risk-table td { border:1px solid var(--border); padding:10px 12px; vertical-align:top; line-height:1.5; color:var(--text-dim); }
-  .risk-table tr:nth-child(even) td { background:var(--bg3); }
-  .rag { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
-  .rag-red    { background:#c0392b; }
-  .rag-amber  { background:#e67e22; }
-  .rag-green  { background:#1a6b3a; }
-  .score-high { color:#c0392b; font-weight:700; font-family:'Source Code Pro',monospace; }
-  .score-med  { color:#e67e22; font-weight:700; font-family:'Source Code Pro',monospace; }
-  .score-low  { color:#1a6b3a; font-weight:700; font-family:'Source Code Pro',monospace; }
+  /* Story cards */
+  .story-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0; }
+  .story-card { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
+  .story-card.carried { border-top:3px solid var(--amber); }
+  .story-card.new { border-top:3px solid var(--pm); }
+  .story-id { font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-bottom:4px; }
+  .story-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .story-desc { font-size:12px; color:var(--text-dim); margin-bottom:10px; line-height:1.5; }
+  .story-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .story-pts { font-size:11px; font-family:'Source Code Pro',monospace; background:var(--bg3); border:1px solid var(--border); padding:2px 8px; border-radius:10px; color:var(--text-dimmer); }
+  .story-tag { font-size:10px; font-family:'Source Code Pro',monospace; padding:2px 8px; border-radius:10px; }
+  .story-tag.fe  { background:var(--blue-light);  color:#0f4a7a;       border:1px solid #b8d0ed; }
+  .story-tag.be  { background:var(--pm-light);    color:var(--pm-dark); border:1px solid var(--pm-mid); }
+  .story-tag.qa  { background:var(--amber-light); color:var(--amber);   border:1px solid #e8c97a; }
+  .story-tag.dep { background:var(--coral-light); color:var(--coral);   border:1px solid var(--coral-mid); }
+
+  .sprint-summary { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--radius); padding:16px 20px; margin:20px 0; display:flex; gap:24px; flex-wrap:wrap; }
+  .sprint-stat { text-align:center; }
+  .sprint-stat .val { font-size:24px; font-weight:700; color:var(--pm); font-family:'Source Code Pro',monospace; }
+  .sprint-stat .lbl { font-size:11px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
 
   .tags-row { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0; }
   .tag { font-size:11px; font-family:'Source Code Pro',monospace; padding:4px 10px; border-radius:20px; border:1px solid var(--border); color:var(--text-dimmer); background:var(--bg3); }
@@ -80,7 +88,7 @@
   .nav-btn:hover { background:var(--pm-dark); }
   .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
   footer { text-align:center; padding:28px 32px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); }
-  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .risk-table { font-size:11px; } }
+  @media(max-width:640px) { .topnav,.main { padding-left:20px; padding-right:20px; } .story-grid { grid-template-columns:1fr; } }
 /* ── Learner assessment ─────────────────────────────────────────────────── */
   .assessment-wrap {
     background:var(--bg2); border:1.5px solid var(--border);
@@ -143,16 +151,71 @@
   .complete-bar.disabled input { cursor:not-allowed; }
   .hidden { display:none !important; }
 
+
+  /* ── Google SSO overlay ─────────────────────────────────────────────────── */
+  .auth-overlay {
+    position:fixed; inset:0; background:rgba(15,30,60,.7);
+    display:flex; align-items:center; justify-content:center;
+    z-index:9999; backdrop-filter:blur(4px);
+  }
+  .auth-overlay.hidden { display:none; }
+  .auth-box {
+    background:#fff; border-radius:16px; padding:48px 40px;
+    max-width:420px; width:90%; text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.2);
+  }
+  .auth-logo { font-size:32px; margin-bottom:16px; }
+  .auth-title { font-size:22px; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .auth-sub { font-size:15px; color:var(--text-dim); line-height:1.6; margin-bottom:28px; }
+  .auth-google-btn {
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    width:100%; padding:14px 20px; border-radius:8px;
+    background:var(--blue); color:#fff; border:none;
+    font-size:16px; font-weight:600; cursor:pointer;
+    font-family:'Merriweather Sans',sans-serif; transition:background .15s;
+  }
+  .auth-google-btn:hover { background:var(--blue-dark); }
+  .auth-google-btn svg { width:20px; height:20px; flex-shrink:0; }
+  .auth-error { font-size:13px; color:var(--coral); margin-top:12px; font-family:'Source Code Pro',monospace; }
+  .auth-user-bar {
+    background:var(--blue-light); border-bottom:1px solid var(--blue-mid);
+    padding:8px 32px; font-size:13px; font-family:'Source Code Pro',monospace;
+    color:var(--blue-dark); display:flex; align-items:center; justify-content:space-between;
+  }
+  .auth-user-bar.hidden { display:none; }
+  .auth-signout { background:none; border:none; color:var(--blue); cursor:pointer; font-size:12px; font-family:'Source Code Pro',monospace; text-decoration:underline; }
+
 </style>
 </head>
 <body>
+
+<!-- Auth overlay -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">🎓</div>
+    <div class="auth-title">Claude for PM</div>
+    <div class="auth-sub">Sign in with your SourceFuse Google account to access the course and save your progress.</div>
+    <button class="auth-google-btn" id="googleSignInBtn">
+      <svg viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
+      Sign in with Google
+    </button>
+    <div class="auth-error hidden" id="authError"></div>
+  </div>
+</div>
+
+<!-- Signed-in user bar -->
+<div class="auth-user-bar hidden" id="authUserBar">
+  <span id="authUserEmail"></span>
+  <button class="auth-signout" id="authSignOutBtn">Sign out</button>
+</div>
+
 
 <nav class="topnav">
   <a href="course-map.html">Course map</a>
   <span class="sep">/</span>
   <span>Tier 1 examples</span>
   <span class="sep">/</span>
-  <span>Example 3 — Risk register</span>
+  <span>Example 4 — Sprint planning</span>
 </nav>
 
 <div class="tabs-wrap">
@@ -178,31 +241,36 @@
     </div>
 
     <div class="tags-row">
-      <span class="tag pm">Example 3 · Tier 1</span>
-      <span class="tag">Risk identification</span>
+      <span class="tag pm">Example 4 · Tier 1</span>
+      <span class="tag">Sprint planning</span>
       <span class="tag">Single-context</span>
       <span class="tag">2–3 turn interaction</span>
     </div>
 
     <p class="prose">
-      The Meridian Cloud Migration project is entering its planning phase. Sarah needs to produce a risk register for the project kick-off — a document that will be reviewed by Raj Patel (SF Delivery Head) and shared with Lisa Park (Meridian PMO Lead).
-    </p>
-
-    <p class="prose">
-      The input she has is the project brief plus her knowledge of the Meridian context — a financial services firm with strict compliance requirements, an on-premise legacy infrastructure being migrated to AWS, and an aggressive Q4 deadline.
+      Sprint 3 planning for the Meridian AI Assistant is in two hours. Sarah has a high-level epic — "AI Query Assistant MVP" — that needs to be broken into properly sized, acceptance-criteria-ready user stories before the team can commit.
     </p>
 
     <div class="doc-block">
-      <div class="doc-label">Project brief — Meridian Cloud Migration</div>
-      Migrate Meridian's on-premise data centre workloads to AWS. Scope includes 14 application workloads, database migration (Oracle to Aurora PostgreSQL), network configuration (VPC, Direct Connect), and security/compliance setup (SOC 2, PCI DSS). Timeline: 9 months. Team: 6 SF engineers (cloud), 2 Meridian IT liaisons. Key constraint: zero downtime on 3 business-critical applications (trading platform, client reporting, risk engine). Legacy infrastructure is partially documented.
+      <div class="doc-label">Epic — Meridian AI Assistant: AI Query Assistant MVP</div>
+      Build an AI-powered query assistant for the Meridian client portal. Clients should be able to ask natural language questions about their accounts and get accurate, cited responses. The assistant must not answer questions outside the scope of Meridian's data. It should feel conversational but professional. Must work on mobile. Response time target: under 3 seconds. Integration with the existing portal authentication (already built in Sprint 2).
+    </div>
+
+    <div class="doc-block">
+      <div class="doc-label">Team capacity — Sprint 3 (2 weeks)</div>
+      Carlos (AI/ML lead): 10 days available<br>
+      Priya (frontend lead): 8 days available (one FE engineer still at 80%)<br>
+      Backend engineer (Rohan): 10 days available<br>
+      QA (shared): 4 days available<br>
+      Total capacity: ~32 story points (using 1pt ≈ 1 day, with 20% buffer for BAU)
     </div>
 
     <p class="prose">
-      Risk registers are one of those deliverables that PMs often produce under time pressure and tend to be either too generic ("integration risk — medium") or too exhaustive to be useful. The challenge is producing a register that is specific, scored, and actionable — with mitigations that reflect the actual project context.
+      The AI Assistant epic is deliberately vague at this stage — "feel conversational but professional" is not a testable acceptance criterion. Before the sprint planning session, Sarah needs stories with clear acceptance criteria, estimated sizes, and dependency flags so the team can have an informed commitment conversation.
     </p>
 
     <div class="callout">
-      <strong>What makes cloud migration risks different:</strong> Unlike a greenfield build, migration projects have dependency risks on the legacy system state, compliance risks that are binary (you pass the audit or you don't), and zero-downtime requirements that make sequencing critical. A generic risk register won't capture these.
+      <strong>Why this is PM work, not just developer work:</strong> Developers can decompose technically. PMs decompose for deliverability — which means understanding what can be demo'd to the client at the end of the sprint, what has external dependencies, and what needs to be excluded from Sprint 3 to avoid scope creep. Claude can help structure this thinking before the room fills up.
     </div>
 
     <div class="divider"></div>
@@ -218,22 +286,26 @@
       </div>
     </div>
 
-    <p class="prose">The naive approach produces a risk register that looks complete but is generic enough to apply to any project:</p>
+    <p class="prose">The naive prompt produces stories without acceptance criteria, without sizing guidance, and without flagging what's actually achievable in a 2-week sprint:</p>
 
     <div class="prompt-block">
-      <div class="speaker user">Sarah (naive prompt)</div>Create a risk register for a cloud migration project.</div>
+      <div class="speaker user">Sarah (naive prompt)</div>Break this AI assistant epic into user stories.
+
+[pastes epic]</div>
 
     <div class="doc-block">
-      <div class="doc-label">Naive output — generic risk register (excerpt)</div>
-      1. Timeline risk — Likelihood: Medium | Impact: High | Mitigation: Monitor progress weekly<br>
-      2. Budget overrun — Likelihood: Medium | Impact: High | Mitigation: Track costs monthly<br>
-      3. Technical complexity — Likelihood: Medium | Impact: Medium | Mitigation: Engage experienced engineers<br>
-      4. Stakeholder misalignment — Likelihood: Low | Impact: Medium | Mitigation: Regular communication<br>
-      5. Data loss during migration — Likelihood: Low | Impact: High | Mitigation: Back up data before migration
+      <div class="doc-label">Naive output — unsized stories without acceptance criteria</div>
+      1. As a client, I want to ask natural language questions about my account<br>
+      2. As a client, I want to receive accurate responses to my questions<br>
+      3. As a client, I want the assistant to cite its sources<br>
+      4. As a client, I want the assistant to work on mobile<br>
+      5. As a client, I want responses within 3 seconds<br>
+      6. As a client, I want the assistant to stay within Meridian's data scope<br>
+      7. As a client, I want a conversational experience
     </div>
 
     <div class="callout callout-bad">
-      <strong>What's wrong:</strong> Every item is generic. "Monitor progress weekly" is not a mitigation — it's a standard PM practice. "Engage experienced engineers" tells you nothing about the actual risk. None of the Meridian-specific risks appear: the partially-documented legacy infrastructure, the zero-downtime requirement on three business-critical applications, the Oracle-to-Aurora database migration complexity, or the SOC 2 + PCI DSS compliance dependency. This register provides no value to Raj or Lisa.
+      <strong>What's wrong:</strong> These are feature descriptions masquerading as user stories. None have acceptance criteria — how do you test "accurate responses"? How do you test "conversational experience"? There are no size estimates, no dependency flags, and no indication that stories 1, 2, 5, and 6 together represent significantly more than 32 story points of work for Sprint 3. The team would arrive at planning and spend 40 minutes discovering this.
     </div>
 
     <div class="divider"></div>
@@ -249,71 +321,86 @@
       </div>
     </div>
 
-    <p class="prose">Sarah provides the specific project context, a scoring rubric, and instructions to surface Meridian-specific risks — not generic cloud migration risks.</p>
+    <p class="prose">Sarah provides capacity context, a sizing convention, and asks Claude to flag what fits in the sprint and what should be deferred — with acceptance criteria for each story.</p>
 
     <div class="prompt-block">
-      <div class="speaker user">Sarah — Turn 1</div>I'm a senior PM at a cloud consultancy. I need a risk register for the project described below. Use this scoring approach:
+      <div class="speaker user">Sarah — Turn 1</div>I'm a senior PM at a cloud consultancy. I need to decompose this AI assistant epic into sprint-ready user stories for a 2-week sprint. Here are my constraints:
 
-Likelihood: 1 (unlikely) to 5 (almost certain)
-Impact: 1 (negligible) to 5 (project-ending)
-Risk score: Likelihood × Impact (1–25)
-RAG: Red (15–25), Amber (8–14), Green (1–7)
+Team capacity: ~32 story points total (1 point ≈ 1 day of work)
+Team: AI/ML engineer (10 days), frontend engineer (8 days), backend engineer (10 days), QA shared (4 days)
+Sprint goal: A demo-able AI query MVP that a client can actually use to ask account questions
 
-Requirements:
-— Surface risks that are SPECIFIC to this project context, not generic cloud migration risks
-— Each risk must have a specific mitigation (not "monitor closely" or "communicate regularly")
-— Flag any risks that require CLIENT action to mitigate (not just SF action)
-— Include a "risk owner" for each item
+For each story, provide:
+— User story (As a... I want... So that...)
+— Acceptance criteria (3–5 testable conditions using Given/When/Then format)
+— Story point estimate
+— Which team member(s) own it
+— Any dependencies on other stories or external systems
 
-Project brief:
-[pastes brief]
+Also tell me:
+— What fits in Sprint 3 given the capacity
+— What should be deferred to Sprint 4 and why
+
+Epic:
+[pastes epic]
 <hr class="prompt-sep">
-<div class="speaker claude">Claude — Turn 1</div>Here is the Meridian Cloud Migration risk register:
+<div class="speaker claude">Claude — Turn 1</div><strong>Sprint 3 Stories — Meridian AI Query Assistant MVP</strong>
 
-<strong>Risk 1: Legacy infrastructure documentation gaps</strong>
-Likelihood: 4 | Impact: 4 | Score: 16 | RAG: RED
-The brief notes legacy infrastructure is "partially documented." Undocumented dependencies or configurations will cause unplanned migration work.
-Mitigation: Run a 3-week discovery sprint before migration begins. Produce a dependency map for all 14 workloads. Do not begin migration until documentation is complete.
-Owner: Arjun (SF Cloud lead) + Meridian IT liaisons
-Client action required: YES — Meridian IT must provide access to all legacy system configurations and assign liaisons with sufficient knowledge to fill gaps.
+<strong>Story AI-01: RAG pipeline foundation</strong>
+As a system, the AI assistant must retrieve relevant account data from Meridian's data store to answer client queries accurately.
+Acceptance criteria:
+— Given a client query, the RAG pipeline retrieves the top 3 relevant document chunks from Meridian's indexed account data
+— Given a query outside Meridian's data scope, the pipeline returns no results and triggers the out-of-scope response
+— Given indexed data, retrieval completes in under 1 second (to support the 3s total response time)
+— Given a new document is added to the index, it is available for retrieval within 5 minutes
+Estimate: 8 points | Owner: Carlos (AI/ML) | Dependencies: Meridian data access + indexing pipeline (external dependency — confirm with Meridian IT)
 
-<strong>Risk 2: Zero-downtime requirement on 3 business-critical applications</strong>
-Likelihood: 3 | Impact: 5 | Score: 15 | RAG: RED
-Trading platform, client reporting, and risk engine cannot tolerate downtime. Any migration sequencing error or cutover failure creates immediate business and regulatory impact.
-Mitigation: Design blue-green deployment for all three applications. Mandate load testing in staging at 2× production load before cutover. Define rollback procedure with a maximum 15-minute RTO before cutover is approved.
-Owner: Arjun (SF Cloud lead)
-Client action required: YES — Meridian must define acceptable maintenance windows and confirm regulatory notification requirements for cutover events.
+<strong>Story AI-02: Query interface — portal integration</strong>
+As a client, I want to type a natural language question in the portal so that I can get an answer without navigating menus.
+Acceptance criteria:
+— Given I am authenticated, a query input field is visible on the portal dashboard
+— Given I type a query and submit, a loading state is shown within 200ms
+— Given a response is returned, it is displayed with the source citation visible
+— Given I am on mobile, the query interface is fully functional at 375px viewport width
+— Given the session expires, I am prompted to re-authenticate before my query is submitted
+Estimate: 5 points | Owner: Priya (frontend) | Dependencies: AI-01 (API endpoint), portal auth (Sprint 2 — complete)
 
-<strong>Risk 3: Oracle to Aurora PostgreSQL migration complexity</strong>
-Likelihood: 4 | Impact: 4 | Score: 16 | RAG: RED
-Oracle-to-PostgreSQL schema and stored procedure incompatibilities are common and frequently underestimated. Financial services databases often contain complex procedural logic.
-Mitigation: Engage AWS Schema Conversion Tool in Week 1. Catalogue all stored procedures and triggers. Allocate a dedicated database engineer for conversion. Build a 4-week buffer for database migration in the project plan.
-Owner: Arjun (SF Cloud lead)
-Client action required: YES — Meridian DBA team must be available for knowledge transfer sessions.
+<strong>Story AI-03: Out-of-scope guardrail</strong>
+As a client, when I ask a question outside Meridian's account data, I receive a clear and professional response explaining what the assistant can help with.
+Acceptance criteria:
+— Given a query that matches no Meridian data, the assistant responds with a predefined message explaining its scope
+— Given the out-of-scope response, it suggests 2–3 topics the assistant can help with
+— Given any query, the assistant never fabricates information (verified by QA test set of 20 adversarial queries)
+Estimate: 3 points | Owner: Carlos (AI/ML) | Dependencies: AI-01
 
-<strong>Risk 4: PCI DSS compliance scope expansion</strong>
-Likelihood: 3 | Impact: 4 | Score: 12 | RAG: AMBER
-PCI DSS scope may expand if the migrated architecture introduces new cardholder data flows not present in the legacy setup. This would require additional security controls and audit time.
-Mitigation: Engage a PCI DSS QSA in the architecture review phase (not post-migration). Document cardholder data flows explicitly in the architecture design document.
-Owner: Sarah Chen (PM) — escalate to Raj Patel if scope confirmed to expand
-Client action required: YES — Meridian must provide their current PCI DSS scoping document before architecture design begins.
+<strong>Story AI-04: Response latency validation</strong>
+As a client, I want responses within 3 seconds so that the assistant feels responsive and usable.
+Acceptance criteria:
+— Given a standard query, end-to-end response time (query submission to response displayed) is under 3 seconds for 95th percentile
+— Given a complex query requiring multiple retrieval chunks, response time does not exceed 5 seconds
+— Given a response time exceeds 3 seconds, a "still working" indicator is shown after 2 seconds
+Estimate: 3 points | Owner: Carlos (AI/ML) + Rohan (backend) | Dependencies: AI-01, AI-02
 
-<strong>Risk 5: Direct Connect provisioning lead time</strong>
-Likelihood: 4 | Impact: 3 | Score: 12 | RAG: AMBER
-AWS Direct Connect provisioning typically takes 4–8 weeks. If not ordered at project start, it becomes a critical path blocker for the network configuration phase.
-Mitigation: Initiate Direct Connect order in Week 1. Do not schedule network configuration phase until provisioning is confirmed.
-Owner: Arjun (SF Cloud lead)
-Client action required: YES — Meridian IT must raise the procurement order and provide AWS account access immediately.
+<strong>Story AI-05: QA test suite — MVP</strong>
+As a QA engineer, I want a test suite for the AI assistant so that we can validate accuracy and guardrail behaviour before demo.
+Acceptance criteria:
+— 30-question test set covering: in-scope queries (15), out-of-scope queries (10), adversarial queries (5)
+— All in-scope queries return a response with a valid citation
+— All out-of-scope queries return the guardrail message
+— All adversarial queries return either the guardrail message or a correct in-scope response
+Estimate: 4 points | Owner: QA | Dependencies: AI-01, AI-02, AI-03
 
-<strong>Risk 6: Meridian IT liaison availability</strong>
-Likelihood: 3 | Impact: 3 | Score: 9 | RAG: AMBER
-The project relies on 2 Meridian IT liaisons. If these resources are pulled for BAU work, migration progress will stall on dependency resolution and testing sign-off.
-Mitigation: Formalise liaison commitment in the project charter — minimum 60% allocation for duration. Escalate to Lisa Park if availability drops below 40% in any given week.
-Owner: Sarah Chen (PM)
-Client action required: YES — Meridian IT management must confirm liaison availability in writing before project start.</div>
+<strong>Total Sprint 3: 23 points — within 32pt capacity ✓</strong>
+Remaining capacity (9 points): buffer for integration issues and carried items from Sprint 2
+
+<strong>Deferred to Sprint 4:</strong>
+— Conversation history / multi-turn queries (requires session state management — 6pts)
+— Admin monitoring dashboard for query logs (8pts)
+— Fine-tuning on Meridian-specific terminology (requires training data collection first — 10pts)
+These are deferred because they are not required for a client-demo-able MVP and would consume the sprint buffer needed for integration risk.</div>
 
     <div class="callout callout-good" style="margin-top:20px;">
-      <strong>What changed:</strong> Every risk is specific to Meridian's context. Every mitigation is actionable. Client-required actions are explicitly flagged — which turns the risk register into a client accountability document, not just an internal planning tool.
+      <strong>What changed:</strong> Every story has testable acceptance criteria. The sprint total is calculated against capacity. External dependencies are flagged. The deferred items have reasons — not just "left for later." Sarah arrives at planning with a proposal, not a question.
     </div>
 
     <div class="divider"></div>
@@ -329,94 +416,67 @@ Client action required: YES — Meridian IT management must confirm liaison avai
       </div>
     </div>
 
-    <p class="prose">Sarah reviews the register and asks Claude to format it as a table for the kickoff presentation, then adds one risk Claude missed — based on her prior experience with financial services clients.</p>
+    <p class="prose">After the sprint planning session, the team adjusts two estimates (AI-01 goes from 8 to 10 points after Carlos flags the indexing pipeline complexity) and adds a dependency confirmation requirement. The final sprint board looks like this:</p>
 
-    <div class="output-block">
-      <div class="output-label">✓ Refined output — Meridian Cloud Migration Risk Register v1.0</div>
+    <div class="sprint-summary">
+      <div class="sprint-stat"><div class="val">23</div><div class="lbl">Committed pts</div></div>
+      <div class="sprint-stat"><div class="val">32</div><div class="lbl">Capacity pts</div></div>
+      <div class="sprint-stat"><div class="val">5</div><div class="lbl">Stories</div></div>
+      <div class="sprint-stat"><div class="val">9</div><div class="lbl">Buffer pts</div></div>
+      <div class="sprint-stat"><div class="val">1</div><div class="lbl">Ext. dependency</div></div>
+    </div>
 
-      <table class="risk-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Risk</th>
-            <th>L</th>
-            <th>I</th>
-            <th>Score</th>
-            <th>RAG</th>
-            <th>Client action?</th>
-            <th>Owner</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td>Legacy infrastructure documentation gaps</td>
-            <td>4</td><td>4</td>
-            <td class="score-high">16</td>
-            <td><span class="rag rag-red"></span>Red</td>
-            <td>Yes</td>
-            <td>Arjun + Meridian IT</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Zero-downtime requirement — 3 critical apps</td>
-            <td>3</td><td>5</td>
-            <td class="score-high">15</td>
-            <td><span class="rag rag-red"></span>Red</td>
-            <td>Yes</td>
-            <td>Arjun</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>Oracle → Aurora PostgreSQL migration complexity</td>
-            <td>4</td><td>4</td>
-            <td class="score-high">16</td>
-            <td><span class="rag rag-red"></span>Red</td>
-            <td>Yes</td>
-            <td>Arjun</td>
-          </tr>
-          <tr>
-            <td>4</td>
-            <td>PCI DSS scope expansion</td>
-            <td>3</td><td>4</td>
-            <td class="score-med">12</td>
-            <td><span class="rag rag-amber"></span>Amber</td>
-            <td>Yes</td>
-            <td>Sarah → Raj</td>
-          </tr>
-          <tr>
-            <td>5</td>
-            <td>Direct Connect provisioning lead time</td>
-            <td>4</td><td>3</td>
-            <td class="score-med">12</td>
-            <td><span class="rag rag-amber"></span>Amber</td>
-            <td>Yes</td>
-            <td>Arjun</td>
-          </tr>
-          <tr>
-            <td>6</td>
-            <td>Meridian IT liaison availability</td>
-            <td>3</td><td>3</td>
-            <td class="score-med">9</td>
-            <td><span class="rag rag-amber"></span>Amber</td>
-            <td>Yes</td>
-            <td>Sarah</td>
-          </tr>
-          <tr>
-            <td>7</td>
-            <td>Regulatory change during migration window</td>
-            <td>2</td><td>4</td>
-            <td class="score-med">8</td>
-            <td><span class="rag rag-amber"></span>Amber</td>
-            <td>Yes</td>
-            <td>Sarah + Meridian Legal</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="story-grid">
+      <div class="story-card new">
+        <div class="story-id">AI-01 · 10pts · Carlos</div>
+        <div class="story-title">RAG pipeline foundation</div>
+        <div class="story-desc">Core retrieval pipeline with Meridian data indexing. Revised to 10pts after indexing complexity confirmed.</div>
+        <div class="story-meta">
+          <span class="story-pts">10 pts</span>
+          <span class="story-tag be">Backend/ML</span>
+          <span class="story-tag dep">Ext. dependency</span>
+        </div>
+      </div>
+      <div class="story-card new">
+        <div class="story-id">AI-02 · 5pts · Priya</div>
+        <div class="story-title">Query interface — portal integration</div>
+        <div class="story-desc">Frontend query input, loading state, response display with citations. Mobile responsive.</div>
+        <div class="story-meta">
+          <span class="story-pts">5 pts</span>
+          <span class="story-tag fe">Frontend</span>
+        </div>
+      </div>
+      <div class="story-card new">
+        <div class="story-id">AI-03 · 3pts · Carlos</div>
+        <div class="story-title">Out-of-scope guardrail</div>
+        <div class="story-desc">Predefined response for out-of-scope queries. Verified with 20 adversarial test cases.</div>
+        <div class="story-meta">
+          <span class="story-pts">3 pts</span>
+          <span class="story-tag be">Backend/ML</span>
+        </div>
+      </div>
+      <div class="story-card new">
+        <div class="story-id">AI-04 · 3pts · Carlos + Rohan</div>
+        <div class="story-title">Response latency validation</div>
+        <div class="story-desc">End-to-end latency under 3s at p95. Loading indicator at 2s threshold.</div>
+        <div class="story-meta">
+          <span class="story-pts">3 pts</span>
+          <span class="story-tag be">Backend/ML</span>
+        </div>
+      </div>
+      <div class="story-card new">
+        <div class="story-id">AI-05 · 4pts · QA</div>
+        <div class="story-title">QA test suite — MVP</div>
+        <div class="story-desc">30-question test set: in-scope, out-of-scope, adversarial. All results validated.</div>
+        <div class="story-meta">
+          <span class="story-pts">4 pts</span>
+          <span class="story-tag qa">QA</span>
+        </div>
+      </div>
     </div>
 
     <div class="callout">
-      <strong>Risk 7 — what Claude missed:</strong> Sarah added the regulatory change risk from her own experience. Financial services firms in the US face regulatory change at a pace that can affect in-flight infrastructure projects — a FINRA or SEC rule change during a 9-month migration window is not hypothetical. This is the PM's domain knowledge complementing Claude's analytical output.
+      <strong>The PM's closure:</strong> Sarah notes the external dependency (Meridian IT data access for AI-01) and raises it with Lisa Park before the sprint starts. If this dependency isn't resolved by Day 3, AI-01 is blocked — and with it, the entire sprint. Getting ahead of this is exactly the kind of PM judgment that Claude's output makes visible.
     </div>
 
     <div class="divider"></div>
@@ -433,29 +493,29 @@ Client action required: YES — Meridian IT management must confirm liaison avai
     </div>
 
     <div class="callout callout-bad">
-      <strong>1. Claude will not surface industry-specific risks it wasn't told about</strong><br>
-      Claude doesn't know your client's regulatory environment, change freeze windows, or internal politics unless you tell it. Always add your own domain knowledge after the Claude output — treat the register as a first draft, not a finished product.
+      <strong>1. Claude will underestimate AI/ML work</strong><br>
+      AI-01's initial estimate of 8 points was optimistic — Carlos caught this in planning because he knew the indexing pipeline complexity. Claude doesn't know your team's velocity on AI work specifically. Always validate AI/ML story estimates with the technical lead before committing.
     </div>
 
     <div class="callout callout-bad">
-      <strong>2. Scores are only as good as the context</strong><br>
-      Claude will score risks based on what's in the brief. If the brief undersells a risk (e.g. describes a complex legacy system as "partially documented"), Claude's likelihood score will be conservative. Validate every score against your own judgment before presenting.
+      <strong>2. Acceptance criteria for AI quality are hard to make testable</strong><br>
+      "Accurate responses" and "conversational tone" are not testable. Claude will attempt to operationalise these — but you need to validate whether the test cases it proposes actually measure what the client cares about. A 30-question test set is a starting point, not a guarantee of production quality.
     </div>
 
     <div class="callout callout-bad">
-      <strong>3. Mitigations that require client action are easy to miss</strong><br>
-      Claude will produce SF-side mitigations by default. Explicitly ask it to flag client-required actions — otherwise these disappear into the mitigation column and never get raised at the kickoff.
+      <strong>3. Claude cannot see your team's existing sprint board</strong><br>
+      If there are carried stories, existing technical debt items, or team commitments Claude doesn't know about, the capacity calculation will be wrong. Always provide the full capacity picture — not just the headline number.
     </div>
 
     <div class="callout callout-good">
       <strong>The prompting discipline that makes this work:</strong><br>
-      (1) Provide specific project context — not a generic brief. (2) Give a scoring rubric — Claude will use it. (3) Ask explicitly for client-required actions. (4) Add your own domain knowledge after reviewing the output. A risk register is a living document — update it at each sprint review.
+      (1) Provide team capacity by person — not just total points. (2) State the sprint goal — what needs to be demo-able. (3) Ask explicitly for what should be deferred and why. (4) Ask for dependencies — both internal (story-to-story) and external (client/third-party). (5) Validate with your tech lead before the planning session, not during it.
     </div>
 
     <div class="divider"></div>
     <div class="bottom-nav">
-      <a class="nav-btn secondary" href="example-2-status.html">← Example 2</a>
-      <a class="nav-btn" href="example-4-sprint.html">Example 4 — Sprint planning →</a>
+      <a class="nav-btn secondary" href="example-3-risk.html">← Example 3</a>
+      <a class="nav-btn" href="example-5-requirements.html">Example 5 — Requirements →</a>
     </div>
     <!-- ── Learner assessment ──────────────────────────────────────────────── -->
     <div class="assessment-wrap" id="assessmentWrap">
@@ -468,36 +528,36 @@ Client action required: YES — Meridian IT management must confirm liaison avai
         <!-- Q1 -->
         <div class="question-block" id="qblock-1">
           <div class="q-num">Question 1 of 3</div>
-          <div class="q-text">What is the primary failure of a generic risk register prompt like "create a risk register for a cloud migration"?</div>
+          <div class="q-text">What is the key difference between the naive story decomposition and the Claude-assisted version in this example?</div>
           <div class="options">
-            <label class="option"><input type="radio" name="q1" value="A"> Claude refuses to create risk registers without a scoring rubric</label>
-            <label class="option"><input type="radio" name="q1" value="B"> The output will be too long to be useful in practice</label>
-            <label class="option"><input type="radio" name="q1" value="C"> Claude produces risks that apply to any project, not to the specific context</label>
-            <label class="option"><input type="radio" name="q1" value="D"> The likelihood scores will always be set to Medium by default</label>
+            <label class="option"><input type="radio" name="q1" value="A"> The Claude version had more stories, covering more features</label>
+            <label class="option"><input type="radio" name="q1" value="B"> The Claude version had testable acceptance criteria, size estimates, and dependency flags</label>
+            <label class="option"><input type="radio" name="q1" value="C"> The Claude version used a different user story format</label>
+            <label class="option"><input type="radio" name="q1" value="D"> The Claude version was produced faster because fewer turns were needed</label>
           </div>
         </div>
 
         <!-- Q2 -->
         <div class="question-block" id="qblock-2">
           <div class="q-num">Question 2 of 3</div>
-          <div class="q-text">In the Meridian Cloud Migration example, what made the risk register genuinely useful compared to the naive output?</div>
+          <div class="q-text">The AI-01 story estimate was increased from 8 to 10 points after the sprint planning session. What caused this?</div>
           <div class="options">
-            <label class="option"><input type="radio" name="q2" value="A"> It had more risks listed — over 20 items</label>
-            <label class="option"><input type="radio" name="q2" value="B"> Every risk was specific to Meridian's context and flagged client-required actions</label>
-            <label class="option"><input type="radio" name="q2" value="C"> The scores were calculated using a formula rather than judgment</label>
-            <label class="option"><input type="radio" name="q2" value="D"> It was shorter and easier to read than the naive version</label>
+            <label class="option"><input type="radio" name="q2" value="A"> Claude recalculated the estimate after seeing the full sprint capacity</label>
+            <label class="option"><input type="radio" name="q2" value="B"> Sarah decided to add more acceptance criteria to the story</label>
+            <label class="option"><input type="radio" name="q2" value="C"> Carlos (the AI lead) identified indexing pipeline complexity Claude had not accounted for</label>
+            <label class="option"><input type="radio" name="q2" value="D"> The QA team requested additional test coverage for the story</label>
           </div>
         </div>
 
         <!-- Q3 -->
         <div class="question-block" id="qblock-3">
           <div class="q-num">Question 3 of 3</div>
-          <div class="q-text">Sarah added Risk 7 (regulatory change) that Claude did not include. What does this illustrate?</div>
+          <div class="q-text">What is the most important PM action after receiving Claude's story decomposition?</div>
           <div class="options">
-            <label class="option"><input type="radio" name="q3" value="A"> Claude's output is a first draft — domain knowledge must be added by the PM</label>
-            <label class="option"><input type="radio" name="q3" value="B"> Claude is unable to reason about regulatory risks in financial services</label>
-            <label class="option"><input type="radio" name="q3" value="C"> The prompt was not specific enough about the industry context</label>
-            <label class="option"><input type="radio" name="q3" value="D"> Regulatory risks should always be excluded from the initial register</label>
+            <label class="option"><input type="radio" name="q3" value="A"> Validate estimates with the technical lead before the planning session</label>
+            <label class="option"><input type="radio" name="q3" value="B"> Send the output directly to the client for sign-off</label>
+            <label class="option"><input type="radio" name="q3" value="C"> Reduce all estimates by 20% to account for Claude's optimism</label>
+            <label class="option"><input type="radio" name="q3" value="D"> Add the stories to the sprint board without review</label>
           </div>
         </div>
 
@@ -526,12 +586,86 @@ Client action required: YES — Meridian IT management must confirm liaison avai
 
 <footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
 
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+const _FB_CONFIG = {
+  apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain: "sfcertification-grafana.firebaseapp.com",
+  projectId: "sfcertification-grafana",
+  storageBucket: "sfcertification-grafana.firebasestorage.app",
+  messagingSenderId: "227322696511",
+  appId: "1:227322696511:web:12e7ced7dd3d45fa06798a"
+};
+if (!window._fbApp) {
+  window._fbApp = firebase.initializeApp(_FB_CONFIG);
+}
+const _auth = firebase.auth(window._fbApp);
+const _provider = new firebase.auth.GoogleAuthProvider();
+
+// Expose uid-aware storage key builder
+window.pmLearnerKey = function(exampleId) {
+  const uid = window._learnerUid || 'anon';
+  return 'pm_learner_' + uid + '_' + exampleId;
+};
+
+window.pmCertKey = function() {
+  const uid = window._learnerUid || 'anon';
+  return 'pm_cert_' + uid;
+};
+
+function showOverlay()   { document.getElementById('authOverlay')?.classList.remove('hidden'); }
+function hideOverlay()   { document.getElementById('authOverlay')?.classList.add('hidden'); }
+function showUserBar(email) {
+  const bar = document.getElementById('authUserBar');
+  const em  = document.getElementById('authUserEmail');
+  if (bar) bar.classList.remove('hidden');
+  if (em)  em.textContent = email;
+}
+
+_auth.onAuthStateChanged(function(user) {
+  if (user) {
+    const email = user.email || '';
+    if (!email.endsWith('@sourcefuse.com')) {
+      document.getElementById('authError').textContent = 'Please use your @sourcefuse.com account.';
+      document.getElementById('authError').classList.remove('hidden');
+      _auth.signOut();
+      showOverlay();
+      return;
+    }
+    window._learnerUid  = user.uid;
+    window._learnerEmail = email;
+    hideOverlay();
+    showUserBar(email);
+    // Fire page-ready event for page-specific JS
+    document.dispatchEvent(new Event('learnerReady'));
+  } else {
+    window._learnerUid  = null;
+    window._learnerEmail = null;
+    showOverlay();
+  }
+});
+
+document.getElementById('googleSignInBtn')?.addEventListener('click', function() {
+  _auth.signInWithPopup(_provider).catch(function(err) {
+    const el = document.getElementById('authError');
+    if (el) { el.textContent = err.message; el.classList.remove('hidden'); }
+  });
+});
+
+document.getElementById('authSignOutBtn')?.addEventListener('click', function() {
+  _auth.signOut();
+});
+</script>
+
 </body>
 </html>
 <script>
 const CACHE_VERSION = '2026-04-05-v1';
-const EXAMPLE_ID    = 'example-3-risk';
-const CORRECT       = { q1: 'C', q2: 'B', q3: 'A' };
+const EXAMPLE_ID    = 'example-4-sprint';
+const CORRECT       = { q1: 'B', q2: 'C', q3: 'A' };
 
 // Cache busting
 (function() {
@@ -554,11 +688,12 @@ function showTab(n) {
 }
 
 // Storage
-const STORAGE_KEY = 'pm_learner_' + EXAMPLE_ID;
 function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; } }
 function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('learnerReady', function() {
+  // Re-key storage with uid
+  const STORAGE_KEY = window.pmLearnerKey(EXAMPLE_ID);
   const state = loadState();
 
   // Already completed
