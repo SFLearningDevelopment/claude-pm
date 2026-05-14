@@ -121,9 +121,64 @@
     .stage-arrow { display:none; }
     .ba-grid { grid-template-columns:1fr; }
   }
+
+  /* ── Google SSO overlay ─────────────────────────────────────────────────── */
+  .auth-overlay {
+    position:fixed; inset:0; background:rgba(15,30,60,.7);
+    display:flex; align-items:center; justify-content:center;
+    z-index:9999; backdrop-filter:blur(4px);
+  }
+  .auth-overlay.hidden { display:none; }
+  .auth-box {
+    background:#fff; border-radius:16px; padding:48px 40px;
+    max-width:420px; width:90%; text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.2);
+  }
+  .auth-logo { font-size:32px; margin-bottom:16px; }
+  .auth-title { font-size:22px; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .auth-sub { font-size:15px; color:var(--text-dim); line-height:1.6; margin-bottom:28px; }
+  .auth-google-btn {
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    width:100%; padding:14px 20px; border-radius:8px;
+    background:var(--blue); color:#fff; border:none;
+    font-size:16px; font-weight:600; cursor:pointer;
+    font-family:'Merriweather Sans',sans-serif; transition:background .15s;
+  }
+  .auth-google-btn:hover { background:var(--blue-dark); }
+  .auth-google-btn svg { width:20px; height:20px; flex-shrink:0; }
+  .auth-error { font-size:13px; color:var(--coral); margin-top:12px; font-family:'Source Code Pro',monospace; }
+  .auth-user-bar {
+    background:var(--blue-light); border-bottom:1px solid var(--blue-mid);
+    padding:8px 32px; font-size:13px; font-family:'Source Code Pro',monospace;
+    color:var(--blue-dark); display:flex; align-items:center; justify-content:space-between;
+  }
+  .auth-user-bar.hidden { display:none; }
+  .auth-signout { background:none; border:none; color:var(--blue); cursor:pointer; font-size:12px; font-family:'Source Code Pro',monospace; text-decoration:underline; }
+
 </style>
 </head>
 <body>
+
+<!-- Auth overlay -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">🎓</div>
+    <div class="auth-title">Claude for PM</div>
+    <div class="auth-sub">Sign in with your SourceFuse Google account to access the course and save your progress.</div>
+    <button class="auth-google-btn" id="googleSignInBtn">
+      <svg viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
+      Sign in with Google
+    </button>
+    <div class="auth-error hidden" id="authError"></div>
+  </div>
+</div>
+
+<!-- Signed-in user bar -->
+<div class="auth-user-bar hidden" id="authUserBar">
+  <span id="authUserEmail"></span>
+  <button class="auth-signout" id="authSignOutBtn">Sign out</button>
+</div>
+
 
 <nav class="topnav">
   <a href="course-map.html">Course map</a>
@@ -351,7 +406,9 @@ const touchpoints = {
   }
 };
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('learnerReady', function() {
+  // Re-key storage with uid
+  const STORAGE_KEY = window.pmLearnerKey(EXAMPLE_ID);
   document.querySelectorAll('[data-stage]').forEach(function(el) {
     el.addEventListener('click', function() { showStage(this.getAttribute('data-stage')); });
   });
@@ -404,5 +461,79 @@ function showTouchpoint(key) {
   if (touchpoints[key]) renderDetail(touchpoints[key]);
 }
 </script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+const _FB_CONFIG = {
+  apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain: "sfcertification-grafana.firebaseapp.com",
+  projectId: "sfcertification-grafana",
+  storageBucket: "sfcertification-grafana.firebasestorage.app",
+  messagingSenderId: "227322696511",
+  appId: "1:227322696511:web:12e7ced7dd3d45fa06798a"
+};
+if (!window._fbApp) {
+  window._fbApp = firebase.initializeApp(_FB_CONFIG);
+}
+const _auth = firebase.auth(window._fbApp);
+const _provider = new firebase.auth.GoogleAuthProvider();
+
+// Expose uid-aware storage key builder
+window.pmLearnerKey = function(exampleId) {
+  const uid = window._learnerUid || 'anon';
+  return 'pm_learner_' + uid + '_' + exampleId;
+};
+
+window.pmCertKey = function() {
+  const uid = window._learnerUid || 'anon';
+  return 'pm_cert_' + uid;
+};
+
+function showOverlay()   { document.getElementById('authOverlay')?.classList.remove('hidden'); }
+function hideOverlay()   { document.getElementById('authOverlay')?.classList.add('hidden'); }
+function showUserBar(email) {
+  const bar = document.getElementById('authUserBar');
+  const em  = document.getElementById('authUserEmail');
+  if (bar) bar.classList.remove('hidden');
+  if (em)  em.textContent = email;
+}
+
+_auth.onAuthStateChanged(function(user) {
+  if (user) {
+    const email = user.email || '';
+    if (!email.endsWith('@sourcefuse.com')) {
+      document.getElementById('authError').textContent = 'Please use your @sourcefuse.com account.';
+      document.getElementById('authError').classList.remove('hidden');
+      _auth.signOut();
+      showOverlay();
+      return;
+    }
+    window._learnerUid  = user.uid;
+    window._learnerEmail = email;
+    hideOverlay();
+    showUserBar(email);
+    // Fire page-ready event for page-specific JS
+    document.dispatchEvent(new Event('learnerReady'));
+  } else {
+    window._learnerUid  = null;
+    window._learnerEmail = null;
+    showOverlay();
+  }
+});
+
+document.getElementById('googleSignInBtn')?.addEventListener('click', function() {
+  _auth.signInWithPopup(_provider).catch(function(err) {
+    const el = document.getElementById('authError');
+    if (el) { el.textContent = err.message; el.classList.remove('hidden'); }
+  });
+});
+
+document.getElementById('authSignOutBtn')?.addEventListener('click', function() {
+  _auth.signOut();
+});
+</script>
+
 </body>
 </html>
