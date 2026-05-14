@@ -77,7 +77,7 @@
   .option input[type="radio"] { margin-top:3px; flex-shrink:0; accent-color:var(--blue); }
   .submit-btn { margin-top:20px; padding:12px 28px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Merriweather Sans',sans-serif; }
   .submit-btn:disabled { background:var(--border); color:var(--text-dimmer); cursor:not-allowed; }
-  .submit-btn:not(:disabled):hover { background:var(--blue-dark); color:#fff; }
+  .submit-btn:not(:disabled):hover { background:var(--blue-dark); color:#000; }
   .submit-note { font-size:13px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:8px; }
   .submitted-wrap { text-align:center; padding:16px 0; }
   .submitted-icon { font-size:36px; color:var(--green); margin-bottom:8px; }
@@ -90,6 +90,9 @@
   .complete-bar.done { background:var(--green-light); border-color:var(--green-mid); border-left:3px solid var(--green); color:var(--green); }
   .complete-bar input[type="checkbox"] { width:18px; height:18px; accent-color:var(--green); }
   .complete-bar.disabled input { cursor:not-allowed; }
+  .redo-btn { display:none; margin-left:16px; padding:8px 18px; background:var(--bg2); color:var(--coral); border:1.5px solid var(--coral-mid); border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Merriweather Sans',sans-serif; transition:background .15s; }
+  .redo-btn:hover { background:var(--coral-light); }
+  .redo-btn.visible { display:inline-block; }
   .hidden { display:none !important; }
   .step-nav-row { display:flex; justify-content:flex-end; margin-top:24px; }
   .continue-btn { padding:12px 24px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Merriweather Sans',sans-serif; transition:background .15s; }
@@ -329,6 +332,7 @@ The original estimate was based on standard web application infrastructure costs
   <div class="complete-bar disabled" id="completeBar">
     <input type="checkbox" id="completeCb" disabled>
     <label for="completeCb" id="completeLabel">Answer all questions to unlock</label>
+    <button class="redo-btn" id="redoBtn">↺ Redo example</button>
   </div>
 
   <div class="bottom-nav">
@@ -360,11 +364,10 @@ function showTab(n) {
   document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; } }
-function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+function loadState() { const k = window.pmLearnerKey ? window.pmLearnerKey(EXAMPLE_ID) : 'pm_learner_' + EXAMPLE_ID; try { return JSON.parse(localStorage.getItem(k)) || {}; } catch(e) { return {}; } }
+function saveState(s) { const k = window.pmLearnerKey ? window.pmLearnerKey(EXAMPLE_ID) : 'pm_learner_' + EXAMPLE_ID; localStorage.setItem(k, JSON.stringify(s)); }
 document.addEventListener('learnerReady', function() {
-  // Re-key storage with uid
-  const STORAGE_KEY = window.pmLearnerKey(EXAMPLE_ID);
+  // Re-key storage with uid — key is now computed in loadState/saveState
   const state = loadState();
   if (state.submittedAt) { showSubmittedState(); activateCompleteBar(state.complete); return; }
   document.querySelectorAll('.options input[type="radio"]').forEach(function(r) { r.addEventListener('change', checkAllAnswered); });
@@ -374,6 +377,23 @@ document.addEventListener('learnerReady', function() {
     if (!cb.checked) return;
     const s = loadState(); s.complete = true; saveState(s); activateCompleteBar(true);
   });
+  const redoBtn = document.getElementById('redoBtn');
+  if (redoBtn) redoBtn.addEventListener('click', function() {
+    const k = window.pmLearnerKey ? window.pmLearnerKey(EXAMPLE_ID) : ('pm_learner_' + EXAMPLE_ID);
+    localStorage.removeItem(k);
+    document.getElementById('questionsWrap')?.classList.remove('hidden');
+    document.getElementById('submittedWrap')?.classList.add('hidden');
+    document.querySelectorAll('.options input[type="radio"]').forEach(function(r) { r.checked = false; });
+    const sBtn = document.getElementById('submitAnswersBtn');
+    if (sBtn) sBtn.disabled = true;
+    const sNote = document.getElementById('submitNote');
+    if (sNote) sNote.textContent = 'Select an answer for each question to submit.';
+    activateCompleteBar(false);
+    showTab(1);
+  });
+
+  // Redo button
+
 });
 function checkAllAnswered() {
   const all = ['q1','q2','q3'].every(n => document.querySelector('input[name="'+n+'"]:checked'));
@@ -392,12 +412,22 @@ function showSubmittedState() {
   document.getElementById('submittedWrap')?.classList.remove('hidden');
 }
 function activateCompleteBar(isDone) {
-  const bar = document.getElementById('completeBar');
-  const cb  = document.getElementById('completeCb');
-  const lbl = document.getElementById('completeLabel');
+  const bar   = document.getElementById('completeBar');
+  const cb    = document.getElementById('completeCb');
+  const label = document.getElementById('completeLabel');
+  const redo  = document.getElementById('redoBtn');
   if (!bar) return;
-  if (isDone) { bar.className='complete-bar done'; cb.disabled=false; cb.checked=true; lbl.textContent='✓ Example complete'; }
-  else { bar.className='complete-bar ready'; cb.disabled=false; lbl.textContent='Mark example as complete'; }
+  if (isDone) {
+    bar.className = 'complete-bar done';
+    cb.disabled   = true; cb.checked = true;
+    label.textContent = '✓ Example complete';
+    if (redo) redo.classList.add('visible');
+  } else {
+    bar.className = 'complete-bar ready';
+    cb.disabled   = false; cb.checked = false;
+    label.textContent = 'Mark example as complete';
+    if (redo) redo.classList.remove('visible');
+  }
 }
 </script>
 
