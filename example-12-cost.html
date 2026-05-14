@@ -37,7 +37,7 @@
   .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
   .step-num { width:52px; height:52px; border-radius:50%; background:var(--blue); color:#fff; font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
   .step-meta { flex:1; }
-  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--blue); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
   .step-title { font-size:28px; font-weight:700; }
   .prose { font-size:17px; color:var(--text-dim); line-height:1.9; margin-bottom:24px; }
   .prose strong { color:var(--text); font-weight:600; }
@@ -91,6 +91,10 @@
   .complete-bar input[type="checkbox"] { width:18px; height:18px; accent-color:var(--green); }
   .complete-bar.disabled input { cursor:not-allowed; }
   .hidden { display:none !important; }
+  .step-nav-row { display:flex; justify-content:flex-end; margin-top:24px; }
+  .continue-btn { padding:12px 24px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Merriweather Sans',sans-serif; transition:background .15s; }
+  .continue-btn:hover { background:var(--blue-dark); }
+  .back-dashboard-btn { padding:12px 22px; background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
   .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:8px; }
   .nav-btn { padding:12px 22px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; transition:background .15s; background:var(--blue); color:#fff; border:none; }
   .nav-btn:hover { background:var(--blue-dark); }
@@ -181,6 +185,7 @@
   </div>
   <div class="callout callout-warn"><strong>Why this is Tier 3:</strong> The PM must take Carlos's technical cost breakdown — which contains GPU instance types, vector store pricing, embedding API economics, and optimisation options — and turn it into a board-ready narrative that explains a $60K budget overrun without alarming the client, while being technically accurate and presenting concrete options. Translating cost overruns is harder than translating progress updates — the client is being asked to accept additional spend.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(2)">Continue →</button></div>
 </section>
 
 <!-- STEP 2 -->
@@ -190,6 +195,7 @@
   <div class="prompt-block"><div class="speaker user">Sarah (naive — cost update to Mark)</div>Hi Mark — wanted to flag a budget update on the AI Assistant workstream. Current AWS spend is running at $6,530/month vs our estimate of $2,400/month. The main drivers are the GPU compute requirements for embedding generation (we needed p3.2xlarge instead of t3.large), the Pinecone vector store running larger than expected, and OpenAI API costs. We're looking at optimisations including switching to Graviton3 instances and Bedrock Titan embeddings. Projected total is now ~$180K vs the $120K approved budget. Happy to discuss.</div>
   <div class="callout callout-bad"><strong>What's wrong:</strong> Every sentence contains jargon Mark cannot decode. "p3.2xlarge," "Pinecone vector store," "Graviton3," "Bedrock Titan embeddings" — none of these mean anything to a financial services CTO without an AI background. The $60K overrun is presented as a number without context — is this normal for AI projects? Was the estimate naive from the start? What is Mark being asked to decide? "Happy to discuss" again defers the decision to a call that should not need to happen if the communication is done correctly.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(3)">Continue →</button></div>
 </section>
 
 <!-- STEP 3 -->
@@ -235,6 +241,7 @@ The original estimate was based on standard web application infrastructure costs
 [rest of narrative follows]</div>
   <div class="callout callout-good" style="margin-top:20px;"><strong>What changed:</strong> The $60K overrun is now contextualised as a known pattern in AI projects, not a project management failure. The options are presented with decision language — what Mark needs to approve, not what the engineering team needs to do. The recommendation leads, so Mark knows what he is being asked to decide before he reads the detail. No jargon. No deferral to a call.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(4)">Continue →</button></div>
 </section>
 
 <!-- STEP 4 -->
@@ -264,6 +271,7 @@ The original estimate was based on standard web application infrastructure costs
   </div>
   <div class="callout"><strong>Why this addition matters:</strong> Mark is the CTO of a financial services firm. He is used to thinking in programme-level numbers. A $35K variance on a $120K AI workstream sounds like a 29% overrun. A $35K variance on a $680K programme sounds like normal project variance. Claude produced the AI workstream narrative — Sarah added the programme context that reframes the number correctly. This is the PM's financial judgment layer.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(5)">Continue →</button></div>
 </section>
 
 <!-- STEP 5 -->
