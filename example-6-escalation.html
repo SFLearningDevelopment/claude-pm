@@ -152,7 +152,7 @@
   .hidden { display:none !important; }
   .step-nav-row { display:flex; justify-content:flex-end; margin-top:24px; }
   .continue-btn { padding:12px 24px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Merriweather Sans',sans-serif; transition:background .15s; }
-  .continue-btn:hover { background:var(--blue-dark); }
+  .continue-btn:hover { background:var(--blue-dark); color:#000; }
   .back-dashboard-btn { padding:12px 22px; background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
 
 
@@ -681,6 +681,7 @@ function showTab(n) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('step-' + n).classList.add('active');
   document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Storage
