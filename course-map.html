@@ -51,8 +51,8 @@
   .hero-wrap { background: var(--bg2); border-bottom: 2px solid var(--border); }
   .hero { max-width: 1400px; margin: 0 auto; padding: 40px 32px 36px; }
   .hero-eyebrow {
-    font-size: 11px; font-family: 'Source Code Pro', monospace;
-    color: var(--pm); letter-spacing: .12em; text-transform: uppercase;
+    font-size: 15px; font-family: 'Source Code Pro', monospace; font-weight: 700;
+    color: var(--blue); letter-spacing: .12em; text-transform: uppercase;
     margin-bottom: 12px;
   }
   .hero h1 { font-size: 36px; font-weight: 700; line-height: 1.25; margin-bottom: 16px; }
@@ -61,7 +61,7 @@
 
   /* ── Progress bar ── */
   .progress-row { display: flex; align-items: center; gap: 12px; }
-  .progress-label { font-size: 11px; font-family: 'Source Code Pro', monospace; color: var(--text-dimmer); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+  .progress-label { font-size: 15px; font-family: 'Source Code Pro', monospace; font-weight: 700; color: var(--text-dim); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
   .progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
   .progress-fill { height: 100%; width: 0%; background: var(--pm); border-radius: 3px; transition: width 0.6s ease; }
   .progress-count { font-size: 11px; font-family: 'Source Code Pro', monospace; color: var(--text-dimmer); white-space: nowrap; }
@@ -88,6 +88,11 @@
   .section-desc { font-size: 17px; color: var(--text-dim); margin-bottom: 22px; font-weight: 400; max-width: 860px; line-height: 1.75; }
 
   /* ── Tier badge ── */
+  .tier-section {
+    border: 2px solid var(--blue-mid); border-left: 5px solid var(--blue);
+    border-radius: var(--radius); padding: 24px 28px; margin-bottom: 28px;
+    background: var(--bg2);
+  }
   .tier-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
   .tier-icon {
     width: 36px; height: 36px; border-radius: 8px;
@@ -220,7 +225,7 @@
       decisions — without replacing the judgment that makes a great PM irreplaceable.
     </p>
     <div class="progress-row">
-      <span class="progress-label">Progress</span>
+      <span class="progress-label">Course Progress</span>
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       <span class="progress-count" id="progressCount">0 of 12 complete</span>
     </div>
@@ -260,6 +265,7 @@
   <div class="section-divider"></div>
 
   <!-- ── Tier 1 ── -->
+  <div class="tier-section">
   <div class="tier-header">
     <div class="tier-icon">◎</div>
     <div class="tier-info">
@@ -317,9 +323,12 @@
 
   </div>
 
+  </div><!-- /tier-section -->
+
   <div class="section-divider"></div>
 
   <!-- ── Tier 2 ── -->
+  <div class="tier-section">
   <div class="tier-header">
     <div class="tier-icon">⊕</div>
     <div class="tier-info">
@@ -387,9 +396,12 @@
 
   </div>
 
+  </div><!-- /tier-section -->
+
   <div class="section-divider"></div>
 
   <!-- ── Tier 3 ── -->
+  <div class="tier-section">
   <div class="tier-header">
     <div class="tier-icon">⊗</div>
     <div class="tier-info">
@@ -436,6 +448,8 @@
     </a>
 
   </div>
+
+  </div><!-- /tier-section -->
 
   <div class="section-divider"></div>
 
