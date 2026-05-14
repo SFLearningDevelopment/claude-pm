@@ -37,7 +37,7 @@
   .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
   .step-num { width:52px; height:52px; border-radius:50%; background:var(--blue); color:#fff; font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
   .step-meta { flex:1; }
-  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--blue); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
   .step-title { font-size:28px; font-weight:700; }
   .prose { font-size:17px; color:var(--text-dim); line-height:1.9; margin-bottom:24px; }
   .prose strong { color:var(--text); font-weight:600; }
@@ -93,6 +93,10 @@
   .complete-bar input[type="checkbox"] { width:18px; height:18px; accent-color:var(--green); }
   .complete-bar.disabled input { cursor:not-allowed; }
   .hidden { display:none !important; }
+  .step-nav-row { display:flex; justify-content:flex-end; margin-top:24px; }
+  .continue-btn { padding:12px 24px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Merriweather Sans',sans-serif; transition:background .15s; }
+  .continue-btn:hover { background:var(--blue-dark); }
+  .back-dashboard-btn { padding:12px 22px; background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
   .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:8px; }
   .nav-btn { padding:12px 22px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; transition:background .15s; background:var(--blue); color:#fff; border:none; }
   .nav-btn:hover { background:var(--blue-dark); }
@@ -187,6 +191,7 @@
   </div>
   <div class="callout callout-warn"><strong>Why this is Tier 3:</strong> The PM must reason across multiple inputs simultaneously — contract language, the client's compliance requirements, SF's liability position as prime contractor, and a hard signing deadline — and produce a prioritised brief that is specific enough to direct legal review without overstepping into legal advice. Claude cannot replace a lawyer but can dramatically accelerate the triage.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(2)">Continue →</button></div>
 </section>
 
 <!-- STEP 2 -->
@@ -196,6 +201,7 @@
   <div class="prompt-block"><div class="speaker user">Sarah (naive — email to legal)</div>Hi — can you review the attached MSA from CloudMind AI? We need to sign by Wednesday. Key things I noticed: their liability cap seems low and they have some IP clauses worth checking. Let me know if you see anything. Thanks.</div>
   <div class="callout callout-bad"><strong>What's wrong:</strong> "Liability cap seems low" and "some IP clauses worth checking" give legal no direction. A 40-page MSA will take 4–6 hours to review properly. Without a prioritised brief, legal will read sequentially — and may spend significant time on boilerplate while missing the clauses that actually matter for this specific engagement. The PII and data residency requirements — which are specific to Meridian and critical given SF's prime contractor liability — are not mentioned at all.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(3)">Continue →</button></div>
 </section>
 
 <!-- STEP 3 -->
@@ -258,6 +264,7 @@ If CloudMind's availability failure causes SF to miss a client milestone or SLA,
 Deliverables remain CloudMind's IP, licensed non-exclusively. If the RAG pipeline is customised for Meridian's data and CloudMind is later acquired or goes out of business, SF has no ownership of the custom components. Legal should consider whether a work-for-hire clause or ownership transfer is required for Meridian-specific deliverables.</div>
   <div class="callout callout-good" style="margin-top:20px;"><strong>What changed:</strong> Legal now has a prioritised brief — three critical items and four amber items, each with the specific reason it matters for this engagement. A 4-hour review can be focused on the critical items first. Sarah has not given legal advice — she has given direction. The data residency conflict was entirely missed in the naive approach and is the single highest-risk clause in the contract.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(4)">Continue →</button></div>
 </section>
 
 <!-- STEP 4 -->
@@ -281,6 +288,7 @@ Deliverables remain CloudMind's IP, licensed non-exclusively. If the RAG pipelin
   </div>
   <div class="callout callout-bad"><strong>Sarah's recommendation to Raj:</strong> Do not sign by Wednesday. Request a 5-business-day extension from CloudMind — frame it as "standard legal review process." The three Critical items are deal-condition issues, not negotiating preferences. Section 12.1 (EU data residency) alone is sufficient grounds to delay signing — it directly conflicts with a written client requirement. If CloudMind declines to extend, escalate to Raj immediately.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(5)">Continue →</button></div>
 </section>
 
 <!-- STEP 5 -->
