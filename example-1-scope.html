@@ -24,7 +24,7 @@
   body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
 
   /* Topnav */
-  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:15px; font-weight:700; color:var(--text-dim); font-family:'Merriweather Sans',sans-serif; }
   .topnav a { color:var(--pm); text-decoration:none; }
   .topnav a:hover { text-decoration:underline; }
   .sep { opacity:.4; }
@@ -65,8 +65,8 @@
     font-family:'Source Code Pro',monospace;
   }
   .step-meta { flex:1; }
-  .step-label { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
-  .step-title { font-size:24px; font-weight:700; }
+  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+  .step-title { font-size:28px; font-weight:700; }
 
   /* Content blocks */
   .prose { font-size:17px; color:var(--text-dim); line-height:1.9; margin-bottom:24px; }
@@ -89,9 +89,9 @@
     font-size:16px; line-height:1.85; color:var(--text-dim);
   }
   .doc-block .doc-label {
-    font-size:10px; font-family:'Source Code Pro',monospace;
-    letter-spacing:.12em; text-transform:uppercase; color:var(--text-dimmer);
-    margin-bottom:10px;
+    font-size:13px; font-family:'Source Code Pro',monospace; font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim);
+    margin-bottom:12px;
   }
 
   /* Code / prompt block */
@@ -272,7 +272,7 @@
 
 
 <nav class="topnav">
-  <a href="course-map.html">Course map</a>
+  <a href="course-map.html">Back to course dashboard</a>
   <span class="sep">/</span>
   <span>Tier 1 examples</span>
   <span class="sep">/</span>
@@ -724,7 +724,7 @@ function showUserBar(email) {
   const bar = document.getElementById('authUserBar');
   const em  = document.getElementById('authUserEmail');
   if (bar) bar.classList.remove('hidden');
-  if (em)  em.textContent = email;
+  if (em)  em.textContent = 'Welcome, ' + email;
 }
 
 _auth.onAuthStateChanged(function(user) {
