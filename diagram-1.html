@@ -23,7 +23,7 @@
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; min-height:100vh; }
 
-  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:15px; font-weight:700; color:var(--text-dim); font-family:'Merriweather Sans',sans-serif; }
   .topnav a { color:var(--pm); text-decoration:none; }
   .topnav a:hover { text-decoration:underline; }
   .sep { opacity:.4; }
@@ -175,7 +175,7 @@
 
 
 <nav class="topnav">
-  <a href="course-map.html">Course map</a>
+  <a href="course-map.html">Back to course dashboard</a>
   <span class="sep">/</span>
   <span>Diagram 1 — Claude in the PM workflow</span>
 </nav>
@@ -496,7 +496,7 @@ function showUserBar(email) {
   const bar = document.getElementById('authUserBar');
   const em  = document.getElementById('authUserEmail');
   if (bar) bar.classList.remove('hidden');
-  if (em)  em.textContent = email;
+  if (em)  em.textContent = 'Welcome, ' + email;
 }
 
 _auth.onAuthStateChanged(function(user) {
