@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Results · Claude for PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#eef2f7; --bg2:#ffffff; --bg3:#f0f4f9; --border:#d0dae8;
+    --text:#1a2332; --text-dim:#4a5568; --text-dimmer:#8fa3bc;
+    --blue:#1a6eb5; --blue-light:#e8f1fb; --blue-mid:#b8d0ed; --blue-dark:#0f4a7a;
+    --coral:#c0392b; --coral-light:#fdf0ee; --coral-mid:#f0b8b2;
+    --green:#1a6b3a; --green-light:#e8f5ed; --green-mid:#a3d4b8;
+    --amber:#92600a; --amber-light:#fdf3e3; --radius:12px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Merriweather Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .topnav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; height:52px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dimmer); font-family:'Source Code Pro',monospace; }
+  .topnav a { color:var(--blue); text-decoration:none; }
+  .topnav a:hover { text-decoration:underline; }
+  .sep { opacity:.4; }
+  .hero { background:var(--bg2); border-bottom:2px solid var(--border); padding:32px; }
+  .hero-inner { max-width:1400px; margin:0 auto; }
+  .hero-eyebrow { font-size:11px; font-family:'Source Code Pro',monospace; color:var(--blue); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-size:30px; font-weight:700; margin-bottom:8px; }
+  .hero-sub { font-size:16px; color:var(--text-dim); line-height:1.7; }
+  .main { max-width:1400px; margin:0 auto; padding:32px; }
+  .score-banner { border-radius:var(--radius); padding:32px 36px; margin-bottom:28px; display:flex; align-items:center; gap:32px; }
+  .score-banner.pass { background:var(--green-light); border:2px solid var(--green-mid); border-left:6px solid var(--green); }
+  .score-banner.fail { background:var(--coral-light); border:2px solid var(--coral-mid); border-left:6px solid var(--coral); }
+  .score-big { font-size:56px; font-weight:700; font-family:'Source Code Pro',monospace; flex-shrink:0; }
+  .score-banner.pass .score-big { color:var(--green); }
+  .score-banner.fail .score-big { color:var(--coral); }
+  .score-meta { flex:1; }
+  .score-result { font-size:22px; font-weight:700; margin-bottom:6px; }
+  .score-banner.pass .score-result { color:var(--green); }
+  .score-banner.fail .score-result { color:var(--coral); }
+  .score-detail { font-size:15px; color:var(--text-dim); line-height:1.7; }
+  .score-badge { display:inline-block; margin-top:10px; padding:6px 16px; border-radius:20px; font-size:13px; font-weight:700; font-family:'Source Code Pro',monospace; }
+  .score-banner.pass .score-badge { background:var(--green); color:#fff; }
+  .score-banner.fail .score-badge { background:var(--coral); color:#fff; }
+  .summary-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+  .sum-card { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px 24px; text-align:center; }
+  .sum-card .val { font-size:28px; font-weight:700; font-family:'Source Code Pro',monospace; margin-bottom:4px; }
+  .sum-card .lbl { font-size:12px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); text-transform:uppercase; letter-spacing:.08em; }
+  .sum-card.c .val { color:var(--green); }
+  .sum-card.w .val { color:var(--coral); }
+  .sum-card.t .val { color:var(--blue); }
+  .sum-card.a .val { color:var(--amber); }
+  .section-title { font-size:18px; font-weight:700; margin-bottom:16px; padding-bottom:8px; border-bottom:2px solid var(--border); }
+  .q-table { width:100%; border-collapse:collapse; margin-bottom:32px; }
+  .q-table th { background:var(--bg3); border:1px solid var(--border); padding:10px 14px; text-align:left; font-size:11px; font-family:'Source Code Pro',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dimmer); }
+  .q-table td { border:1px solid var(--border); padding:12px 14px; font-size:15px; color:var(--text-dim); vertical-align:top; line-height:1.5; }
+  .q-table tr:nth-child(even) td { background:var(--bg3); }
+  .pill { display:inline-block; padding:3px 12px; border-radius:20px; font-size:13px; font-family:'Source Code Pro',monospace; font-weight:700; }
+  .pill-correct { background:var(--green-light); color:var(--green); border:1px solid var(--green-mid); }
+  .pill-wrong   { background:var(--coral-light); color:var(--coral); border:1px solid var(--coral-mid); }
+  .pill-ans     { background:var(--blue-light); color:var(--blue-dark); border:1px solid var(--blue-mid); }
+  .empty-state { text-align:center; padding:60px 32px; background:var(--bg2); border-radius:var(--radius); border:1.5px solid var(--border); }
+  .empty-icon { font-size:48px; margin-bottom:16px; }
+  .empty-title { font-size:22px; font-weight:700; margin-bottom:8px; }
+  .empty-sub { font-size:16px; color:var(--text-dim); margin-bottom:24px; }
+  .empty-btn { display:inline-block; padding:12px 24px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-weight:600; font-size:15px; }
+  .empty-btn:hover { background:var(--blue-dark); }
+  .nav-row { display:flex; gap:16px; margin-top:32px; padding-top:24px; border-top:1px solid var(--border); flex-wrap:wrap; }
+  .nav-btn { padding:12px 22px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
+  .nav-btn.primary { background:var(--blue); color:#fff; }
+  .nav-btn.primary:hover { background:var(--blue-dark); }
+  .nav-btn.secondary { background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); }
+  footer { text-align:center; padding:32px; font-size:11px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); border-top:1px solid var(--border); margin-top:16px; }
+  @media(max-width:700px) { .summary-grid { grid-template-columns:1fr 1fr; } .score-banner { flex-direction:column; gap:16px; } }
+
+  /* ── Google SSO overlay ─────────────────────────────────────────────────── */
+  .auth-overlay {
+    position:fixed; inset:0; background:rgba(15,30,60,.7);
+    display:flex; align-items:center; justify-content:center;
+    z-index:9999; backdrop-filter:blur(4px);
+  }
+  .auth-overlay.hidden { display:none; }
+  .auth-box {
+    background:#fff; border-radius:16px; padding:48px 40px;
+    max-width:420px; width:90%; text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.2);
+  }
+  .auth-logo { font-size:32px; margin-bottom:16px; }
+  .auth-title { font-size:22px; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .auth-sub { font-size:15px; color:var(--text-dim); line-height:1.6; margin-bottom:28px; }
+  .auth-google-btn {
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    width:100%; padding:14px 20px; border-radius:8px;
+    background:var(--blue); color:#fff; border:none;
+    font-size:16px; font-weight:600; cursor:pointer;
+    font-family:'Merriweather Sans',sans-serif; transition:background .15s;
+  }
+  .auth-google-btn:hover { background:var(--blue-dark); }
+  .auth-google-btn svg { width:20px; height:20px; flex-shrink:0; }
+  .auth-error { font-size:13px; color:var(--coral); margin-top:12px; font-family:'Source Code Pro',monospace; }
+  .auth-user-bar {
+    background:var(--blue-light); border-bottom:1px solid var(--blue-mid);
+    padding:8px 32px; font-size:13px; font-family:'Source Code Pro',monospace;
+    color:var(--blue-dark); display:flex; align-items:center; justify-content:space-between;
+  }
+  .auth-user-bar.hidden { display:none; }
+  .auth-signout { background:none; border:none; color:var(--blue); cursor:pointer; font-size:12px; font-family:'Source Code Pro',monospace; text-decoration:underline; }
+
+</style>
+</head>
+<body>
+
+<!-- Auth overlay -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">🎓</div>
+    <div class="auth-title">Claude for PM</div>
+    <div class="auth-sub">Sign in with your SourceFuse Google account to access the course and save your progress.</div>
+    <button class="auth-google-btn" id="googleSignInBtn">
+      <svg viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
+      Sign in with Google
+    </button>
+    <div class="auth-error hidden" id="authError"></div>
+  </div>
+</div>
+
+<!-- Signed-in user bar -->
+<div class="auth-user-bar hidden" id="authUserBar">
+  <span id="authUserEmail"></span>
+  <button class="auth-signout" id="authSignOutBtn">Sign out</button>
+</div>
+
+
+<nav class="topnav">
+  <a href="course-map.html">Course map</a><span class="sep">/</span>
+  <span>Exam results</span>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">SF Certified AI-Augmented Project Manager</div>
+    <h1>Exam Results</h1>
+    <p class="hero-sub" id="heroSub">Loading your results...</p>
+  </div>
+</div>
+
+<div class="main" id="mainContent"></div>
+
+<footer>Claude for PM &middot; SourceFuse L&D &middot; SF Certified AI-Augmented Project Manager</footer>
+
+<script>
+const PASS_MARK = 75;
+const TOTAL_QS  = 36;
+const STORAGE_KEY = window.pmCertKey ? window.pmCertKey() : 'pm_cert_exam';
+
+function loadExamState() {
+  const key = window.pmCertKey ? window.pmCertKey() : 'pm_cert_exam';
+  try { return JSON.parse(localStorage.getItem(key)) || null; }
+  catch(e) { return null; }
+}
+
+const EXAM_QUESTIONS = [
+  "When managing scope ambiguity, what is the PM's primary responsibility before asking Claude to generate a document?",
+  "Which prompting approach produces the most reliable scope document from a vague brief?",
+  "What should a scope document always include that a vague brief typically does not?",
+  "What is the most important element of an executive status update that Claude tends to omit by default?",
+  "When writing status updates for two different audiences from the same data, what must the PM specify?",
+  "A declining sprint velocity trend requires what minimum input to Claude for useful risk analysis?",
+  "What makes a risk register genuinely useful versus generic?",
+  "Why must a PM validate Claude's risk scores against their own judgment?",
+  "What type of risk does Claude most commonly miss without explicit prompting?",
+  "What is the key output that separates a Claude-assisted sprint plan from a naive decomposition?",
+  "When should a PM validate story point estimates with the technical lead?",
+  "What is the correct sequence for sprint planning with Claude?",
+  "For fixed-deadline projects, what scheduling technique must always be applied first?",
+  "What hidden constraint did the SOC 2 requirement create in the Meridian Portal plan?",
+  "What operational element did Sarah add to the milestone plan that Claude had not included?",
+  "What two inputs are both required for Claude to produce a useful delivery risk model?",
+  "Three-scenario delivery modelling serves what primary purpose in a stakeholder conversation?",
+  "When root cause analysis identifies contributing factors to velocity decline, what should the PM do before presenting options?",
+  "Without explicit instructions, how does Claude handle a multi-workstream health report request?",
+  "What is the single most important section of a programme health report for client accountability?",
+  "What makes a client-side blocker different from a delivery team blocker in a health report?",
+  "What is the most dangerous PM behaviour when a senior client requests a scope change?",
+  "A formal Change Request record is required for what types of scope change requests?",
+  "What creative option did analysis surface for the Meridian investor day scenario?",
+  "When producing two documents for different audiences from a single incident, what is the correct order?",
+  "Why must an engineering RCA never be shared with the client?",
+  "What information in a P1 board communication can only come from the PM, not from Claude?",
+  "What is the PM's role when using Claude to review a vendor contract?",
+  "Why must engagement context be provided to Claude before contract clauses are pasted?",
+  "What makes the unlimited subcontracting clause a red flag specifically in the Meridian context?",
+  "When translating AI project costs for a board audience, what must always lead the communication?",
+  "What contextual reframe transforms a workstream-level cost overrun into a programme-level one?",
+  "Before presenting Claude's industry benchmark claims to a client, what must a PM always do?",
+  "When should the certification exam card on the course map become active?",
+  "What is the primary purpose of the results page in this course?",
+  "What distinguishes a Tier 3 PM task from a Tier 1 task in this course?"
+];
+
+const CORRECT = {
+  q1:'B',q2:'B',q3:'C',q4:'A',q5:'B',q6:'C',
+  q7:'C',q8:'A',q9:'B',q10:'B',q11:'A',q12:'B',
+  q13:'A',q14:'B',q15:'C',q16:'C',q17:'A',q18:'B',
+  q19:'B',q20:'A',q21:'C',q22:'B',q23:'A',q24:'C',
+  q25:'B',q26:'C',q27:'C',q28:'B',q29:'C',q30:'B',
+  q31:'B',q32:'B',q33:'C',q34:'C',q35:'A',q36:'B'
+};
+
+function renderResults() {
+  const main  = document.getElementById('mainContent');
+  const state = loadExamState();
+
+  if (!state || !state.submittedAt) {
+    main.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">&#x1F4DD;</div>
+        <div class="empty-title">No exam results yet</div>
+        <div class="empty-sub">Complete the certification exam to see your results here.</div>
+        <a class="empty-btn" href="certification-test.html">Take the exam &rarr;</a>
+      </div>`;
+    document.getElementById('heroSub').textContent = 'Complete the certification exam to see your results.';
+    return;
+  }
+
+  const answers = state.answers || {};
+  const correct = state.correct || CORRECT;
+  let numCorrect = 0, numWrong = 0;
+  for (let i = 1; i <= TOTAL_QS; i++) {
+    const k = 'q' + i;
+    if (answers[k]) {
+      if (answers[k] === correct[k]) numCorrect++;
+      else numWrong++;
+    }
+  }
+
+  const pct     = Math.round((numCorrect / TOTAL_QS) * 100);
+  const passed  = pct >= PASS_MARK;
+  const dateStr = new Date(state.submittedAt).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+  const attempt = state.attempt || 1;
+  const remaining = Math.max(0, 3 - attempt);
+
+  document.getElementById('heroSub').textContent =
+    'Submitted ' + dateStr + ' · Attempt ' + attempt + ' of 3 · ' + pct + '% — ' + (passed ? 'PASSED' : 'NOT PASSED');
+
+  const bannerClass = passed ? 'pass' : 'fail';
+  const bannerText  = passed ? '&#x2713; Passed' : '&#x2717; Not passed';
+  const badgeText   = passed ? 'SF Certified AI-Augmented Project Manager' : PASS_MARK + '% required to pass';
+
+  let html = `
+    <div class="score-banner ${bannerClass}">
+      <div class="score-big">${pct}%</div>
+      <div class="score-meta">
+        <div class="score-result">${bannerText}</div>
+        <div class="score-detail">${numCorrect} of ${TOTAL_QS} correct &middot; Attempt ${attempt} of 3 &middot; ${dateStr}</div>
+        <div class="score-badge">${badgeText}</div>
+      </div>
+    </div>
+    <div class="summary-grid">
+      <div class="sum-card c"><div class="val">${numCorrect}</div><div class="lbl">Correct</div></div>
+      <div class="sum-card w"><div class="val">${numWrong}</div><div class="lbl">Incorrect</div></div>
+      <div class="sum-card t"><div class="val">${TOTAL_QS}</div><div class="lbl">Total</div></div>
+      <div class="sum-card a"><div class="val">${remaining}</div><div class="lbl">Attempts left</div></div>
+    </div>
+    <div class="section-title">Question review</div>
+    <table class="q-table">
+      <thead><tr><th>#</th><th>Question</th><th>Your answer</th><th>Correct answer</th><th>Result</th></tr></thead>
+      <tbody>`;
+
+  for (let i = 1; i <= TOTAL_QS; i++) {
+    const k       = 'q' + i;
+    const userAns = answers[k] || '—';
+    const corrAns = correct[k] || '—';
+    const isOk    = userAns === corrAns;
+    const pillU   = isOk ? 'pill-correct' : 'pill-wrong';
+    const result  = isOk
+      ? '<span class="pill pill-correct">&#x2713; Correct</span>'
+      : '<span class="pill pill-wrong">&#x2717; Incorrect</span>';
+    html += `<tr>
+      <td style="font-family:'Source Code Pro',monospace;color:var(--text-dimmer)">${i}</td>
+      <td>${EXAM_QUESTIONS[i-1] || 'Question ' + i}</td>
+      <td><span class="pill ${pillU}">${userAns}</span></td>
+      <td><span class="pill pill-ans">${corrAns}</span></td>
+      <td>${result}</td>
+    </tr>`;
+  }
+
+  html += `</tbody></table><div class="nav-row">`;
+  if (!passed && remaining > 0) {
+    html += `<a class="nav-btn primary" href="certification-test.html">Retake exam (Attempt ${attempt + 1} of 3) &rarr;</a>`;
+  } else if (passed) {
+    html += `<a class="nav-btn primary" href="course-map.html">&larr; Back to course map</a>`;
+  } else {
+    html += `<span class="nav-btn secondary" style="opacity:.5;cursor:not-allowed;">No attempts remaining</span>`;
+  }
+  html += `<a class="nav-btn secondary" href="course-map.html">&larr; Course map</a></div>`;
+
+  main.innerHTML = html;
+}
+
+document.addEventListener('learnerReady', renderResults);
+document.addEventListener('DOMContentLoaded', function() {
+  if (window._learnerUid) renderResults();
+});
+</script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+const _FB_CONFIG = {
+  apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain: "sfcertification-grafana.firebaseapp.com",
+  projectId: "sfcertification-grafana",
+  storageBucket: "sfcertification-grafana.firebasestorage.app",
+  messagingSenderId: "227322696511",
+  appId: "1:227322696511:web:12e7ced7dd3d45fa06798a"
+};
+if (!window._fbApp) {
+  window._fbApp = firebase.initializeApp(_FB_CONFIG);
+}
+const _auth = firebase.auth(window._fbApp);
+const _provider = new firebase.auth.GoogleAuthProvider();
+
+// Expose uid-aware storage key builder
+window.pmLearnerKey = function(exampleId) {
+  const uid = window._learnerUid || 'anon';
+  return 'pm_learner_' + uid + '_' + exampleId;
+};
+
+window.pmCertKey = function() {
+  const uid = window._learnerUid || 'anon';
+  return 'pm_cert_' + uid;
+};
+
+function showOverlay()   { document.getElementById('authOverlay')?.classList.remove('hidden'); }
+function hideOverlay()   { document.getElementById('authOverlay')?.classList.add('hidden'); }
+function showUserBar(email) {
+  const bar = document.getElementById('authUserBar');
+  const em  = document.getElementById('authUserEmail');
+  if (bar) bar.classList.remove('hidden');
+  if (em)  em.textContent = email;
+}
+
+_auth.onAuthStateChanged(function(user) {
+  if (user) {
+    const email = user.email || '';
+    if (!email.endsWith('@sourcefuse.com')) {
+      document.getElementById('authError').textContent = 'Please use your @sourcefuse.com account.';
+      document.getElementById('authError').classList.remove('hidden');
+      _auth.signOut();
+      showOverlay();
+      return;
+    }
+    window._learnerUid  = user.uid;
+    window._learnerEmail = email;
+    hideOverlay();
+    showUserBar(email);
+    // Fire page-ready event for page-specific JS
+    document.dispatchEvent(new Event('learnerReady'));
+  } else {
+    window._learnerUid  = null;
+    window._learnerEmail = null;
+    showOverlay();
+  }
+});
+
+document.getElementById('googleSignInBtn')?.addEventListener('click', function() {
+  _auth.signInWithPopup(_provider).catch(function(err) {
+    const el = document.getElementById('authError');
+    if (el) { el.textContent = err.message; el.classList.remove('hidden'); }
+  });
+});
+
+document.getElementById('authSignOutBtn')?.addEventListener('click', function() {
+  _auth.signOut();
+});
+</script>
+
+</body>
+</html>
