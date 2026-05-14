@@ -37,7 +37,7 @@
   .step-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
   .step-num { width:52px; height:52px; border-radius:50%; background:var(--blue); color:#fff; font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Source Code Pro',monospace; }
   .step-meta { flex:1; }
-  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+  .step-label { font-size:14px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--blue); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
   .step-title { font-size:28px; font-weight:700; }
   .prose { font-size:17px; color:var(--text-dim); line-height:1.9; margin-bottom:24px; }
   .prose strong { color:var(--text); font-weight:600; }
@@ -87,6 +87,10 @@
   .complete-bar input[type="checkbox"] { width:18px; height:18px; accent-color:var(--green); }
   .complete-bar.disabled input { cursor:not-allowed; }
   .hidden { display:none !important; }
+  .step-nav-row { display:flex; justify-content:flex-end; margin-top:24px; }
+  .continue-btn { padding:12px 24px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Merriweather Sans',sans-serif; transition:background .15s; }
+  .continue-btn:hover { background:var(--blue-dark); }
+  .back-dashboard-btn { padding:12px 22px; background:var(--bg2); color:var(--text-dim); border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; font-family:'Merriweather Sans',sans-serif; }
   .bottom-nav { display:flex; justify-content:space-between; padding:32px 0 0; border-top:1px solid var(--border); margin-top:8px; }
   .nav-btn { padding:12px 22px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; font-family:'Merriweather Sans',sans-serif; transition:background .15s; background:var(--blue); color:#fff; border:none; }
   .nav-btn:hover { background:var(--blue-dark); }
@@ -178,6 +182,7 @@
   </div>
   <div class="callout callout-warn"><strong>Why this is Tier 3:</strong> The PM is under real time pressure managing two completely different stakeholder tracks from a single raw technical log. The naive approach — forwarding Arjun's log to Mark — would be a career-limiting move. The PM must triage, translate, and structure under pressure without losing accuracy.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(2)">Continue →</button></div>
 </section>
 
 <!-- STEP 2 -->
@@ -188,6 +193,7 @@
   <div class="callout callout-bad"><strong>What's wrong:</strong> "EBS volume," "gp2," "gp3," "IOPS throttling," and "auto-scaling health check" mean nothing to a CTO from a financial services background. The email reads as technical excuse-making. Mark will arrive at the 2pm call confused, anxious, and without the context to brief his board. "Happy to walk through the details" signals that Sarah hasn't prepared a proper response — she's deferring to the call.</div>
   <div class="callout callout-bad" style="margin-top:8px;"><strong>The second failure:</strong> The engineering RCA was never written. Without it, the 2pm call will be a stream-of-consciousness explanation rather than a structured account. Every minute spent explaining instead of presenting is a credibility loss.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(3)">Continue →</button></div>
 </section>
 
 <!-- STEP 3 -->
@@ -272,6 +278,7 @@ I will send a full written RCA by end of day and will walk through it with you a
 Sarah Chen | SF Senior PM</div>
   <div class="callout callout-good" style="margin-top:20px;"><strong>What changed:</strong> Two documents, two turns, 25 minutes. The engineering RCA is structured and actionable with named owners and deadlines. The board communication is 178 words, jargon-free, and leads with resolution — not explanation. Mark reads it and knows the situation is under control before the 2pm call.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(4)">Continue →</button></div>
 </section>
 
 <!-- STEP 4 -->
@@ -288,6 +295,7 @@ Sarah Chen | SF Senior PM</div>
   </div>
   <div class="callout"><strong>The PM's final layer:</strong> The risk register cross-reference turns the RCA from an incident report into a project management artefact — it shows Raj Patel that Sarah is connecting operational events to the project risk framework. The business impact addition gives Mark what his board will actually ask about: were any transactions lost? Claude could not have provided either — one required Sarah's knowledge of the risk register, the other required a conversation with Arjun.</div>
   <div class="divider"></div>
+    <div class="step-nav-row"><button class="continue-btn" onclick="showTab(5)">Continue →</button></div>
 </section>
 
 <!-- STEP 5 -->
