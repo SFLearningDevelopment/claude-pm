@@ -165,9 +165,41 @@
   .cert-card.locked { pointer-events:none; }
   .cert-card.unlocked { cursor:pointer !important; opacity:1 !important; pointer-events:auto; }
   .cert-card.unlocked:hover { border-color:var(--blue); box-shadow:0 4px 16px rgba(26,110,181,.15); }
+
+  .auth-overlay { position:fixed; inset:0; background:rgba(15,30,60,.7); display:flex; align-items:center; justify-content:center; z-index:9999; backdrop-filter:blur(4px); }
+  .auth-overlay.hidden { display:none; }
+  .auth-box { background:#fff; border-radius:16px; padding:48px 40px; max-width:420px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+  .auth-logo { font-size:32px; margin-bottom:16px; }
+  .auth-title { font-size:22px; font-weight:700; color:#1a2332; margin-bottom:8px; }
+  .auth-sub { font-size:15px; color:#4a5568; line-height:1.6; margin-bottom:28px; }
+  .auth-google-btn { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:14px 20px; border-radius:8px; background:#1a6eb5; color:#fff; border:none; font-size:16px; font-weight:600; cursor:pointer; font-family:'Merriweather Sans',sans-serif; }
+  .auth-google-btn:hover { background:#0f4a7a; }
+  .auth-error { font-size:13px; color:#c0392b; margin-top:12px; font-family:'Source Code Pro',monospace; }
+  .auth-user-bar { background:#e8f1fb; border-bottom:1px solid #b8d0ed; padding:8px 32px; font-size:13px; font-family:'Source Code Pro',monospace; color:#0f4a7a; display:flex; align-items:center; justify-content:space-between; }
+  .auth-user-bar.hidden { display:none; }
+  .auth-signout { background:none; border:none; color:#1a6eb5; cursor:pointer; font-size:12px; font-family:'Source Code Pro',monospace; text-decoration:underline; }
+
 </style>
 </head>
 <body>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">🎓</div>
+    <div class="auth-title">Claude for PM</div>
+    <div class="auth-sub">Sign in with your SourceFuse Google account to access the course and save your progress.</div>
+    <button class="auth-google-btn" id="googleSignInBtn">
+      <svg viewBox="0 0 48 48" width="20" height="20"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
+      Sign in with Google
+    </button>
+    <div class="auth-error hidden" id="authError"></div>
+  </div>
+</div>
+<div class="auth-user-bar hidden" id="authUserBar">
+  <span id="authUserEmail"></span>
+  <button class="auth-signout" id="authSignOutBtn">Sign out</button>
+</div>
+
 
 <nav class="topnav">
   <a href="#">SourceFuse L&D</a>
@@ -471,7 +503,8 @@ document.getElementById('progressCount').textContent = done + ' of ' + EXAMPLES.
   function checkCertUnlock() {
     const allComplete = EXAMPLE_IDS.every(function(id) {
       try {
-        const s = JSON.parse(localStorage.getItem('pm_learner_' + id));
+        const uid = window._learnerUid || 'anon';
+        const s = JSON.parse(localStorage.getItem('pm_learner_' + uid + '_' + id));
         return s && s.complete === true;
       } catch(e) { return false; }
     });
@@ -491,5 +524,51 @@ document.getElementById('progressCount').textContent = done + ' of ' + EXAMPLES.
   checkCertUnlock();
 
 </script>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+const _FB_CONFIG = {
+  apiKey:"AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain:"sfcertification-grafana.firebaseapp.com",
+  projectId:"sfcertification-grafana",
+  storageBucket:"sfcertification-grafana.firebasestorage.app",
+  messagingSenderId:"227322696511",
+  appId:"1:227322696511:web:12e7ced7dd3d45fa06798a"
+};
+if (!window._fbApp) window._fbApp = firebase.initializeApp(_FB_CONFIG);
+const _auth = firebase.auth(window._fbApp);
+const _provider = new firebase.auth.GoogleAuthProvider();
+window.pmLearnerKey = function(id) { return 'pm_learner_' + (window._learnerUid||'anon') + '_' + id; };
+window.pmCertKey    = function()   { return 'pm_cert_' + (window._learnerUid||'anon'); };
+_auth.onAuthStateChanged(function(user) {
+  if (user) {
+    const email = user.email || '';
+    if (!email.endsWith('@sourcefuse.com')) {
+      document.getElementById('authError').textContent = 'Please use your @sourcefuse.com account.';
+      document.getElementById('authError').classList.remove('hidden');
+      _auth.signOut(); return;
+    }
+    window._learnerUid = user.uid; window._learnerEmail = email;
+    document.getElementById('authOverlay').classList.add('hidden');
+    document.getElementById('authUserBar').classList.remove('hidden');
+    document.getElementById('authUserEmail').textContent = email;
+    checkCertUnlock();
+    updateProgress();
+  } else {
+    window._learnerUid = null;
+    document.getElementById('authOverlay').classList.remove('hidden');
+    document.getElementById('authUserBar').classList.add('hidden');
+  }
+});
+document.getElementById('googleSignInBtn').addEventListener('click', function() {
+  _auth.signInWithPopup(_provider).catch(function(e) {
+    const el = document.getElementById('authError');
+    if (el) { el.textContent = e.message; el.classList.remove('hidden'); }
+  });
+});
+document.getElementById('authSignOutBtn').addEventListener('click', function() { _auth.signOut(); });
+</script>
+
 </body>
 </html>
