@@ -34,7 +34,7 @@
   .hero h1 { font-size:24px; font-weight:700; margin-bottom:8px; }
   .hero h1 span { color:var(--pm); }
   .hero-sub { font-size:14px; color:var(--text-dim); max-width:800px; line-height:1.7; }
-  .hero-hint { font-size:12px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); margin-top:10px; }
+  .hero-hint { font-size:16px; font-family:'Source Code Pro',monospace; font-weight:700; color:var(--blue); margin-top:12px; }
 
   /* Main layout */
   .main { max-width:1400px; margin:0 auto; padding:28px 32px; }
@@ -69,11 +69,11 @@
 
   .node-icon { font-size:22px; margin-bottom:6px; }
   .node-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:4px; }
-  .node-sub { font-size:12px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); }
+  .node-sub { font-size:14px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); font-weight:600; }
   .node-badge {
     position:absolute; top:8px; right:8px;
-    font-size:9px; font-family:'Source Code Pro',monospace;
-    padding:2px 6px; border-radius:8px; font-weight:700; letter-spacing:.04em;
+    font-size:13px; font-family:'Source Code Pro',monospace;
+    padding:4px 10px; border-radius:8px; font-weight:700; letter-spacing:.04em;
   }
   .badge-claude { background:var(--pm-light); color:var(--pm-dark); border:1px solid var(--pm-mid); }
   .badge-human  { background:#fff8e6; color:var(--amber); border:1px solid #e8c97a; }
@@ -94,7 +94,7 @@
     margin-bottom:24px; min-height:180px;
     transition:opacity .2s;
   }
-  .detail-panel.empty { display:flex; align-items:center; justify-content:center; color:var(--text-dimmer); font-size:13px; font-family:'Source Code Pro',monospace; }
+  .detail-panel.empty { display:flex; align-items:center; justify-content:center; color:var(--blue); font-size:16px; font-weight:700; font-family:'Source Code Pro',monospace; }
   .detail-eyebrow { font-size:10px; font-family:'Source Code Pro',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--pm); margin-bottom:6px; }
   .detail-title { font-size:20px; font-weight:700; margin-bottom:14px; }
   .detail-body { font-size:16px; color:var(--text-dim); line-height:1.8; margin-bottom:18px; }
@@ -202,7 +202,7 @@
 
       <!-- Row 1: Initiation -->
       <div class="node node-header" style="grid-column:1/-1; padding:10px 16px;">
-        <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 1 — Initiation & Scoping</div>
+        <div style="font-size:14px; font-family:'Source Code Pro',monospace; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; font-weight:700;">Phase 1 — Initiation & Scoping</div>
       </div>
 
       <div class="node node-claude" data-key="scope" id="node-scope">
@@ -228,7 +228,7 @@
 
       <!-- Row 2: Planning -->
       <div class="node node-header" style="grid-column:1/-1; padding:10px 16px;">
-        <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 2 — Planning</div>
+        <div style="font-size:14px; font-family:'Source Code Pro',monospace; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; font-weight:700;">Phase 2 — Planning</div>
       </div>
 
       <div class="node node-claude" data-key="plan" id="node-plan">
@@ -254,7 +254,7 @@
 
       <!-- Row 3: Execution -->
       <div class="node node-header" style="grid-column:1/-1; padding:10px 16px;">
-        <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 3 — Execution & Tracking</div>
+        <div style="font-size:14px; font-family:'Source Code Pro',monospace; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; font-weight:700;">Phase 3 — Execution & Tracking</div>
       </div>
 
       <div class="node node-claude" data-key="status" id="node-status">
@@ -280,7 +280,7 @@
 
       <!-- Row 4: Stakeholder -->
       <div class="node node-header" style="grid-column:1/-1; padding:10px 16px;">
-        <div style="font-size:10px; font-family:'Source Code Pro',monospace; color:var(--text-dimmer); letter-spacing:.1em; text-transform:uppercase;">Phase 4 — Stakeholder & Change Management</div>
+        <div style="font-size:14px; font-family:'Source Code Pro',monospace; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; font-weight:700;">Phase 4 — Stakeholder & Change Management</div>
       </div>
 
       <div class="node node-claude" data-key="reporting" id="node-reporting">
@@ -313,7 +313,7 @@
   </div>
 
   <div class="nav-row">
-    <a class="nav-btn secondary" href="course-map.html">← Course map</a>
+    <a class="nav-btn secondary" href="course-map.html">← Back to course dashboard</a>
     <a class="nav-btn" href="diagram-2.html">Diagram 2 — Operating model →</a>
   </div>
 
