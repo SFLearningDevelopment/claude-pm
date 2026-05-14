@@ -569,7 +569,7 @@ _auth.onAuthStateChanged(function(user) {
     window._learnerUid = user.uid; window._learnerEmail = email;
     document.getElementById('authOverlay').classList.add('hidden');
     document.getElementById('authUserBar').classList.remove('hidden');
-    document.getElementById('authUserEmail').textContent = email;
+    document.getElementById('authUserEmail').textContent = 'Welcome, ' + email;
     checkCertUnlock();
     updateProgress();
   } else {
