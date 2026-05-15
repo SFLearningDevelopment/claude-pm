@@ -417,7 +417,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.addEventListener('learnerReady', function() {
   // Re-key storage with uid
-  const STORAGE_KEY = window.pmLearnerKey(EXAMPLE_ID);
 });
 
 function clearActive() {
@@ -549,6 +548,7 @@ document.getElementById('googleSignInBtn')?.addEventListener('click', function()
 });
 
 document.getElementById('authSignOutBtn')?.addEventListener('click', function() {
+  sessionStorage.removeItem('pm_session');
   _auth.signOut();
 });
 </script>

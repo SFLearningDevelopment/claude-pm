@@ -540,6 +540,7 @@ document.getElementById('googleSignInBtn')?.addEventListener('click', function()
 });
 
 document.getElementById('authSignOutBtn')?.addEventListener('click', function() {
+  sessionStorage.removeItem('pm_session');
   _auth.signOut();
 });
 </script>
