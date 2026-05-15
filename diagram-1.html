@@ -423,12 +423,15 @@ const details = {
 
 let activeNode = null;
 
-document.addEventListener('learnerReady', function() {
-  // Re-key storage with uid
-  const STORAGE_KEY = window.pmLearnerKey(EXAMPLE_ID);
+document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('[data-key]').forEach(function(el) {
     el.addEventListener('click', function() { showDetail(this.getAttribute('data-key')); });
   });
+});
+
+document.addEventListener('learnerReady', function() {
+  // Re-key storage with uid
+  const STORAGE_KEY = window.pmLearnerKey(EXAMPLE_ID);
 });
 
 function showDetail(key) {
