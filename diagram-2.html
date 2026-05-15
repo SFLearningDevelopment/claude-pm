@@ -406,15 +406,18 @@ const touchpoints = {
   }
 };
 
-document.addEventListener('learnerReady', function() {
-  // Re-key storage with uid
-  const STORAGE_KEY = window.pmLearnerKey(EXAMPLE_ID);
+document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('[data-stage]').forEach(function(el) {
     el.addEventListener('click', function() { showStage(this.getAttribute('data-stage')); });
   });
   document.querySelectorAll('[data-tp]').forEach(function(el) {
     el.addEventListener('click', function() { showTouchpoint(this.getAttribute('data-tp')); });
   });
+});
+
+document.addEventListener('learnerReady', function() {
+  // Re-key storage with uid
+  const STORAGE_KEY = window.pmLearnerKey(EXAMPLE_ID);
 });
 
 function clearActive() {
