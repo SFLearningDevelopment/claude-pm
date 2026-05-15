@@ -603,6 +603,21 @@ _auth.onAuthStateChanged(function(user) {
     // Fire page-ready event for page-specific JS
     document.dispatchEvent(new Event('learnerReady'));
   } else {
+    // Check sessionStorage for a session established on course-map.html
+    const _pmSession = sessionStorage.getItem('pm_session');
+    if (_pmSession) {
+      try {
+        const _s = JSON.parse(_pmSession);
+        if (_s.email && _s.email.endsWith('@sourcefuse.com')) {
+          window._learnerUid   = _s.uid || 'ep-user';
+          window._learnerEmail = _s.email;
+          hideOverlay();
+          showUserBar(_s.email);
+          document.dispatchEvent(new Event('learnerReady'));
+          return;
+        }
+      } catch(e) {}
+    }
     window._learnerUid  = null;
     window._learnerEmail = null;
     showOverlay();

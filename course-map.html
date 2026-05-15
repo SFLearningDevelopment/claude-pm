@@ -198,6 +198,12 @@
       <svg viewBox="0 0 48 48" width="20" height="20"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z"/></svg>
       Sign in with Google
     </button>
+    <div style="margin:14px 0;color:#999;font-size:12px;letter-spacing:0.05em;">OR</div>
+    <input id="pm-ep-email" type="email" placeholder="you@sourcefuse.com" autocomplete="email"
+      style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:6px;padding:9px 12px;font-size:13px;margin-bottom:8px;outline:none;">
+    <input id="pm-ep-password" type="password" placeholder="Password" autocomplete="current-password"
+      style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:6px;padding:9px 12px;font-size:13px;margin-bottom:8px;outline:none;">
+    <button onclick="pmEmailSignIn()" style="width:100%;background:#2563eb;color:#fff;border:none;border-radius:6px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;">Sign in with Email</button>
     <div class="auth-error hidden" id="authError"></div>
   </div>
 </div>
@@ -567,6 +573,8 @@ _auth.onAuthStateChanged(function(user) {
       _auth.signOut(); return;
     }
     window._learnerUid = user.uid; window._learnerEmail = email;
+    // Persist session for all course pages
+    sessionStorage.setItem('pm_session', JSON.stringify({ email: email, uid: user.uid }));
     document.getElementById('authOverlay').classList.add('hidden');
     document.getElementById('authUserBar').classList.remove('hidden');
     document.getElementById('authUserEmail').textContent = 'Welcome, ' + email;
@@ -584,7 +592,24 @@ document.getElementById('googleSignInBtn').addEventListener('click', function() 
     if (el) { el.textContent = e.message; el.classList.remove('hidden'); }
   });
 });
-document.getElementById('authSignOutBtn').addEventListener('click', function() { _auth.signOut(); });
+document.getElementById('authSignOutBtn').addEventListener('click', function() {
+  sessionStorage.removeItem('pm_session');
+  _auth.signOut();
+});
+window.pmEmailSignIn = function() {
+  const email = (document.getElementById('pm-ep-email').value || '').trim().toLowerCase();
+  const pwd   = document.getElementById('pm-ep-password').value || '';
+  const errEl = document.getElementById('authError');
+  errEl.classList.add('hidden');
+  if (!email || !pwd) { errEl.textContent = 'Please enter your email and password.'; errEl.classList.remove('hidden'); return; }
+  if (!email.endsWith('@sourcefuse.com')) { errEl.textContent = 'Only @sourcefuse.com accounts are allowed.'; errEl.classList.remove('hidden'); return; }
+  _auth.signInWithEmailAndPassword(email, pwd).catch(function(e) {
+    errEl.textContent = (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential')
+      ? 'Incorrect password.' : (e.code === 'auth/user-not-found') ? 'No account found for this email.'
+      : e.message;
+    errEl.classList.remove('hidden');
+  });
+};
 </script>
 
 </body>
