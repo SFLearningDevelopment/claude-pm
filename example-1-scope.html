@@ -839,7 +839,6 @@ document.addEventListener('learnerReady', function() {
   const state = loadState();
 
   // Complete checkbox — always attach before early return
-  // Complete checkbox
   const completeCb = document.getElementById('completeCb');
   if (completeCb) {
     completeCb.addEventListener('change', function() {
@@ -850,7 +849,6 @@ document.addEventListener('learnerReady', function() {
       activateCompleteBar(true);
     });
   }
-});
 
   // If already submitted — show submitted state
   if (state.submittedAt) {
@@ -858,8 +856,6 @@ document.addEventListener('learnerReady', function() {
     activateCompleteBar(state.complete || false);
     return;
   }
-
-
 
   // Track answer selections — enable submit when all answered
   document.querySelectorAll('.options input[type="radio"]').forEach(function(radio) {
@@ -871,7 +867,6 @@ document.addEventListener('learnerReady', function() {
   if (submitBtn) {
     submitBtn.addEventListener('click', submitAnswers);
   }
-
 });
 
 function showQuestions() {
