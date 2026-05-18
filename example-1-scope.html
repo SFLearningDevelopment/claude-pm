@@ -793,7 +793,7 @@ document.getElementById('authSignOutBtn')?.addEventListener('click', function() 
 </body>
 </html>
 <script>
-const CACHE_VERSION = '2026-04-05-v1';
+const CACHE_VERSION = '2026-05-18-v1';
 const EXAMPLE_ID    = 'example-1-scope';
 const CORRECT       = { q1: 'B', q2: 'B', q3: 'B' };
 
@@ -838,6 +838,20 @@ document.addEventListener('learnerReady', function() {
   // Re-key storage with uid — key is now computed in loadState/saveState
   const state = loadState();
 
+  // Complete checkbox — always attach before early return
+  // Complete checkbox
+  const completeCb = document.getElementById('completeCb');
+  if (completeCb) {
+    completeCb.addEventListener('change', function() {
+      if (!completeCb.checked) return;
+      const s = loadState();
+      s.complete = true;
+      saveState(s);
+      activateCompleteBar(true);
+    });
+  }
+});
+
   // If already submitted — show submitted state
   if (state.submittedAt) {
     showSubmittedState();
@@ -858,17 +872,6 @@ document.addEventListener('learnerReady', function() {
     submitBtn.addEventListener('click', submitAnswers);
   }
 
-  // Complete checkbox
-  const completeCb = document.getElementById('completeCb');
-  if (completeCb) {
-    completeCb.addEventListener('change', function() {
-      if (!completeCb.checked) return;
-      const s = loadState();
-      s.complete = true;
-      saveState(s);
-      activateCompleteBar(true);
-    });
-  }
 });
 
 function showQuestions() {
