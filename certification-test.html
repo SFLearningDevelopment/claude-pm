@@ -409,9 +409,14 @@ function startExam() {
   if (state.inProgress) {
     answers  = state.inProgress.answers || {};
     secsLeft = state.inProgress.secsLeft || TIME_LIMIT;
+    // Preserve original startedAt if resuming
+    if (!state.inProgress.startedAt) { state.inProgress.startedAt = new Date().toISOString(); saveExamState(state); }
   } else {
     answers  = {};
     secsLeft = TIME_LIMIT;
+    // Record exam start time for duration calculation
+    state.inProgress = { answers, secsLeft, startedAt: new Date().toISOString() };
+    saveExamState(state);
   }
 
   showScreen('screenExam');
@@ -526,9 +531,33 @@ function submitExam(timeUp) {
   const pass  = pct >= PASS_MARK;
   const state = loadExamState();
 
-  state.attempts.push({ correct, pct, submittedAt: new Date().toISOString(), timeUp, answers: Object.assign({}, answers) });
+  // Calculate duration from exam start time stored in inProgress
+  const startedAt = state.inProgress && state.inProgress.startedAt ? state.inProgress.startedAt : null;
+  const durationSeconds = startedAt ? Math.round((Date.now() - new Date(startedAt).getTime()) / 1000) : null;
+
+  const attemptRecord = {
+    attemptNumber:   state.attempts.length + 1,
+    correct,
+    total:           36,
+    pct,
+    pass,
+    submittedAt:     new Date().toISOString(),
+    durationSeconds,
+    timeUp,
+    answers:         Object.assign({}, answers),
+    questions:       EXAM_QUESTIONS.map(function(q) {
+      return { qn: q.qn, text: q.q, options: q.o, correct: q.c };
+    })
+  };
+
+  state.attempts.push({ correct, pct, submittedAt: attemptRecord.submittedAt, timeUp, answers: Object.assign({}, answers) });
   state.inProgress = null;
   saveExamState(state);
+
+  // Write to Firestore for admin reporting (non-blocking)
+  if (typeof window.pmCertSaveResult === 'function') {
+    window.pmCertSaveResult(attemptRecord);
+  }
 
   showResults(correct, pct, pass, state.attempts.length, timeUp);
 }
@@ -586,6 +615,47 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
 }
+</script>
+
+<!-- Firebase — write PM cert results to Firestore -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+(function() {
+  var _FB = {
+    apiKey:            "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+    authDomain:        "sfcertification-grafana.firebaseapp.com",
+    projectId:         "sfcertification-grafana",
+    storageBucket:     "sfcertification-grafana.firebasestorage.app",
+    messagingSenderId: "541921403376",
+    appId:             "1:541921403376:web:86da2a3f5e7d6d4e7f9c3b"
+  };
+  if (!window._pmCertFbApp) {
+    window._pmCertFbApp = firebase.initializeApp(_FB, 'pm-cert');
+  }
+  window._pmCertDb   = firebase.firestore(window._pmCertFbApp);
+  window._pmCertAuth = firebase.auth(window._pmCertFbApp);
+})();
+
+// ── Write PM cert result to Firestore ────────────────────────────────────────
+// Called after localStorage is already saved. Uses email from sessionStorage
+// (set by course-map.html on sign-in). Fails silently — localStorage is the
+// source of truth; Firestore is for admin reporting only.
+window.pmCertSaveResult = async function(attemptData) {
+  try {
+    const session = JSON.parse(sessionStorage.getItem('pm_session') || '{}');
+    const email = session.email || window._learnerEmail || null;
+    if (!email) { console.warn('[PM Cert] No learner email — skipping Firestore write'); return; }
+    const safeEmail = email.toLowerCase().trim();
+    const db = window._pmCertDb;
+    await db.collection('pm_cert_results').doc(safeEmail)
+            .collection('attempts').add(Object.assign({ email: safeEmail }, attemptData));
+    console.log('[PM Cert] Result saved to Firestore for', safeEmail);
+  } catch(e) {
+    console.warn('[PM Cert] Firestore write failed (non-fatal):', e.message);
+  }
+};
 </script>
 </body>
 </html>
