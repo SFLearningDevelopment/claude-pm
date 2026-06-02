@@ -642,6 +642,7 @@ function showScreen(id) {
 // Called after localStorage is already saved. Uses email from sessionStorage
 // (set by course-map.html on sign-in). Fails silently — localStorage is the
 // source of truth; Firestore is for admin reporting only.
+// Path: courseExamResults/{email}/courses/claude-for-pm/attempts/{autoId}
 window.pmCertSaveResult = async function(attemptData) {
   try {
     const session = JSON.parse(sessionStorage.getItem('pm_session') || '{}');
@@ -649,8 +650,9 @@ window.pmCertSaveResult = async function(attemptData) {
     if (!email) { console.warn('[PM Cert] No learner email — skipping Firestore write'); return; }
     const safeEmail = email.toLowerCase().trim();
     const db = window._pmCertDb;
-    await db.collection('pm_cert_results').doc(safeEmail)
-            .collection('attempts').add(Object.assign({ email: safeEmail }, attemptData));
+    await db.collection('courseExamResults').doc(safeEmail)
+            .collection('courses').doc('claude-for-pm')
+            .collection('attempts').add(Object.assign({ email: safeEmail, courseId: 'claude-for-pm' }, attemptData));
     console.log('[PM Cert] Result saved to Firestore for', safeEmail);
   } catch(e) {
     console.warn('[PM Cert] Firestore write failed (non-fatal):', e.message);
