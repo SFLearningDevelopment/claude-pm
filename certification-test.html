@@ -632,7 +632,10 @@ function showScreen(id) {
     appId:             "1:227322696511:web:12e7ced7dd3d45fa06798a"
   };
   if (!window._pmCertFbApp) {
-    window._pmCertFbApp = firebase.initializeApp(_FB, 'pm-cert');
+    // Use DEFAULT app (no name) so Firebase reads the auth session from IndexedDB
+    // that course-map.html established. Both files share the same apiKey and
+    // DEFAULT app name → same storage key → auth token carried on Firestore writes.
+    window._pmCertFbApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(_FB);
   }
   window._pmCertDb   = firebase.firestore(window._pmCertFbApp);
   window._pmCertAuth = firebase.auth(window._pmCertFbApp);
