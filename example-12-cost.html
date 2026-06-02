@@ -405,7 +405,7 @@ function submitAnswers() {
   ['q1','q2','q3'].forEach(n => { const v = document.querySelector('input[name="'+n+'"]:checked')?.value; if(v) answers[n]=v; });
   const s = loadState();
   s.exampleId = EXAMPLE_ID; s.answers = answers; s.correct = CORRECT; s.submittedAt = new Date().toISOString();
-  saveState(s); showSubmittedState(); activateCompleteBar(false);
+  s.complete = true; saveState(s); showSubmittedState(); activateCompleteBar(true);
 }
 function showSubmittedState() {
   document.getElementById('questionsWrap')?.classList.add('hidden');
