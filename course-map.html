@@ -550,6 +550,7 @@ updateProgress();
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
 const _FB_CONFIG = {
   apiKey:"AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
@@ -564,6 +565,35 @@ const _auth = firebase.auth(window._fbApp);
 const _provider = new firebase.auth.GoogleAuthProvider();
 window.pmLearnerKey = function(id) { return 'pm_learner_' + (window._learnerUid||'anon') + '_' + id; };
 window.pmCertKey    = function()   { return 'pm_cert_' + (window._learnerUid||'anon'); };
+
+// ── courseProgress: record course start once (claude-for-pm) ────────────────
+// Bookmarked: replicate this pattern on each course's landing page (generic; only courseId changes).
+function pmEnsureCourseStarted() {
+  if (!window._fbApp || !window._learnerUid) return;
+  var ref = firebase.firestore(window._fbApp).collection('courseProgress').doc(window._learnerUid);
+  ref.get().then(function(snap){
+    var data = snap.exists ? (snap.data() || {}) : {};
+    var course = (data.courses && data.courses['claude-for-pm']) || {};
+    var update = {
+      email: window._learnerEmail || null,
+      name:  window._learnerEmail || null,
+      courses: {}
+    };
+    if (!course.courseStartedOn) {
+      var d = new Date();
+      var pad = function(n){ return String(n).padStart(2,'0'); };
+      update.courses['claude-for-pm'] = {
+        courseStartedOn: d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),
+        courseStartedAt: pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())
+      };
+    } else {
+      update.courses['claude-for-pm'] = {};
+    }
+    ref.set(update, { merge: true })
+       .catch(function(e){ console.warn('[courseProgress] course start failed:', e.message); });
+  }).catch(function(e){ console.warn('[courseProgress] course start read failed:', e.message); });
+}
+
 _auth.onAuthStateChanged(function(user) {
   if (user) {
     const email = user.email || '';
@@ -573,6 +603,7 @@ _auth.onAuthStateChanged(function(user) {
       _auth.signOut(); return;
     }
     window._learnerUid = user.uid; window._learnerEmail = email;
+    pmEnsureCourseStarted();   // courseProgress: record course start once
     // Persist session for all course pages
     sessionStorage.setItem('pm_session', JSON.stringify({ email: email, uid: user.uid }));
     document.getElementById('authOverlay').classList.add('hidden');
