@@ -724,6 +724,7 @@ function saveState(s) { const k = window.pmLearnerKey ? window.pmLearnerKey(EXAM
 document.addEventListener('learnerReady', function() {
   // Re-key storage with uid — key is now computed in loadState/saveState
   const state = loadState();
+  cpEnsureModuleStarted();   // courseProgress: set module start once
 
   // Already completed
   if (state.complete) {
@@ -815,6 +816,7 @@ function activateCompleteBar(isDone) {
     label.textContent = '✓ Example complete';
     if (redo) redo.classList.add('visible');
     pmWriteExampleProgress();
+    cpWriteModuleComplete();
   } else {
     bar.className = 'complete-bar ready';
     cb.disabled   = false; cb.checked = false;
@@ -823,6 +825,7 @@ function activateCompleteBar(isDone) {
   }
 }
 
+// To delete after courseProgress implementation is tested and deployed
 function pmWriteExampleProgress() {
   if (!window._fbApp || !window._learnerUid || window._learnerUid === 'anon') return;
   try {
@@ -831,6 +834,101 @@ function pmWriteExampleProgress() {
       .set({ pm_examples: firebase.firestore.FieldValue.arrayUnion(EXAMPLE_ID) }, { merge: true })
       .catch(function(e) { console.warn('[PM Progress] Firestore write failed:', e.message); });
   } catch(e) { console.warn('[PM Progress] error:', e.message); }
+}
+
+// ── courseProgress (new schema) — keyed by uid, map of modules ──────────────
+// Shared across all PM example pages. Course id is constant; module id = EXAMPLE_ID.
+var CP_COURSE_ID = 'claude-for-pm';
+var CP_MODULE_IDS = [
+  'example-1-scope','example-2-status','example-3-risk','example-4-sprint',
+  'example-5-requirements','example-6-tracking','example-7-reporting',
+  'example-8-change','example-9-model','example-10-rca',
+  'example-11-contract','example-12-cost'
+];
+function cpNow() {
+  var d = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  return {
+    date: d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),
+    time: pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()),
+    ms:   d.getTime()
+  };
+}
+function cpFmtDuration(ms) {
+  if (ms == null || ms < 0) return null;
+  var s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  if (h > 0) return h+'h '+m+'m '+sec+'s';
+  if (m > 0) return m+'m '+sec+'s';
+  return sec+'s';
+}
+function cpDb() { return firebase.firestore(window._fbApp); }
+function cpDocRef() { return cpDb().collection('courseProgress').doc(window._learnerUid); }
+function cpReady() { return window._fbApp && window._learnerUid && window._learnerUid !== 'anon'; }
+
+// Set module start once (on page load). Never overwrites an existing start.
+function cpEnsureModuleStarted() {
+  if (!cpReady()) return;
+  var ref = cpDocRef();
+  ref.get().then(function(snap){
+    var data = snap.exists ? (snap.data() || {}) : {};
+    var course = (data.courses && data.courses[CP_COURSE_ID]) || {};
+    var mods = course.modules || {};
+    var t = cpNow();
+    var update = {
+      email: window._learnerEmail || null,
+      name:  window._learnerEmail || null,
+      courses: {}
+    };
+    update.courses[CP_COURSE_ID] = { moduleInProgress: EXAMPLE_ID, modules: {} };
+    // Only write start fields if this module has no recorded start yet
+    if (!mods[EXAMPLE_ID] || !mods[EXAMPLE_ID].startedOn) {
+      update.courses[CP_COURSE_ID].modules[EXAMPLE_ID] = { startedOn: t.date, startedAt: t.time };
+    }
+    ref.set(update, { merge: true })
+       .catch(function(e){ console.warn('[courseProgress] start write failed:', e.message); });
+  }).catch(function(e){ console.warn('[courseProgress] start read failed:', e.message); });
+}
+
+// On completion: write module completion + timeTaken; if all modules done, close the course.
+function cpWriteModuleComplete() {
+  if (!cpReady()) return;
+  var ref = cpDocRef();
+  ref.get().then(function(snap){
+    var data = snap.exists ? (snap.data() || {}) : {};
+    var course = (data.courses && data.courses[CP_COURSE_ID]) || {};
+    var mods = course.modules || {};
+    var t = cpNow();
+    var startMs = null;
+    var mEntry = mods[EXAMPLE_ID];
+    if (mEntry && mEntry.startedOn && mEntry.startedAt) {
+      startMs = new Date(mEntry.startedOn + 'T' + mEntry.startedAt).getTime();
+    }
+    var moduleTimeTaken = startMs != null ? cpFmtDuration(t.ms - startMs) : null;
+
+    var courseUpdate = { modules: {} };
+    courseUpdate.modules[EXAMPLE_ID] = {
+      completedOn: t.date, completedAt: t.time, timeTaken: moduleTimeTaken
+    };
+    if (course.moduleInProgress === EXAMPLE_ID) courseUpdate.moduleInProgress = null;
+
+    var completedCount = 0;
+    CP_MODULE_IDS.forEach(function(id){
+      if (id === EXAMPLE_ID) { completedCount++; return; }
+      if (mods[id] && mods[id].completedOn) completedCount++;
+    });
+    if (completedCount >= CP_MODULE_IDS.length && !course.courseCompletedOn) {
+      courseUpdate.courseCompletedOn = t.date;
+      courseUpdate.courseCompletedAt = t.time;
+      if (course.courseStartedOn && course.courseStartedAt) {
+        var cStart = new Date(course.courseStartedOn + 'T' + course.courseStartedAt).getTime();
+        courseUpdate.timeTaken = cpFmtDuration(t.ms - cStart);
+      }
+    }
+    var update = { email: window._learnerEmail || null, name: window._learnerEmail || null, courses: {} };
+    update.courses[CP_COURSE_ID] = courseUpdate;
+    ref.set(update, { merge: true })
+       .catch(function(e){ console.warn('[courseProgress] complete write failed:', e.message); });
+  }).catch(function(e){ console.warn('[courseProgress] complete read failed:', e.message); });
 }
 </script>
 </body>
