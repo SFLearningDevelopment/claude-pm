@@ -447,6 +447,7 @@ function activateCompleteBar(isDone) {
     cb.disabled   = true; cb.checked = true;
     label.textContent = '✓ Example complete';
     if (redo) redo.classList.add('visible');
+    pmWriteExampleProgress();
   } else {
     bar.className = 'complete-bar ready';
     cb.disabled   = false; cb.checked = false;
@@ -459,6 +460,7 @@ function activateCompleteBar(isDone) {
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
 const _FB_CONFIG = {
   apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
@@ -543,6 +545,16 @@ document.getElementById('authSignOutBtn')?.addEventListener('click', function() 
   sessionStorage.removeItem('pm_session');
   _auth.signOut();
 });
+
+function pmWriteExampleProgress() {
+  if (!window._fbApp || !window._learnerUid || window._learnerUid === 'anon') return;
+  try {
+    firebase.firestore(window._fbApp)
+      .collection('progress').doc(window._learnerUid)
+      .set({ pm_examples: firebase.firestore.FieldValue.arrayUnion(EXAMPLE_ID) }, { merge: true })
+      .catch(function(e) { console.warn('[PM Progress] Firestore write failed:', e.message); });
+  } catch(e) { console.warn('[PM Progress] error:', e.message); }
+}
 </script>
 
 </body>
