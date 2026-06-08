@@ -140,6 +140,9 @@
       <strong>Before you begin:</strong> Complete all 12 course examples before taking this exam. Your exam results are saved locally. You have <strong id="attemptsLeft">3 attempts</strong> remaining.
     </div>
     <button class="start-btn" id="startBtn">Begin exam →</button>
+    <!-- TEMP: re-sync existing local exam result to Firestore (remove after validation) -->
+    <button class="start-btn" id="resyncBtn" style="margin-top:12px;background:#475569;">Re-sync my exam results</button>
+    <div id="resyncStatus" style="margin-top:12px;font-family:'Source Code Pro',monospace;font-size:13px;"></div>
   </div>
 </div>
 
@@ -648,19 +651,102 @@ function showScreen(id) {
 // Path: courseExamResults/{email}/courses/claude-for-pm/attempts/{autoId}
 window.pmCertSaveResult = async function(attemptData) {
   try {
-    const session = JSON.parse(sessionStorage.getItem('pm_session') || '{}');
-    const email = session.email || window._learnerEmail || null;
-    if (!email) { console.warn('[PM Cert] No learner email — skipping Firestore write'); return; }
+    // Resolve learner email from the authenticated Firebase user (default app,
+    // backed by IndexedDB → shared across tabs and persisted across reopen).
+    // currentUser may be transiently null before onAuthStateChanged fires, so
+    // await one auth-state resolution. Fall back to sessionStorage only if no
+    // signed-in user is available at all.
+    let email = (window._pmCertAuth && window._pmCertAuth.currentUser && window._pmCertAuth.currentUser.email) || null;
+    if (email) {
+      console.log('[PM Cert] email from currentUser (IndexedDB-backed):', email,
+                  '| uid:', window._pmCertAuth.currentUser.uid,
+                  '| displayName:', window._pmCertAuth.currentUser.displayName);
+    }
+    if (!email && window._pmCertAuth) {
+      email = await new Promise(function(resolve) {
+        const unsub = window._pmCertAuth.onAuthStateChanged(function(u) {
+          unsub(); resolve(u && u.email ? u.email : null);
+        });
+      });
+      if (email) {
+        const cu = window._pmCertAuth.currentUser;
+        console.log('[PM Cert] email from onAuthStateChanged (IndexedDB-backed):', email,
+                    '| uid:', cu && cu.uid, '| displayName:', cu && cu.displayName);
+      }
+    }
+    if (!email) {
+      const session = JSON.parse(sessionStorage.getItem('pm_session') || '{}');
+      email = session.email || window._learnerEmail || null;
+      if (email) console.warn('[PM Cert] email fell back to sessionStorage/_learnerEmail:', email);
+    }
+    if (!email) { console.warn('[PM Cert] No learner email — skipping Firestore write'); return { ok:false, reason:'no-email' }; }
     const safeEmail = email.toLowerCase().trim();
     const db = window._pmCertDb;
     await db.collection('courseExamResults').doc(safeEmail)
             .collection('courses').doc('claude-for-pm')
             .collection('attempts').add(Object.assign({ email: safeEmail, courseId: 'claude-for-pm' }, attemptData));
     console.log('[PM Cert] Result saved to Firestore for', safeEmail);
+    return { ok:true, email: safeEmail };
   } catch(e) {
     console.warn('[PM Cert] Firestore write failed (non-fatal):', e.message);
+    return { ok:false, reason: e.message };
   }
 };
+
+// ── TEMP: Re-sync existing local exam result to Firestore (remove after validation) ──
+// Rebuilds the attempt record from localStorage and calls the same (fixed)
+// pmCertSaveResult path used on real submit, so success validates the fix.
+(function() {
+  const btn = document.getElementById('resyncBtn');
+  const status = document.getElementById('resyncStatus');
+  if (!btn) return;
+  btn.addEventListener('click', async function() {
+    status.style.color = '#cbd5e1';
+    status.textContent = 'Re-syncing…';
+    try {
+      const state = JSON.parse(localStorage.getItem('pm_cert_exam') || 'null');
+      if (!state || !state.attempts || !state.attempts.length) {
+        status.style.color = '#f87171';
+        status.textContent = 'No local exam attempt found to re-sync.';
+        return;
+      }
+      const idx = state.attempts.length - 1;
+      const a = state.attempts[idx];
+      const correct = a.correct;
+      const pct = (typeof a.pct === 'number') ? a.pct : (correct / 36);
+      const attemptRecord = {
+        attemptNumber:   idx + 1,
+        correct:         correct,
+        total:           36,
+        pct:             pct,
+        pass:            pct >= PASS_MARK,
+        submittedAt:     a.submittedAt || new Date().toISOString(),
+        durationSeconds: (typeof a.durationSeconds === 'number') ? a.durationSeconds : null,
+        timeUp:          !!a.timeUp,
+        answers:         Object.assign({}, a.answers || {}),
+        questions:       []
+      };
+      if (typeof window.pmCertSaveResult !== 'function') {
+        status.style.color = '#f87171';
+        status.textContent = 'Save function not loaded — reload the page and retry.';
+        return;
+      }
+      const res = await window.pmCertSaveResult(attemptRecord);
+      if (res && res.ok) {
+        status.style.color = '#4ade80';
+        status.textContent = '✓ Saved to Firestore for ' + res.email + '. Check the Exam Results page to confirm.';
+      } else {
+        status.style.color = '#f87171';
+        status.textContent = 'Re-sync did not save: ' + ((res && res.reason) || 'unknown') +
+                             '. See console for details.';
+      }
+    } catch (e) {
+      status.style.color = '#f87171';
+      status.textContent = 'Re-sync failed: ' + e.message;
+      console.warn('[PM Cert] Re-sync failed:', e);
+    }
+  });
+})();
 </script>
 </body>
 </html>
