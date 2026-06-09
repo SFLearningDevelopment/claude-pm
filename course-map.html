@@ -476,6 +476,12 @@
     </div>
   </div>
 
+  <!-- TEMP: re-sync local example completions to courseProgress (remove after validation) -->
+  <div style="max-width:420px;margin-top:16px;">
+    <button id="cpResyncBtn" style="width:100%;padding:12px 16px;border:none;border-radius:8px;background:#475569;color:#fff;font-family:'Source Code Pro',monospace;font-size:14px;cursor:pointer;">Sync my course progress</button>
+    <div id="cpResyncStatus" style="margin-top:10px;font-family:'Source Code Pro',monospace;font-size:13px;line-height:1.5;"></div>
+  </div>
+
 </div>
 
 <footer>
@@ -641,6 +647,116 @@ window.pmEmailSignIn = function() {
     errEl.classList.remove('hidden');
   });
 };
+
+// ── TEMP: Re-sync local example completions to courseProgress (remove after validation) ──
+// Reads each local pm_learner_<uid>_<id> key; for those with complete===true,
+// writes module completion to courseProgress using the same schema the example
+// pages use (set/merge). startedOn/timeTaken are preserved from any existing
+// server record; left null where no start was recorded. Closes the course when
+// all 12 are complete.
+(function() {
+  var CP_COURSE_ID = 'claude-for-pm';
+  var CP_MODULE_IDS = EXAMPLE_IDS;
+
+  function cpNow() {
+    var d = new Date(), pad = function(n){ return String(n).padStart(2,'0'); };
+    return {
+      date: d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),
+      time: pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()),
+      ms:   d.getTime()
+    };
+  }
+  function cpFmtDuration(ms) {
+    if (ms == null || ms < 0) return null;
+    var s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+    if (h > 0) return h+'h '+m+'m '+sec+'s';
+    if (m > 0) return m+'m '+sec+'s';
+    return sec+'s';
+  }
+
+  var btn = document.getElementById('cpResyncBtn');
+  var status = document.getElementById('cpResyncStatus');
+  if (!btn) return;
+
+  btn.addEventListener('click', async function() {
+    status.style.color = '#475569';
+    if (!window._fbApp || !window._learnerUid || window._learnerUid === 'anon') {
+      status.style.color = '#dc2626';
+      status.textContent = 'Not signed in — sign in first, then retry.';
+      return;
+    }
+    var uid = window._learnerUid;
+
+    // Collect locally-complete modules
+    var localComplete = [];
+    CP_MODULE_IDS.forEach(function(id) {
+      try {
+        var s = JSON.parse(localStorage.getItem('pm_learner_' + uid + '_' + id));
+        if (s && s.complete === true) localComplete.push(id);
+      } catch(e) {}
+    });
+
+    if (!localComplete.length) {
+      status.style.color = '#dc2626';
+      status.textContent = 'No locally-completed examples found on this browser to sync.';
+      return;
+    }
+
+    status.textContent = 'Syncing ' + localComplete.length + ' completed example(s)…';
+
+    try {
+      var ref = firebase.firestore(window._fbApp).collection('courseProgress').doc(uid);
+      var snap = await ref.get();
+      var data = snap.exists ? (snap.data() || {}) : {};
+      var course = (data.courses && data.courses[CP_COURSE_ID]) || {};
+      var mods = course.modules || {};
+      var t = cpNow();
+
+      var courseUpdate = { modules: {} };
+      localComplete.forEach(function(id) {
+        var existing = mods[id] || {};
+        // Preserve an already-recorded completion; otherwise record now.
+        var completedOn = existing.completedOn || t.date;
+        var completedAt = existing.completedAt || t.time;
+        var timeTaken = existing.timeTaken || null;
+        if (timeTaken == null && existing.startedOn && existing.startedAt) {
+          var startMs = new Date(existing.startedOn + 'T' + existing.startedAt).getTime();
+          timeTaken = cpFmtDuration(new Date(completedOn + 'T' + completedAt).getTime() - startMs);
+        }
+        courseUpdate.modules[id] = { completedOn: completedOn, completedAt: completedAt, timeTaken: timeTaken };
+      });
+
+      // Build the merged view to test all-complete (existing + this sync)
+      var mergedComplete = 0;
+      CP_MODULE_IDS.forEach(function(id) {
+        var willComplete = courseUpdate.modules[id] || (mods[id] && mods[id].completedOn);
+        if (willComplete) mergedComplete++;
+      });
+      if (mergedComplete >= CP_MODULE_IDS.length && !course.courseCompletedOn) {
+        courseUpdate.courseCompletedOn = t.date;
+        courseUpdate.courseCompletedAt = t.time;
+        if (course.courseStartedOn && course.courseStartedAt) {
+          var cStart = new Date(course.courseStartedOn + 'T' + course.courseStartedAt).getTime();
+          courseUpdate.timeTaken = cpFmtDuration(t.ms - cStart);
+        }
+      }
+
+      var update = { email: window._learnerEmail || null, name: window._learnerEmail || null, courses: {} };
+      update.courses[CP_COURSE_ID] = courseUpdate;
+
+      await ref.set(update, { merge: true });
+
+      status.style.color = '#16a34a';
+      status.textContent = '\u2713 Synced ' + localComplete.length + ' example(s) to courseProgress for '
+                         + (window._learnerEmail || uid) + '. Check the admin Course Progress display to confirm.';
+      console.log('[courseProgress re-sync] wrote modules:', localComplete);
+    } catch (e) {
+      status.style.color = '#dc2626';
+      status.textContent = 'Sync failed: ' + e.message + ' (see console)';
+      console.warn('[courseProgress re-sync] failed:', e);
+    }
+  });
+})();
 </script>
 
 </body>
