@@ -675,6 +675,18 @@ document.addEventListener('learnerReady', function() {
   const state = loadState();
   cpEnsureModuleStarted();   // courseProgress: set module start once
 
+  // Complete checkbox — always attach before early return
+  const completeCb = document.getElementById('completeCb');
+  if (completeCb) {
+    completeCb.addEventListener('change', function() {
+      if (!completeCb.checked) return;
+      const s = loadState();
+      s.complete = true;
+      saveState(s);
+      activateCompleteBar(true);
+    });
+  }
+
   // Already completed
   if (state.complete) {
     showSubmittedState();
@@ -698,17 +710,6 @@ document.addEventListener('learnerReady', function() {
   const submitBtn = document.getElementById('submitAnswersBtn');
   if (submitBtn) submitBtn.addEventListener('click', submitAnswers);
 
-  // Complete checkbox
-  const completeCb = document.getElementById('completeCb');
-  if (completeCb) {
-    completeCb.addEventListener('change', function() {
-      if (!completeCb.checked) return;
-      const s = loadState();
-      s.complete = true;
-      saveState(s);
-      activateCompleteBar(true);
-    });
-  }
   const redoBtn = document.getElementById('redoBtn');
   if (redoBtn) redoBtn.addEventListener('click', function() {
     const k = window.pmLearnerKey ? window.pmLearnerKey(EXAMPLE_ID) : ('pm_learner_' + EXAMPLE_ID);
