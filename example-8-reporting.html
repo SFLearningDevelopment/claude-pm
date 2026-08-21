@@ -651,8 +651,9 @@ document.getElementById('authSignOutBtn')?.addEventListener('click', function() 
 </body>
 </html>
 <script>
-const CACHE_VERSION = '2026-04-05-v1';
-const EXAMPLE_ID    = 'example-8-change';
+const CACHE_VERSION = '2026-08-21-v2';
+const EXAMPLE_ID    = 'example-8-reporting';
+const LEGACY_ID     = 'example-8-change';
 const CORRECT       = { q1: 'B', q2: 'C', q3: 'A' };
 
 // Cache busting
@@ -677,7 +678,19 @@ function showTab(n) {
 }
 
 // Storage
-function loadState() { const k = window.pmLearnerKey ? window.pmLearnerKey(EXAMPLE_ID) : 'pm_learner_' + EXAMPLE_ID; try { return JSON.parse(localStorage.getItem(k)) || {}; } catch(e) { return {}; } }
+function loadState() {
+  const k = window.pmLearnerKey ? window.pmLearnerKey(EXAMPLE_ID) : 'pm_learner_' + EXAMPLE_ID;
+  try {
+    const cur = JSON.parse(localStorage.getItem(k));
+    if (cur) return cur;
+    // One-time migration: this page used to store under LEGACY_ID. Read it
+    // across so an existing completion survives; the legacy key is left alone.
+    const lk = window.pmLearnerKey ? window.pmLearnerKey(LEGACY_ID) : 'pm_learner_' + LEGACY_ID;
+    const old = JSON.parse(localStorage.getItem(lk));
+    if (old) { old.exampleId = EXAMPLE_ID; localStorage.setItem(k, JSON.stringify(old)); return old; }
+  } catch(e) {}
+  return {};
+}
 function saveState(s) { const k = window.pmLearnerKey ? window.pmLearnerKey(EXAMPLE_ID) : 'pm_learner_' + EXAMPLE_ID; localStorage.setItem(k, JSON.stringify(s)); }
 
 document.addEventListener('learnerReady', function() {
@@ -800,10 +813,19 @@ function pmWriteExampleProgress() {
 var CP_COURSE_ID = 'claude-for-pm';
 var CP_MODULE_IDS = [
   'example-1-scope','example-2-status','example-3-risk','example-4-sprint',
-  'example-5-requirements','example-6-tracking','example-7-reporting',
-  'example-8-change','example-9-model','example-10-rca',
+  'example-5-requirements','example-6-escalation','example-7-vendor',
+  'example-8-reporting','example-9-model','example-10-rca',
   'example-11-contract','example-12-cost'
 ];
+// Examples 6-8 previously wrote a slug that differed from their filename.
+// Legacy keys are honoured on read so existing completions still count;
+// nothing legacy is ever deleted.
+var CP_LEGACY_IDS = {
+  'example-6-escalation': 'example-6-tracking',
+  'example-7-vendor':     'example-7-reporting',
+  'example-8-reporting':  'example-8-change'
+};
+function cpIdsFor(id) { return CP_LEGACY_IDS[id] ? [id, CP_LEGACY_IDS[id]] : [id]; }
 function cpNow() {
   var d = new Date();
   var pad = function(n){ return String(n).padStart(2,'0'); };
@@ -840,7 +862,9 @@ function cpEnsureModuleStarted() {
     };
     update.courses[CP_COURSE_ID] = { moduleInProgress: EXAMPLE_ID, modules: {} };
     // Only write start fields if this module has no recorded start yet
-    if (!mods[EXAMPLE_ID] || !mods[EXAMPLE_ID].startedOn) {
+    var cpStarted = (mods[EXAMPLE_ID] && mods[EXAMPLE_ID].startedOn) ||
+                    (typeof LEGACY_ID !== 'undefined' && mods[LEGACY_ID] && mods[LEGACY_ID].startedOn);
+    if (!cpStarted) {
       update.courses[CP_COURSE_ID].modules[EXAMPLE_ID] = { startedOn: t.date, startedAt: t.time };
     }
     ref.set(update, { merge: true })
@@ -858,7 +882,7 @@ function cpWriteModuleComplete() {
     var mods = course.modules || {};
     var t = cpNow();
     var startMs = null;
-    var mEntry = mods[EXAMPLE_ID];
+    var mEntry = mods[EXAMPLE_ID] || (typeof LEGACY_ID !== 'undefined' && mods[LEGACY_ID]) || null;
     if (mEntry && mEntry.startedOn && mEntry.startedAt) {
       startMs = new Date(mEntry.startedOn + 'T' + mEntry.startedAt).getTime();
     }
@@ -873,7 +897,7 @@ function cpWriteModuleComplete() {
     var completedCount = 0;
     CP_MODULE_IDS.forEach(function(id){
       if (id === EXAMPLE_ID) { completedCount++; return; }
-      if (mods[id] && mods[id].completedOn) completedCount++;
+      if (cpIdsFor(id).some(function(k){ return mods[k] && mods[k].completedOn; })) completedCount++;
     });
     if (completedCount >= CP_MODULE_IDS.length && !course.courseCompletedOn) {
       courseUpdate.courseCompletedOn = t.date;
