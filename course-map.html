@@ -489,7 +489,7 @@
 </footer>
 
 <script>
-const CACHE_VERSION = '2026-04-05-v1';
+const CACHE_VERSION = '2026-08-21-v1';
 (function() {
   function addVersion(url) {
     if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
@@ -504,13 +504,14 @@ const CACHE_VERSION = '2026-04-05-v1';
 // ── Example IDs (canonical) ───────────────────────────────────────────────
 const EXAMPLE_IDS = [
   'example-1-scope','example-2-status','example-3-risk','example-4-sprint',
-  'example-5-requirements','example-6-tracking','example-7-reporting',
-  'example-8-change','example-9-model','example-10-rca',
+  'example-5-requirements','example-6-escalation','example-7-vendor',
+  'example-8-reporting','example-9-model','example-10-rca',
   'example-11-contract','example-12-cost'
 ];
 
 // ── Progress bar (uid-aware) ───────────────────────────────────────────────
-function updateProgress() {
+// Locally-recorded completions on this browser.
+function localCompletedCount() {
   const uid = window._learnerUid || 'anon';
   let done = 0;
   EXAMPLE_IDS.forEach(function(id) {
@@ -519,6 +520,26 @@ function updateProgress() {
       if (s && s.complete === true) done++;
     } catch(e) {}
   });
+  return done;
+}
+
+// Server truth: count module entries carrying completedOn, whatever they're keyed as.
+// Slug-agnostic on purpose, so a renamed example page can't relock the exam.
+function cpCompletedCount(cb) {
+  if (!window._fbApp || !window._learnerUid) { cb(null); return; }
+  firebase.firestore(window._fbApp).collection('courseProgress').doc(window._learnerUid).get()
+    .then(function(snap) {
+      const data = snap.exists ? (snap.data() || {}) : {};
+      const course = (data.courses && data.courses['claude-for-pm']) || {};
+      const mods = course.modules || {};
+      let n = 0;
+      Object.keys(mods).forEach(function(k) { if (mods[k] && mods[k].completedOn) n++; });
+      cb(n);
+    })
+    .catch(function(e) { console.warn('[courseProgress] unlock read failed:', e.message); cb(null); });
+}
+
+function renderProgress(done) {
   const pct = Math.round((done / EXAMPLE_IDS.length) * 100);
   const fill  = document.getElementById('progressFill');
   const count = document.getElementById('progressCount');
@@ -526,27 +547,34 @@ function updateProgress() {
   if (count) count.textContent = done + ' of ' + EXAMPLE_IDS.length + ' complete';
 }
 
+function updateProgress() { renderProgress(localCompletedCount()); }
+
 // ── Cert card unlock ──────────────────────────────────────────────────────
-function checkCertUnlock() {
-  const uid = window._learnerUid || 'anon';
-  const allComplete = EXAMPLE_IDS.every(function(id) {
-    try {
-      const s = JSON.parse(localStorage.getItem('pm_learner_' + uid + '_' + id));
-      return s && s.complete === true;
-    } catch(e) { return false; }
-  });
+let _certUnlocked = false;
+function unlockCertCard() {
   const card  = document.getElementById('certCard');
   const arrow = document.getElementById('certArrow');
-  if (!card) return;
-  if (allComplete) {
-    card.className = 'example-card cert-card unlocked';
-    card.style.cssText = 'max-width:420px; display:block;';
-    card.style.cursor = 'pointer';
-    if (arrow) arrow.textContent = '\u2192';
-    card.addEventListener('click', function() {
-      window.location.href = 'certification-test.html';
-    });
-  }
+  if (!card || _certUnlocked) return;
+  _certUnlocked = true;
+  card.className = 'example-card cert-card unlocked';
+  card.style.cssText = 'max-width:420px; display:block;';
+  card.style.cursor = 'pointer';
+  card.removeAttribute('title');
+  if (arrow) arrow.textContent = '\u2192';
+  card.addEventListener('click', function() {
+    window.location.href = 'certification-test.html?v=' + CACHE_VERSION;
+  });
+}
+
+// Unlock on local completions, else on courseProgress (cross-browser / renamed slugs).
+function checkCertUnlock() {
+  const local = localCompletedCount();
+  if (local >= EXAMPLE_IDS.length) { unlockCertCard(); return; }
+  cpCompletedCount(function(n) {
+    if (n == null) return;
+    if (n > local) renderProgress(Math.min(n, EXAMPLE_IDS.length));
+    if (n >= EXAMPLE_IDS.length) unlockCertCard();
+  });
 }
 
 // Run on page load with anon uid (updates after auth)
