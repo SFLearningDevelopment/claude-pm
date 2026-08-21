@@ -692,7 +692,7 @@ document.getElementById('authSignOutBtn')?.addEventListener('click', function() 
 </body>
 </html>
 <script>
-const CACHE_VERSION = '2026-08-21-v2';
+const CACHE_VERSION = '2026-08-21-v3';
 const EXAMPLE_ID    = 'example-4-sprint';
 const CORRECT       = { q1: 'B', q2: 'C', q3: 'A' };
 
@@ -725,6 +725,17 @@ document.addEventListener('learnerReady', function() {
   // Re-key storage with uid — key is now computed in loadState/saveState
   const state = loadState();
   cpEnsureModuleStarted();   // courseProgress: set module start once
+  // Complete checkbox
+  const completeCb = document.getElementById('completeCb');
+  if (completeCb) {
+    completeCb.addEventListener('change', function() {
+      if (!completeCb.checked) return;
+      const s = loadState();
+      s.complete = true;
+      saveState(s);
+      activateCompleteBar(true);
+    });
+  }
 
   // Already completed
   if (state.complete) {
@@ -749,17 +760,6 @@ document.addEventListener('learnerReady', function() {
   const submitBtn = document.getElementById('submitAnswersBtn');
   if (submitBtn) submitBtn.addEventListener('click', submitAnswers);
 
-  // Complete checkbox
-  const completeCb = document.getElementById('completeCb');
-  if (completeCb) {
-    completeCb.addEventListener('change', function() {
-      if (!completeCb.checked) return;
-      const s = loadState();
-      s.complete = true;
-      saveState(s);
-      activateCompleteBar(true);
-    });
-  }
   const redoBtn = document.getElementById('redoBtn');
   if (redoBtn) redoBtn.addEventListener('click', function() {
     const k = window.pmLearnerKey ? window.pmLearnerKey(EXAMPLE_ID) : ('pm_learner_' + EXAMPLE_ID);
