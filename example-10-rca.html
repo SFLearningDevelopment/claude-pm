@@ -369,7 +369,7 @@ Sarah Chen | SF Senior PM</div>
 </div>
 <footer>Claude for PM · SourceFuse L&D · SF Certified AI-Augmented Project Manager</footer>
 <script>
-const CACHE_VERSION = '2026-08-21-v2';
+const CACHE_VERSION = '2026-08-21-v3';
 const EXAMPLE_ID    = 'example-10-rca';
 const CORRECT       = { q1: 'B', q2: 'C', q3: 'C' };
 (function() {
@@ -395,14 +395,14 @@ document.addEventListener('learnerReady', function() {
   // Re-key storage with uid — key is now computed in loadState/saveState
   const state = loadState();
   cpEnsureModuleStarted();   // courseProgress: set module start once
-  if (state.submittedAt) { showSubmittedState(); activateCompleteBar(state.complete); return; }
-  document.querySelectorAll('.options input[type="radio"]').forEach(function(r) { r.addEventListener('change', checkAllAnswered); });
-  document.getElementById('submitAnswersBtn').addEventListener('click', submitAnswers);
   const cb = document.getElementById('completeCb');
   if (cb) cb.addEventListener('change', function() {
     if (!cb.checked) return;
     const s = loadState(); s.complete = true; saveState(s); activateCompleteBar(true);
   });
+  if (state.submittedAt) { showSubmittedState(); activateCompleteBar(state.complete); return; }
+  document.querySelectorAll('.options input[type="radio"]').forEach(function(r) { r.addEventListener('change', checkAllAnswered); });
+  document.getElementById('submitAnswersBtn').addEventListener('click', submitAnswers);
   const redoBtn = document.getElementById('redoBtn');
   if (redoBtn) redoBtn.addEventListener('click', function() {
     const k = window.pmLearnerKey ? window.pmLearnerKey(EXAMPLE_ID) : ('pm_learner_' + EXAMPLE_ID);
