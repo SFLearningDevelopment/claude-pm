@@ -489,7 +489,7 @@
 </footer>
 
 <script>
-const CACHE_VERSION = '2026-08-21-v1';
+const CACHE_VERSION = '2026-08-21-v2';
 (function() {
   function addVersion(url) {
     if (!url || url.startsWith('http') || url.startsWith('#') || url.startsWith('mailto')) return url;
@@ -501,7 +501,10 @@ const CACHE_VERSION = '2026-08-21-v1';
   document.querySelectorAll('a[href]').forEach(a => { a.href = addVersion(a.getAttribute('href')); });
 })();
 
-// ── Example IDs (canonical) ───────────────────────────────────────────────
+// ── Example IDs ───────────────────────────────────────────────────────────
+// CANONICAL ids = example page filename minus .html, and identical to the
+// `file` values in the courses catalog. This is what the admin Course
+// Progress reader keys on.
 const EXAMPLE_IDS = [
   'example-1-scope','example-2-status','example-3-risk','example-4-sprint',
   'example-5-requirements','example-6-escalation','example-7-vendor',
@@ -509,22 +512,37 @@ const EXAMPLE_IDS = [
   'example-11-contract','example-12-cost'
 ];
 
-// ── Progress bar (uid-aware) ───────────────────────────────────────────────
-// Locally-recorded completions on this browser.
-function localCompletedCount() {
-  const uid = window._learnerUid || 'anon';
-  let done = 0;
-  EXAMPLE_IDS.forEach(function(id) {
-    try {
-      const s = JSON.parse(localStorage.getItem('pm_learner_' + uid + '_' + id));
-      if (s && s.complete === true) done++;
-    } catch(e) {}
-  });
-  return done;
+// Examples 6-8 previously wrote a different slug than their filename.
+// Legacy keys are still honoured on read so existing learners keep their
+// completions; nothing legacy is ever deleted.
+const LEGACY_IDS = {
+  'example-6-escalation': 'example-6-tracking',
+  'example-7-vendor':     'example-7-reporting',
+  'example-8-reporting':  'example-8-change'
+};
+
+function idsFor(id) {
+  return LEGACY_IDS[id] ? [id, LEGACY_IDS[id]] : [id];
 }
 
-// Server truth: count module entries carrying completedOn, whatever they're keyed as.
-// Slug-agnostic on purpose, so a renamed example page can't relock the exam.
+// ── Progress bar (uid-aware) ───────────────────────────────────────────────
+// Complete on this browser under either the canonical or the legacy key.
+function localComplete(id) {
+  const uid = window._learnerUid || 'anon';
+  return idsFor(id).some(function(k) {
+    try {
+      const s = JSON.parse(localStorage.getItem('pm_learner_' + uid + '_' + k));
+      return !!(s && s.complete === true);
+    } catch(e) { return false; }
+  });
+}
+
+function localCompletedCount() {
+  return EXAMPLE_IDS.filter(localComplete).length;
+}
+
+// Server truth: courseProgress module entries carrying completedOn, counted
+// against the canonical list with legacy keys accepted.
 function cpCompletedCount(cb) {
   if (!window._fbApp || !window._learnerUid) { cb(null); return; }
   firebase.firestore(window._fbApp).collection('courseProgress').doc(window._learnerUid).get()
@@ -532,9 +550,9 @@ function cpCompletedCount(cb) {
       const data = snap.exists ? (snap.data() || {}) : {};
       const course = (data.courses && data.courses['claude-for-pm']) || {};
       const mods = course.modules || {};
-      let n = 0;
-      Object.keys(mods).forEach(function(k) { if (mods[k] && mods[k].completedOn) n++; });
-      cb(n);
+      cb(EXAMPLE_IDS.filter(function(id) {
+        return idsFor(id).some(function(k) { return mods[k] && mods[k].completedOn; });
+      }).length);
     })
     .catch(function(e) { console.warn('[courseProgress] unlock read failed:', e.message); cb(null); });
 }
@@ -566,7 +584,8 @@ function unlockCertCard() {
   });
 }
 
-// Unlock on local completions, else on courseProgress (cross-browser / renamed slugs).
+// Unlock on local completions, else on courseProgress (covers a learner who
+// completed examples on another browser).
 function checkCertUnlock() {
   const local = localCompletedCount();
   if (local >= EXAMPLE_IDS.length) { unlockCertCard(); return; }
@@ -715,22 +734,16 @@ window.pmEmailSignIn = function() {
     }
     var uid = window._learnerUid;
 
-    // Collect locally-complete modules
-    var localComplete = [];
-    CP_MODULE_IDS.forEach(function(id) {
-      try {
-        var s = JSON.parse(localStorage.getItem('pm_learner_' + uid + '_' + id));
-        if (s && s.complete === true) localComplete.push(id);
-      } catch(e) {}
-    });
+    // Collect locally-complete modules (canonical or legacy key), keyed canonically
+    var localCompleteIds = CP_MODULE_IDS.filter(localComplete);
 
-    if (!localComplete.length) {
+    if (!localCompleteIds.length) {
       status.style.color = '#dc2626';
       status.textContent = 'No locally-completed examples found on this browser to sync.';
       return;
     }
 
-    status.textContent = 'Syncing ' + localComplete.length + ' completed example(s)…';
+    status.textContent = 'Syncing ' + localCompleteIds.length + ' completed example(s)…';
 
     try {
       var ref = firebase.firestore(window._fbApp).collection('courseProgress').doc(uid);
@@ -741,8 +754,10 @@ window.pmEmailSignIn = function() {
       var t = cpNow();
 
       var courseUpdate = { modules: {} };
-      localComplete.forEach(function(id) {
-        var existing = mods[id] || {};
+      localCompleteIds.forEach(function(id) {
+        // Prefer the canonical entry; fall back to the legacy-keyed one so an
+        // earlier completion date is carried forward, not overwritten with today.
+        var existing = mods[id] || (LEGACY_IDS[id] && mods[LEGACY_IDS[id]]) || {};
         // Preserve an already-recorded completion; otherwise record now.
         var completedOn = existing.completedOn || t.date;
         var completedAt = existing.completedAt || t.time;
@@ -757,7 +772,9 @@ window.pmEmailSignIn = function() {
       // Build the merged view to test all-complete (existing + this sync)
       var mergedComplete = 0;
       CP_MODULE_IDS.forEach(function(id) {
-        var willComplete = courseUpdate.modules[id] || (mods[id] && mods[id].completedOn);
+        var willComplete = courseUpdate.modules[id] || idsFor(id).some(function(k) {
+          return mods[k] && mods[k].completedOn;
+        });
         if (willComplete) mergedComplete++;
       });
       if (mergedComplete >= CP_MODULE_IDS.length && !course.courseCompletedOn) {
@@ -775,9 +792,9 @@ window.pmEmailSignIn = function() {
       await ref.set(update, { merge: true });
 
       status.style.color = '#16a34a';
-      status.textContent = '\u2713 Synced ' + localComplete.length + ' example(s) to courseProgress for '
+      status.textContent = '\u2713 Synced ' + localCompleteIds.length + ' example(s) to courseProgress for '
                          + (window._learnerEmail || uid) + '. Check the admin Course Progress display to confirm.';
-      console.log('[courseProgress re-sync] wrote modules:', localComplete);
+      console.log('[courseProgress re-sync] wrote modules:', localCompleteIds);
     } catch (e) {
       status.style.color = '#dc2626';
       status.textContent = 'Sync failed: ' + e.message + ' (see console)';
