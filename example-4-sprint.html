@@ -692,7 +692,7 @@ document.getElementById('authSignOutBtn')?.addEventListener('click', function() 
 </body>
 </html>
 <script>
-const CACHE_VERSION = '2026-04-05-v1';
+const CACHE_VERSION = '2026-08-21-v2';
 const EXAMPLE_ID    = 'example-4-sprint';
 const CORRECT       = { q1: 'B', q2: 'C', q3: 'A' };
 
@@ -841,10 +841,19 @@ function pmWriteExampleProgress() {
 var CP_COURSE_ID = 'claude-for-pm';
 var CP_MODULE_IDS = [
   'example-1-scope','example-2-status','example-3-risk','example-4-sprint',
-  'example-5-requirements','example-6-tracking','example-7-reporting',
-  'example-8-change','example-9-model','example-10-rca',
+  'example-5-requirements','example-6-escalation','example-7-vendor',
+  'example-8-reporting','example-9-model','example-10-rca',
   'example-11-contract','example-12-cost'
 ];
+// Examples 6-8 previously wrote a slug that differed from their filename.
+// Legacy keys are honoured on read so existing completions still count;
+// nothing legacy is ever deleted.
+var CP_LEGACY_IDS = {
+  'example-6-escalation': 'example-6-tracking',
+  'example-7-vendor':     'example-7-reporting',
+  'example-8-reporting':  'example-8-change'
+};
+function cpIdsFor(id) { return CP_LEGACY_IDS[id] ? [id, CP_LEGACY_IDS[id]] : [id]; }
 function cpNow() {
   var d = new Date();
   var pad = function(n){ return String(n).padStart(2,'0'); };
@@ -881,7 +890,9 @@ function cpEnsureModuleStarted() {
     };
     update.courses[CP_COURSE_ID] = { moduleInProgress: EXAMPLE_ID, modules: {} };
     // Only write start fields if this module has no recorded start yet
-    if (!mods[EXAMPLE_ID] || !mods[EXAMPLE_ID].startedOn) {
+    var cpStarted = (mods[EXAMPLE_ID] && mods[EXAMPLE_ID].startedOn) ||
+                    (typeof LEGACY_ID !== 'undefined' && mods[LEGACY_ID] && mods[LEGACY_ID].startedOn);
+    if (!cpStarted) {
       update.courses[CP_COURSE_ID].modules[EXAMPLE_ID] = { startedOn: t.date, startedAt: t.time };
     }
     ref.set(update, { merge: true })
@@ -899,7 +910,7 @@ function cpWriteModuleComplete() {
     var mods = course.modules || {};
     var t = cpNow();
     var startMs = null;
-    var mEntry = mods[EXAMPLE_ID];
+    var mEntry = mods[EXAMPLE_ID] || (typeof LEGACY_ID !== 'undefined' && mods[LEGACY_ID]) || null;
     if (mEntry && mEntry.startedOn && mEntry.startedAt) {
       startMs = new Date(mEntry.startedOn + 'T' + mEntry.startedAt).getTime();
     }
@@ -914,7 +925,7 @@ function cpWriteModuleComplete() {
     var completedCount = 0;
     CP_MODULE_IDS.forEach(function(id){
       if (id === EXAMPLE_ID) { completedCount++; return; }
-      if (mods[id] && mods[id].completedOn) completedCount++;
+      if (cpIdsFor(id).some(function(k){ return mods[k] && mods[k].completedOn; })) completedCount++;
     });
     if (completedCount >= CP_MODULE_IDS.length && !course.courseCompletedOn) {
       courseUpdate.courseCompletedOn = t.date;
